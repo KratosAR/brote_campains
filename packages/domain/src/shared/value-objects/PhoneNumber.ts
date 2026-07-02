@@ -5,6 +5,7 @@ import { ValidationError } from '../errors/DomainError'
 
 interface PhoneNumberProps {
   e164: string
+  international: string
   countryCode: string
   nationalNumber: string
 }
@@ -34,6 +35,7 @@ export class PhoneNumber extends ValueObject<PhoneNumberProps> {
       return Result.ok(
         new PhoneNumber({
           e164: parsed.format('E.164'),
+          international: parsed.format('INTERNATIONAL'),
           countryCode: parsed.countryCallingCode,
           nationalNumber: parsed.nationalNumber,
         }),
@@ -45,6 +47,10 @@ export class PhoneNumber extends ValueObject<PhoneNumberProps> {
 
   toE164(): string {
     return this.props.e164
+  }
+
+  toInternational(): string {
+    return this.props.international
   }
 
   toString(): string {
