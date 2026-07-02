@@ -1,0 +1,31 @@
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'scope-enum': [
+      2,
+      'always',
+      [
+        'domain',
+        'application',
+        'infrastructure',
+        'contracts',
+        'common',
+        'testing',
+        'sdk',
+        'api',
+        'worker',
+        'scheduler',
+        'webhook',
+        'cli',
+        'meta',
+        'evolution',
+        'fake',
+        'prisma',
+        'docker',
+        'ci',
+        'deps',
+        'config',
+      ],
+    ],
+  },
+}

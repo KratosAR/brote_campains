@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: BROTE Communication Platform API
+  description: API de BCP — plataforma de comunicación empresarial omnicanal
+  version: 0.1.0
+  contact:
+    name: BROTE
+
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo local
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: API operativa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /metrics:
+    get:
+      summary: Métricas Prometheus
+      tags: [System]
+      responses:
+        '200':
+          description: Métricas en formato Prometheus text
+          content:
+            text/plain:
+              schema:
+                type: string

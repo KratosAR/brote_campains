@@ -1,0 +1,6867 @@
+# BROTE Messaging Platform
+
+Versión: 0.1 (Draft)
+
+Estado: En diseño
+
+Autor: BROTE
+
+---
+
+# 1. Introducción
+
+BROTE Messaging Platform (BMP) es una plataforma modular para el envío de campañas, notificaciones y comunicaciones empresariales a través de múltiples canales de mensajería.
+
+El objetivo del proyecto no es integrar WhatsApp.
+
+El objetivo del proyecto es construir una plataforma de mensajería desacoplada donde WhatsApp sea simplemente uno de los canales disponibles.
+
+Esta decisión permite que el producto evolucione hacia Email, SMS, Telegram, Instagram, Messenger o cualquier proveedor futuro sin modificar el dominio.
+
+---
+
+# 2. Filosofía
+
+El dominio nunca debe conocer:
+
+- Meta
+- WhatsApp
+- Twilio
+- Evolution API
+- WPPConnect
+- Mailgun
+
+El dominio únicamente conoce:
+
+Mensaje
+
+Campaña
+
+Contacto
+
+Grupo
+
+Proveedor
+
+Entrega
+
+Canal
+
+Todo lo demás pertenece a Infrastructure.
+
+---
+
+# 3. Objetivos
+
+La plataforma deberá permitir:
+
+✓ importar contactos
+
+✓ segmentarlos
+
+✓ crear campañas
+
+✓ programar envíos
+
+✓ monitorear entregas
+
+✓ obtener estadísticas
+
+✓ cambiar el proveedor de envío sin modificar el dominio
+
+✓ soportar múltiples empresas
+
+✓ soportar múltiples usuarios
+
+✓ soportar múltiples canales
+
+---
+
+# 4. Objetivos NO incluidos
+
+La plataforma NO pretende ser:
+
+❌ CRM
+
+❌ HelpDesk
+
+❌ Chatbot
+
+❌ Mesa de soporte
+
+❌ Sistema de tickets
+
+Estos módulos podrán incorporarse en versiones futuras.
+
+---
+
+# 5. Principios de arquitectura
+
+Toda decisión del proyecto deberá respetar los siguientes principios.
+
+## Dominio puro
+
+El dominio nunca dependerá de librerías externas.
+
+## Dependency Rule
+
+Infrastructure depende de Domain.
+
+Nunca al revés.
+
+## Provider Pattern
+
+Cada canal implementará la misma interfaz.
+
+## Open / Closed Principle
+
+Agregar un nuevo proveedor nunca debe requerir modificar el dominio.
+
+## Single Responsibility
+
+Cada módulo tendrá una única responsabilidad.
+
+## Event Driven
+
+Los cambios importantes producirán Domain Events.
+
+## Queue First
+
+Todo envío masivo será asincrónico.
+
+Nunca se enviarán campañas desde un request HTTP.
+
+---
+
+# 6. Objetivos técnicos
+
+Backend
+
+Node.js
+
+TypeScript
+
+Express
+
+Prisma
+
+PostgreSQL
+
+Redis
+
+BullMQ
+
+Docker
+
+Prometheus
+
+Grafana
+
+Winston
+
+JWT
+
+RBAC
+
+OpenAPI
+
+Testing >80%
+
+---
+
+# 7. Objetivos comerciales
+
+El proyecto será utilizado para vender dos productos distintos.
+
+Starter
+
+Automatización sobre WhatsApp Web.
+
+Professional
+
+API Oficial de WhatsApp.
+
+Ambos compartirán exactamente el mismo dominio.
+
+La única diferencia será el Provider utilizado.
+
+---
+
+# 8. Diferencial de BROTE
+
+BROTE no vende licencias.
+
+BROTE entrega soluciones.
+
+Cada cliente será propietario de:
+
+- su infraestructura
+- su número
+- su cuenta
+- sus datos
+- su código contratado
+
+No existirá lock-in tecnológico.
+
+Ese principio deberá mantenerse durante toda la vida del proyecto.
+
+---
+
+# 9. Roadmap General
+
+Fase 1
+
+Arquitectura
+
+Fase 2
+
+Dominio
+
+Fase 3
+
+Providers
+
+Fase 4
+
+Panel Administrativo
+
+Fase 5
+
+Campañas
+
+Fase 6
+
+Métricas
+
+Fase 7
+
+Automatizaciones
+
+Fase 8
+
+IA
+
+---
+
+Fin del documento.
+
+
+# BROTE Messaging Platform
+
+## Product Vision
+
+Versión: 1.0
+
+---
+
+# ¿Por qué existe este producto?
+
+Actualmente existen dos tipos de soluciones.
+
+## Solución A
+
+Herramientas muy simples.
+
+Permiten enviar mensajes.
+
+Nada más.
+
+Ejemplos:
+
+- aplicaciones de difusión
+- scripts
+- automatizaciones básicas
+
+Problemas:
+
+- no escalan
+- poca trazabilidad
+- difícil mantenimiento
+- alto riesgo
+- sin integración
+
+---
+
+## Solución B
+
+Grandes plataformas SaaS.
+
+Ejemplos:
+
+- Twilio
+- ManyChat
+- WATI
+- Interakt
+
+Problemas:
+
+- costos crecientes
+- dependencia del proveedor
+- funcionalidades innecesarias
+- poca flexibilidad
+- difícil personalización
+
+---
+
+BROTE Messaging Platform nace para cubrir el espacio intermedio.
+
+Una plataforma profesional.
+
+Propiedad del cliente.
+
+Personalizable.
+
+Escalable.
+
+Sin lock-in.
+
+---
+
+# Nuestra visión
+
+No queremos construir un software que envíe mensajes.
+
+Queremos construir la infraestructura de comunicación de una empresa.
+
+Hoy el canal será WhatsApp.
+
+Mañana puede ser Email.
+
+SMS.
+
+Telegram.
+
+Instagram.
+
+Messenger.
+
+RCS.
+
+El dominio nunca cambiará.
+
+---
+
+# Nuestra misión
+
+Permitir que cualquier empresa pueda automatizar sus comunicaciones manteniendo el control absoluto sobre sus datos, su infraestructura y sus procesos.
+
+---
+
+# Público objetivo
+
+## Starter
+
+Empresas pequeñas.
+
+Hasta 10.000 contactos.
+
+Pocas campañas.
+
+Necesitan rapidez.
+
+Presupuesto reducido.
+
+---
+
+## Growth
+
+Empresas medianas.
+
+Decenas de miles de contactos.
+
+Campañas frecuentes.
+
+Integraciones.
+
+Usuarios múltiples.
+
+---
+
+## Enterprise
+
+Grandes empresas.
+
+Múltiples canales.
+
+Alta disponibilidad.
+
+Integraciones ERP.
+
+Auditoría.
+
+Observabilidad.
+
+RBAC avanzado.
+
+---
+
+# Diferenciales
+
+✓ Plataforma propia
+
+✓ Código entregable
+
+✓ Multiempresa
+
+✓ Omnicanal
+
+✓ Arquitectura desacoplada
+
+✓ API First
+
+✓ OpenAPI
+
+✓ Escalable
+
+✓ Eventos
+
+✓ Workers
+
+✓ Scheduler
+
+✓ Observabilidad
+
+✓ Sin dependencia tecnológica
+
+---
+
+# Qué NO queremos ser
+
+No queremos competir con ManyChat.
+
+No queremos competir con HubSpot.
+
+No queremos competir con Salesforce.
+
+No queremos competir con Twilio.
+
+Queremos ser la capa de comunicación personalizada de cada empresa.
+
+---
+
+# Filosofía BROTE
+
+El cliente compra una solución.
+
+No alquila una plataforma.
+
+El conocimiento queda documentado.
+
+El código queda documentado.
+
+La infraestructura queda documentada.
+
+El cliente puede continuar el proyecto con cualquier equipo.
+
+Esa independencia forma parte del producto.
+
+---
+
+# Éxito del producto
+
+Consideraremos exitoso el proyecto cuando:
+
+- agregar un nuevo canal requiera menos de un día de trabajo
+- agregar un proveedor no implique modificar el dominio
+- el envío de un millón de mensajes pueda escalar horizontalmente
+- el dominio permanezca inalterado durante años
+- cualquier desarrollador pueda comprender la arquitectura únicamente leyendo la documentación
+
+
+# Ubiquitous Language
+
+Versión: 1.0
+
+---
+
+# Introducción
+
+Todos los miembros del proyecto deberán utilizar exactamente la misma terminología.
+
+No existirán sinónimos.
+
+No existirán nombres ambiguos.
+
+Si una palabra existe aquí, deberá utilizarse en:
+
+- Código
+- Base de datos
+- API
+- Documentación
+- UI
+- Reuniones
+
+---
+
+# Workspace
+
+Representa una empresa que utiliza la plataforma.
+
+Sinónimos prohibidos:
+
+❌ Empresa
+
+❌ Cliente
+
+❌ Tenant
+
+Siempre:
+
+Workspace
+
+---
+
+# User
+
+Persona que accede al sistema.
+
+Puede pertenecer a uno o varios Workspaces.
+
+No envía mensajes.
+
+Administra la plataforma.
+
+---
+
+# Contact
+
+Persona o empresa destinataria de mensajes.
+
+Nunca inicia sesión.
+
+Nunca posee permisos.
+
+Solo recibe comunicaciones.
+
+---
+
+# Contact Group
+
+Conjunto de contactos.
+
+Ejemplo
+
+Clientes Córdoba
+
+Clientes Premium
+
+Prospectos
+
+Veterinarias
+
+---
+
+# Campaign
+
+Proceso organizado para enviar un mensaje a múltiples contactos.
+
+Una campaña posee:
+
+Nombre
+
+Canal
+
+Contenido
+
+Audiencia
+
+Estado
+
+Programación
+
+Estadísticas
+
+---
+
+# Broadcast
+
+Proceso técnico que ejecuta el envío de una campaña.
+
+No es visible para el usuario.
+
+---
+
+# Delivery
+
+Resultado individual del envío de un mensaje.
+
+Existe uno por contacto.
+
+---
+
+# Message
+
+Unidad mínima de comunicación.
+
+Puede contener:
+
+Texto
+
+Imagen
+
+Documento
+
+Variables
+
+Botones
+
+---
+
+# Template
+
+Modelo reutilizable de mensaje.
+
+Puede contener variables.
+
+Ejemplo
+
+Hola {{nombre}}
+
+Tu turno es el {{fecha}}
+
+---
+
+# Provider
+
+Implementación técnica utilizada para enviar mensajes.
+
+Ejemplos
+
+Meta
+
+Evolution API
+
+WPPConnect
+
+Email
+
+SMS
+
+Telegram
+
+---
+
+# Channel
+
+Medio de comunicación.
+
+Ejemplos
+
+WhatsApp
+
+Email
+
+SMS
+
+Telegram
+
+Instagram
+
+Messenger
+
+---
+
+# Conversation
+
+Conjunto de mensajes entre una empresa y un contacto.
+
+No forma parte del MVP.
+
+---
+
+# Scheduler
+
+Servicio encargado de iniciar campañas programadas.
+
+Nunca envía mensajes.
+
+Solo dispara eventos.
+
+---
+
+# Queue
+
+Cola de procesamiento.
+
+Permite desacoplar el envío.
+
+---
+
+# Worker
+
+Proceso que consume mensajes desde una Queue.
+
+---
+
+# Retry
+
+Nuevo intento de envío luego de un error.
+
+---
+
+# Rate Limit
+
+Cantidad máxima de mensajes permitidos durante un período.
+
+Nunca pertenece al dominio.
+
+Pertenece al Provider.
+
+---
+
+# Session
+
+Estado de autenticación de un Provider.
+
+Solo aplica a proveedores que requieren login.
+
+Ejemplo
+
+WhatsApp Web.
+
+---
+
+# Delivery Status
+
+Estados posibles.
+
+Pending
+
+Queued
+
+Sending
+
+Sent
+
+Delivered
+
+Read
+
+Failed
+
+Cancelled
+
+Expired
+
+---
+
+# Campaign Status
+
+Draft
+
+Scheduled
+
+Running
+
+Paused
+
+Completed
+
+Cancelled
+
+Archived
+
+---
+
+# Workspace Settings
+
+Configuración específica de cada empresa.
+
+Zona horaria
+
+Idioma
+
+Canales habilitados
+
+Provider activo
+
+Límites
+
+
+Workspace Created
+
+↓
+
+User Invited
+
+↓
+
+Provider Connected
+
+↓
+
+Contacts Imported
+
+↓
+
+Contact Updated
+
+↓
+
+Group Created
+
+↓
+
+Campaign Created
+
+↓
+
+Campaign Scheduled
+
+↓
+
+Campaign Started
+
+↓
+
+Message Queued
+
+↓
+
+Message Sent
+
+↓
+
+Delivery Confirmed
+
+↓
+
+Delivery Failed
+
+↓
+
+Campaign Completed
+
+
+
+Documento 04 — Event Storming
+Workspace Created
+
+↓
+
+User Invited
+
+↓
+
+Provider Connected
+
+↓
+
+Contacts Imported
+
+↓
+
+Contact Updated
+
+↓
+
+Group Created
+
+↓
+
+Campaign Created
+
+↓
+
+Campaign Scheduled
+
+↓
+
+Campaign Started
+
+↓
+
+Message Queued
+
+↓
+
+Message Sent
+
+↓
+
+Delivery Confirmed
+
+↓
+
+Delivery Failed
+
+↓
+
+Campaign Completed
+
+
+
+Documento 05 — Bounded Contexts
+Context 1
+
+Workspace
+
+Responsable de:
+
+empresas
+usuarios
+permisos
+configuración
+Context 2
+
+Contacts
+
+Responsable de:
+
+contactos
+grupos
+etiquetas
+importaciones
+Context 3
+
+Campaigns
+
+Responsable de:
+
+campañas
+programación
+audiencia
+Context 4
+
+Messaging
+
+Responsable de:
+
+mensajes
+deliveries
+retries
+Context 5
+
+Providers
+
+Responsable de:
+
+Meta
+WhatsApp Web
+Email
+SMS
+Context 6
+
+Scheduler
+
+Responsable de:
+
+ejecutar campañas
+Context 7
+
+Analytics
+
+Responsable de:
+
+métricas
+dashboards
+Context 8
+
+Observability
+
+Responsable de:
+
+logs
+auditoría
+tracing
+métricas
+
+                    Workspace
+
+             /          |          \
+
+      Contacts     Campaigns     Analytics
+
+            \          |          /
+
+               Messaging
+
+                    |
+
+                Providers
+
+                    |
+
+              Meta / WPPConnect
+
+
+
+Documento 06 — El Dominio
+
+Campaign
+
+│
+
+├── Audience
+
+├── Schedule
+
+├── Content
+
+├── Statistics
+
+├── Deliveries
+
+├── ProviderConfiguration
+
+└── ExecutionPolicy
+
+
+Documento 07 — Aggregate Design
+
+Aggregate 1 — Workspace
+
+Es el Aggregate Root principal.
+
+Todo pertenece a un Workspace.
+
+Nunca existe nada "global".
+
+Workspace
+
+├── WorkspaceSettings
+├── Users
+├── Providers
+├── Channels
+├── Billing
+├── Limits
+└── AuditConfiguration
+Responsabilidades
+
+Debe garantizar:
+
+Los usuarios pertenecen al Workspace.
+Los Providers pertenecen al Workspace.
+Los contactos pertenecen al Workspace.
+Las campañas pertenecen al Workspace.
+La configuración es consistente.
+
+Nunca envía mensajes.
+
+Nunca conoce campañas.
+
+Solo administra el entorno.
+
+Invariantes
+Un Workspace SIEMPRE tiene:
+
+✔ al menos un Owner
+
+✔ configuración regional
+
+✔ zona horaria
+
+✔ un estado (Active, Suspended...)
+
+✔ límites definidos
+Estados
+Creating
+
+↓
+
+Active
+
+↓
+
+Suspended
+
+↓
+
+Archived
+
+Nunca puede pasar:
+
+Archived
+
+↓
+
+Active
+
+Debe crearse otro Workspace.
+
+
+Aggregate 2 — Contact
+
+Este Aggregate parece simple.
+
+No lo es.
+
+Contact
+
+├── Identity
+├── Channels
+├── Tags
+├── Groups
+├── Preferences
+├── Metadata
+└── Statistics
+¿Por qué Channels?
+
+Porque mañana puede tener:
+
+WhatsApp
+
+Email
+
+Telegram
+
+SMS
+
+Instagram
+
+No queremos:
+
+contact.phone
+
+Queremos:
+
+Channels
+
+↓
+
+WhatsApp
+
+↓
+
++549351xxxxxxx
+
+Así el mismo contacto puede tener:
+
+Juan
+
+WhatsApp
+
+Email
+
+SMS
+
+Todo dentro del mismo Aggregate.
+
+Value Objects
+
+Identity
+
+Nombre
+
+Apellido
+
+Empresa
+
+Documento
+
+Observaciones
+
+Channel
+
+Tipo
+
+Valor
+
+Verificado
+
+Principal
+
+Preferences
+
+Acepta campañas
+
+Horario permitido
+
+Idioma
+
+Canal preferido
+
+Opt-out
+
+Statistics
+
+Mensajes enviados
+
+Respondidos
+
+Leídos
+
+Última campaña
+
+Último contacto
+
+
+Aggregate 3 — Campaign
+
+Este será el corazón del sistema.
+
+No debería tener menos de 500 líneas de lógica de dominio.
+
+Campaign
+
+├── Audience
+├── Content
+├── Schedule
+├── Execution
+├── Statistics
+├── DeliveryPolicy
+├── ProviderSelection
+└── Status
+¿Qué hace?
+
+NO envía mensajes.
+
+Eso es importante.
+
+La campaña decide.
+
+Los Workers ejecutan.
+
+Casos de uso
+Create
+
+↓
+
+Validate
+
+↓
+
+Schedule
+
+↓
+
+Pause
+
+↓
+
+Resume
+
+↓
+
+Cancel
+
+↓
+
+Archive
+
+Nunca:
+
+Campaign.send()
+
+Jamás.
+
+Debe hacer:
+
+Campaign.start()
+
+↓
+
+CampaignStartedEvent
+
+Y listo.
+
+Otro módulo se encargará.
+
+
+Aggregate 4 — Message
+
+Muchos lo modelan así.
+
+Message
+
+Texto
+
+Eso está mal.
+
+Message
+
+├── Content
+├── Variables
+├── Attachments
+├── Buttons
+├── Header
+├── Footer
+└── Validation
+Ejemplo
+Hola {{nombre}}
+
+Tu pedido {{pedido}}
+
+está listo.
+
+Las variables pertenecen al dominio.
+
+No al Provider.
+
+Aggregate 5 — Delivery
+
+Este probablemente será el Aggregate más importante después de Campaign.
+
+Delivery
+
+├── Recipient
+├── Message
+├── Attempts
+├── Status
+├── ProviderResponse
+├── Timeline
+└── Metrics
+Estados
+Pending
+
+↓
+
+Queued
+
+↓
+
+Sending
+
+↓
+
+Sent
+
+↓
+
+Delivered
+
+↓
+
+Read
+
+Errores
+
+Failed
+
+↓
+
+Retry
+
+↓
+
+Sending
+
+Nunca:
+
+Failed
+
+↓
+
+Delivered
+
+Debe volver a enviar.
+
+
+Aggregate 6 — Provider
+
+Acá está la magia.
+
+El dominio nunca conoce Meta.
+
+Conoce:
+
+interface MessageProvider
+
+Nada más.
+
+Después aparecen implementaciones.
+
+MetaProvider
+
+EvolutionProvider
+
+WPPConnectProvider
+
+EmailProvider
+
+SMSProvider
+
+Todos implementan exactamente la misma interfaz.
+
+
+Documento 08 — Value Objects
+
+Acá quiero ser extremadamente estricto.
+
+PhoneNumber
+
+No será string.
+
+Jamás.
+
+Será:
+
+PhoneNumber
+
+countryCode
+
+areaCode
+
+subscriberNumber
+
+international
+
+e164
+
+¿Por qué?
+
+Porque:
+
+3511234567
+
++54 351 1234567
+
+03511234567
+
+5493511234567
+
+Son el mismo número.
+
+El Value Object normaliza todo.
+
+CampaignName
+
+No será string.
+
+Tendrá reglas.
+
+mínimo
+
+máximo
+
+único
+
+slug
+Schedule
+
+No será Date.
+
+Será
+
+Fecha
+
+Hora
+
+Timezone
+
+Recurrencia
+
+Ventana
+
+Prioridad
+MessageContent
+
+No será string.
+
+Texto
+
+Variables
+
+Caracteres
+
+Encoding
+
+Validación
+
+Vista previa
+ProviderId
+
+No será UUID.
+
+Será un VO.
+
+Porque un Provider puede ser:
+
+meta-production
+
+meta-test
+
+wpp-local
+
+evolution-dev
+
+smtp-brote
+
+
+Documento 09 — Domain Events
+
+Acá quiero que pensemos como Temporal.io.
+
+Todo sucede por eventos.
+
+Ejemplo.
+
+Crear campaña.
+
+No hace:
+
+Guardar
+
+Enviar
+
+Hace:
+
+CampaignCreated
+
+↓
+
+CampaignValidated
+
+↓
+
+CampaignScheduled
+
+↓
+
+CampaignStarted
+
+↓
+
+MessagesGenerated
+
+↓
+
+MessagesQueued
+
+↓
+
+DeliveryStarted
+
+↓
+
+DeliveryCompleted
+
+↓
+
+CampaignCompleted
+
+Cada evento puede disparar:
+
+métricas
+logs
+auditoría
+notificaciones
+analytics
+webhooks
+
+Sin modificar el dominio.
+
+
+Documento 10 — System Architecture
+# System Architecture
+
+Versión: 1.0
+
+Estado: Draft
+
+---
+
+# Filosofía
+
+La arquitectura debe permitir reemplazar cualquier tecnología sin modificar el dominio.
+
+El Dominio representa el negocio.
+
+Todo lo demás representa implementación.
+
+```
+                    Infrastructure
+
+               Express     Redis
+
+                 │            │
+
+        Prisma ──┼────────────┼──── BullMQ
+
+                 │            │
+
+             Providers    Webhooks
+
+                 │
+
+──────────────────────────────────────────────
+
+              Application Layer
+
+          UseCases
+
+          Commands
+
+          Queries
+
+          DTO
+
+          Mappers
+
+──────────────────────────────────────────────
+
+                 Domain
+
+       Entities
+
+       Aggregates
+
+       Value Objects
+
+       Events
+
+       Services
+
+       Repositories
+
+──────────────────────────────────────────────
+
+            External Systems
+
+Meta API
+
+Evolution
+
+Email
+
+SMS
+
+Telegram
+
+```
+
+---
+
+# Regla Nº1
+
+El Dominio nunca importa:
+
+Express
+
+Prisma
+
+BullMQ
+
+Redis
+
+Axios
+
+Fetch
+
+Node
+
+Meta
+
+WPPConnect
+
+---
+
+# Regla Nº2
+
+Infrastructure puede desaparecer completamente.
+
+El dominio debe seguir compilando.
+
+---
+
+# Capas
+
+## Domain
+
+Representa el negocio.
+
+No conoce tecnología.
+
+---
+
+## Application
+
+Orquesta casos de uso.
+
+No conoce infraestructura.
+
+---
+
+## Infrastructure
+
+Implementa contratos.
+
+Conecta el mundo exterior.
+
+---
+
+## Presentation
+
+HTTP
+
+CLI
+
+Workers
+
+Cron
+
+Webhooks
+
+Todos utilizan exactamente los mismos Use Cases.
+
+
+Documento 11 — Arquitectura Física
+brote-messaging-platform/
+
+apps/
+
+backend/
+
+admin/
+
+worker/
+
+scheduler/
+
+packages/
+
+domain/
+
+application/
+
+infrastructure/
+
+shared/
+
+providers/
+
+meta/
+
+wppconnect/
+
+smtp/
+
+telegram/
+
+packages/common/
+
+packages/testing/
+
+packages/sdk/
+
+packages/openapi/
+
+docker/
+
+docs/
+
+adr/
+
+scripts/
+
+monitoring/
+
+prometheus/
+
+grafana/
+
+loki/
+
+tempo/
+
+
+Por qué una estructura tipo monorepo?
+
+Porque tenemos varios ejecutables que comparten el mismo dominio.
+
+Ejemplo.
+
+Admin
+
+↓
+
+Create Campaign
+
+↓
+
+API
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Webhook
+
+↓
+
+Dashboard
+
+Todos comparten:
+
+Entidades
+Value Objects
+Eventos
+Casos de uso
+
+No queremos copiar código.
+
+Documento 12 — Arquitectura Runtime
+
+Ahora imaginemos que el cliente tiene 1 millón de contactos.
+
+¿Qué pasa?
+
+                        Internet
+
+                            │
+
+                     Reverse Proxy
+
+                            │
+
+──────────────────────────────────────────
+
+                     Backend API
+
+                            │
+
+──────────────────────────────────────────
+
+          PostgreSQL      Redis
+
+──────────────────────────────────────────
+
+       Queue 1
+
+       Queue 2
+
+       Queue 3
+
+       Queue N
+
+──────────────────────────────────────────
+
+ Worker 1
+
+ Worker 2
+
+ Worker 3
+
+ Worker 10
+
+──────────────────────────────────────────
+
+              Provider Adapter
+
+                 │
+
+          Meta API
+
+Observación
+
+La API jamás envía mensajes.
+
+La API solamente crea trabajo.
+
+Los Workers hacen el trabajo pesado.
+
+
+
+Documento 13 — Flujo Completo
+
+Quiero documentarlo como Amazon.
+
+Usuario
+
+↓
+
+Crear campaña
+
+↓
+
+Validar
+
+↓
+
+Persistir
+
+↓
+
+CampaignCreated
+
+↓
+
+Scheduler
+
+↓
+
+CampaignStarted
+
+↓
+
+GenerateDeliveries
+
+↓
+
+Queue
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Response
+
+↓
+
+DeliveryUpdated
+
+↓
+
+StatisticsUpdated
+
+↓
+
+CampaignCompleted
+
+Cada flecha representa un evento.
+
+No una llamada.
+
+
+
+Documento 14 — Campaign Execution Engine
+
+Acá aparece el verdadero corazón.
+
+No es Campaign.
+
+Es el motor.
+
+Campaign
+
+↓
+
+Execution Plan
+
+↓
+
+Batch Generator
+
+↓
+
+Rate Controller
+
+↓
+
+Queue Dispatcher
+
+↓
+
+Provider
+
+↓
+
+Retry Engine
+
+↓
+
+Metrics
+
+¿Qué hace?
+
+Divide.
+
+Programa.
+
+Controla.
+
+Reintenta.
+
+Monitorea.
+
+Ejemplo
+
+Campaña
+
+4000 contactos
+
+No genera:
+
+4000 envíos
+
+Genera
+
+Batch 1
+
+100
+
+↓
+
+esperar
+
+↓
+
+Batch 2
+
+100
+
+↓
+
+esperar
+
+↓
+
+Batch 3
+
+¿Por qué?
+
+Porque el dominio no sabe si mañana el Provider permite:
+
+20
+
+200
+
+500
+
+5000
+
+Eso pertenece a la política del Provider.
+
+
+Documento 15 — Provider Strategy
+
+Este documento probablemente sea el más importante de Infrastructure.
+
+No existe:
+
+WhatsAppService
+
+Existe:
+
+interface MessagingProvider {
+
+ connect()
+
+ disconnect()
+
+ validate()
+
+ send()
+
+ status()
+
+ health()
+
+ supports()
+
+}
+
+Implementaciones
+
+MetaProvider
+
+EvolutionProvider
+
+WPPProvider
+
+SMTPProvider
+
+TelegramProvider
+
+
+Y el dominio hace solamente:
+
+provider.send(message)
+
+Nunca:
+
+meta.send(...)
+Documento 16 — Provider Capabilities
+
+Cada Provider declara qué soporta.
+
+Ejemplo.
+
+Meta
+
+✔ botones
+
+✔ multimedia
+
+✔ plantillas
+
+✔ estados
+
+✔ webhooks
+
+
+WPPConnect
+
+✔ texto
+
+✔ imagen
+
+✔ documento
+
+✔ audio
+
+✖ plantillas
+
+✖ estados oficiales
+
+
+SMTP
+
+✔ HTML
+
+✔ adjuntos
+
+✔ CC
+
+✔ BCC
+
+✔ prioridad
+
+
+Entonces el dominio pregunta:
+
+supports(Feature.BUTTONS)
+
+No pregunta
+
+isMeta()
+
+Jamás.
+
+Documento 17 — Delivery Pipeline
+
+Quiero que este módulo sea completamente independiente.
+
+Delivery
+
+↓
+
+Validator
+
+↓
+
+Normalizer
+
+↓
+
+Renderer
+
+↓
+
+Provider Adapter
+
+↓
+
+Transport
+
+↓
+
+Response Parser
+
+↓
+
+Persistence
+
+↓
+
+Events
+
+
+Cada etapa puede reemplazarse.
+
+Una decisión arquitectónica nueva (ADR-011)
+No existirán Services que mezclen responsabilidades.
+
+No vamos a tener clases como:
+
+CampaignService
+
+de 1.500 líneas.
+
+En su lugar, cada responsabilidad será explícita:
+
+CampaignCreationService
+CampaignSchedulingService
+CampaignExecutionPlanner
+CampaignStatisticsService
+DeliveryBatchGenerator
+ProviderSelector
+RetryPolicyResolver
+
+Esto favorece el principio de responsabilidad única, facilita las pruebas unitarias y hace que cada pieza sea reutilizable.
+
+
+Documento 18 — Persistence Strategy
+# Persistence Strategy
+
+Versión 1.0
+
+---
+
+# Filosofía
+
+La persistencia es una implementación.
+
+Nunca forma parte del dominio.
+
+El dominio podrá persistirse en:
+
+- PostgreSQL
+- MongoDB
+- EventStore
+- DynamoDB
+
+Sin modificar una sola regla de negocio.
+
+---
+
+# ¿Qué se persiste?
+
+No todas las clases.
+
+No todos los Value Objects.
+
+No todos los Events.
+
+Solo aquello necesario para reconstruir un Aggregate.
+
+---
+
+# Aggregate Persistence
+
+Workspace
+
+↓
+
+1 registro
+
+---
+
+Contact
+
+↓
+
+1 registro
+
++
+
+colecciones internas
+
+---
+
+Campaign
+
+↓
+
+1 registro
+
++
+
+Execution Plan
+
++
+
+Statistics
+
+---
+
+Delivery
+
+↓
+
+1 registro por destinatario
+
+---
+
+Message
+
+↓
+
+No existe como tabla independiente.
+
+Forma parte de Delivery.
+Primer gran debate
+¿Message debería tener tabla?
+
+La respuesta es:
+
+NO.
+
+¿Por qué?
+
+Porque Message no existe por sí mismo.
+
+Existe únicamente dentro de un Delivery.
+
+Si mañana borramos una campaña...
+
+¿Tiene sentido conservar millones de mensajes huérfanos?
+
+No.
+
+Entonces:
+
+Campaign
+
+↓
+
+Genera
+
+↓
+
+Deliveries
+
+↓
+
+Cada Delivery contiene
+
+↓
+
+Snapshot del mensaje enviado
+
+No dependemos del template.
+
+No dependemos de la campaña.
+
+Tenemos evidencia exacta de lo enviado.
+
+Documento 19 — Aggregate Persistence Map
+Workspace
+
+↓
+
+workspace
+
+-----------------------------
+
+Contact
+
+↓
+
+contact
+
+contact_channels
+
+contact_groups
+
+contact_tags
+
+-----------------------------
+
+Campaign
+
+↓
+
+campaign
+
+campaign_audience
+
+campaign_execution
+
+campaign_statistics
+
+-----------------------------
+
+Delivery
+
+↓
+
+delivery
+
+delivery_attempt
+
+delivery_event
+
+-----------------------------
+
+Provider
+
+↓
+
+provider_configuration
+
+provider_credentials
+¿Por qué delivery_attempt?
+
+Porque un envío puede reintentarse.
+
+Delivery
+
+↓
+
+Attempt 1
+
+↓
+
+Timeout
+
+↓
+
+Attempt 2
+
+↓
+
+429
+
+↓
+
+Attempt 3
+
+↓
+
+Success
+
+Eso tiene muchísimo valor para auditoría.
+
+Documento 20 — Multi Tenancy
+
+Esta decisión es crítica.
+
+Tenemos tres opciones.
+
+Opción 1
+
+Una base por cliente.
+
+Cliente A
+
+↓
+
+DB A
+
+Cliente B
+
+↓
+
+DB B
+
+Ventajas
+
+✔ aislamiento
+
+Desventajas
+
+✖ mantenimiento enorme
+
+Opción 2
+
+Un schema por cliente.
+
+workspace_1
+
+workspace_2
+
+workspace_3
+
+Ventajas
+
+✔ buen aislamiento
+
+Desventajas
+
+✖ Prisma se complica
+
+✖ migraciones difíciles
+
+Opción 3 (Elegida)
+
+Una sola base.
+
+Todas las tablas contienen:
+
+workspaceId
+
+Ejemplo
+
+Campaign
+
+id
+
+workspaceId
+
+status
+
+...
+¿Por qué?
+
+Porque:
+
+simplifica consultas
+simplifica Prisma
+facilita backups
+facilita analytics globales
+escala muy bien hasta cientos de clientes
+
+Y si un cliente Enterprise requiere aislamiento total, podemos migrarlo a una base exclusiva sin cambiar el dominio.
+
+ADR-013
+
+Toda entidad persistente deberá pertenecer a un Workspace.
+
+No existirán registros globales salvo catálogos técnicos.
+
+Documento 21 — Index Strategy
+
+Este documento casi nadie lo escribe.
+
+Y después llegan los problemas.
+
+Contact
+
+Búsquedas frecuentes
+
+workspaceId
+
+phone
+
+email
+
+externalId
+
+Índices
+
+(workspaceId, phone)
+
+(workspaceId, email)
+
+(workspaceId, externalId)
+Campaign
+
+Consultas
+
+Activas
+
+Programadas
+
+Finalizadas
+
+Por fecha
+
+Índices
+
+(workspaceId, status)
+
+(workspaceId, scheduledAt)
+
+(workspaceId, createdAt)
+Delivery
+
+Será la tabla más grande.
+
+Posiblemente millones.
+
+Índices
+
+(workspaceId, campaignId)
+
+(workspaceId, status)
+
+(providerMessageId)
+
+(contactId)
+
+(createdAt)
+
+Nunca:
+
+SELECT *
+
+FROM delivery
+
+Jamás.
+
+Documento 22 — Partition Strategy
+
+La tabla Delivery crecerá muchísimo.
+
+Entonces:
+
+Delivery
+
+2026
+
+↓
+
+enero
+
+febrero
+
+marzo
+
+...
+
+
+Particionado mensual.
+
+¿Por qué mensual?
+
+Porque una campaña suele durar días.
+
+Nunca años.
+
+Documento 23 — Soft Delete
+
+NO.
+
+No me gusta.
+
+En su lugar:
+
+Status
+
+↓
+
+Active
+
+Archived
+
+Deleted
+
+Y un Worker de retención elimina físicamente según políticas configurables (30, 90, 365 días).
+
+Documento 24 — Auditoría
+
+Todo cambio importante genera un registro.
+
+Campaign Created
+
+↓
+
+Audit
+
+Campaign Started
+
+↓
+
+Audit
+
+Campaign Cancelled
+
+↓
+
+Audit
+
+No reutilizamos Winston para esto.
+
+La auditoría es dominio.
+
+Documento 25 — Historial
+
+Cada Aggregate importante tendrá Timeline.
+
+Ejemplo:
+
+Campaign
+
+↓
+
+Creada
+
+↓
+
+Programada
+
+↓
+
+Iniciada
+
+↓
+
+Pausada
+
+↓
+
+Reanudada
+
+↓
+
+Finalizada
+
+Esto permite reconstruir el ciclo de vida sin depender exclusivamente de logs.
+
+Documento 26 — Outbox Pattern
+
+Este, para mí, es obligatorio.
+
+Cada transacción que genere un evento de dominio escribe primero en una tabla outbox.
+
+BEGIN
+
+↓
+
+Guardar Campaign
+
+↓
+
+Guardar DomainEvent
+
+↓
+
+COMMIT
+
+↓
+
+Outbox Worker
+
+↓
+
+Publicar evento
+
+
+Con esto evitamos inconsistencias entre la base y las colas.
+
+ADR-014
+
+Toda integración externa será asíncrona cuando sea posible.
+
+La API responde rápido.
+
+Los procesos pesados viven en Workers.
+
+Documento 27 — Estrategia de Identificadores
+
+No usaría UUID autogenerados por Prisma para todo.
+
+Propondría:
+
+ULID para entidades principales (Workspace, Campaign, Contact, Delivery), porque mantienen orden temporal y funcionan mejor para índices.
+IDs técnicos internos cuando el proveedor los requiera (providerMessageId).
+externalId opcional para sincronización con CRMs o ERPs.
+
+Así mantenemos identificadores estables, ordenables y aptos para integraciones.
+
+
+Documento 28 — Queue Architecture
+Filosofía
+
+Una API nunca debe hacer trabajo pesado.
+
+La API recibe solicitudes.
+
+Los Workers ejecutan trabajo.
+
+Siempre.
+
+Flujo
+HTTP Request
+
+↓
+
+Application Service
+
+↓
+
+Domain Event
+
+↓
+
+Outbox
+
+↓
+
+BullMQ
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Webhook
+
+↓
+
+Update Aggregate
+
+↓
+
+Metrics
+
+↓
+
+Audit
+¿Por qué BullMQ?
+NO queremos
+HTTP
+
+↓
+
+for(contact of contacts){
+
+ send()
+
+}
+
+Porque:
+
+el usuario espera
+puede fallar en el medio
+no escala
+consume memoria
+bloquea Node
+Queremos
+HTTP
+
+↓
+
+CampaignCreated
+
+↓
+
+Queue
+
+↓
+
+Response 200
+
+↓
+
+Worker
+
+↓
+
+Procesamiento
+Tipos de colas
+
+No existirá una sola Queue.
+
+Existirán varias.
+
+Campaign Queue
+
+↓
+
+Delivery Queue
+
+↓
+
+Retry Queue
+
+↓
+
+Webhook Queue
+
+↓
+
+Analytics Queue
+
+↓
+
+Notification Queue
+
+Cada una tiene objetivos distintos.
+
+Campaign Queue
+
+Responsable de:
+
+iniciar campañas
+pausar
+reanudar
+cancelar
+
+Nunca envía mensajes.
+
+Delivery Queue
+
+Responsable de:
+
+enviar mensajes
+
+Nada más.
+
+Retry Queue
+
+Responsable de:
+
+Timeout
+
+↓
+
+Esperar
+
+↓
+
+Nuevo intento
+Analytics Queue
+
+Responsable de:
+
+estadísticas
+dashboards
+KPIs
+
+Nunca toca el dominio.
+
+Notification Queue
+
+Responsable de:
+
+emails
+Slack
+Discord
+alertas
+ADR-015
+
+Cada Queue tendrá un único objetivo.
+
+Nunca mezclaremos responsabilidades.
+
+Documento 29 — Scheduler Engine
+
+El Scheduler probablemente será uno de los procesos más delicados.
+
+No queremos hacer esto:
+
+setInterval(...)
+
+Ni esto:
+
+Cron
+
+↓
+
+SELECT *
+
+FROM Campaign
+
+WHERE ...
+
+Cada minuto.
+
+Queremos
+Campaign Scheduled
+
+↓
+
+Persist
+
+↓
+
+Scheduler
+
+↓
+
+CampaignStartedEvent
+Scheduler
+
+Responsabilidades:
+
+detectar campañas listas
+disparar eventos
+garantizar idempotencia
+nunca enviar mensajes
+Estados
+Scheduled
+
+↓
+
+Starting
+
+↓
+
+Running
+
+↓
+
+Completed
+
+Nunca:
+
+Scheduled
+
+↓
+
+Completed
+ADR-016
+
+El Scheduler nunca hablará con Meta.
+
+Documento 30 — Batch Engine
+
+Este módulo me parece clave.
+
+Porque una campaña NO se envía.
+
+Se divide.
+
+Ejemplo.
+
+10.000 contactos
+
+↓
+
+Genera
+
+100 lotes
+
+↓
+
+100 contactos
+
+↓
+
+100 contactos
+
+↓
+
+100 contactos
+
+Cada Batch conoce:
+
+BatchId
+
+CampaignId
+
+Size
+
+Priority
+
+Status
+
+RetryCount
+Documento 31 — Rate Limiter
+
+No será un middleware Express.
+
+Será un componente del dominio de ejecución.
+
+Cada Provider declara límites.
+
+Ejemplo.
+
+Meta
+
+↓
+
+100 msg/min
+
+Otro.
+
+Evolution
+
+↓
+
+30 msg/min
+
+Otro.
+
+SMTP
+
+↓
+
+500 emails/min
+
+Entonces el Execution Engine pregunta:
+
+Provider
+
+↓
+
+¿Qué velocidad soportás?
+
+No pregunta:
+
+¿Cuántos contactos tengo?
+ADR-017
+
+La velocidad pertenece al Provider.
+
+Nunca a Campaign.
+
+Documento 32 — Retry Engine
+
+No todos los errores son iguales.
+
+Error permanente
+Número inexistente
+
+No reintentar.
+
+Error temporal
+429
+
+Esperar.
+
+Error de red
+Timeout
+
+Reintentar.
+
+Error Provider
+503
+
+Backoff exponencial.
+
+Política
+Intento 1
+
+↓
+
+10 segundos
+
+↓
+
+Intento 2
+
+↓
+
+30 segundos
+
+↓
+
+Intento 3
+
+↓
+
+2 minutos
+
+↓
+
+Intento 4
+
+↓
+
+10 minutos
+
+↓
+
+Falló definitivamente
+Documento 33 — Provider Orchestrator
+
+Este módulo probablemente sea el más importante de Infrastructure.
+
+No existe:
+
+MetaService
+
+Existe:
+
+ProviderOrchestrator
+
+El flujo:
+
+Campaign
+
+↓
+
+ProviderResolver
+
+↓
+
+Meta
+
+↓
+
+send()
+
+Si mañana cambia:
+
+Meta
+
+↓
+
+Evolution
+
+Nada cambia arriba.
+
+Documento 34 — Health Monitoring
+
+Todos los Providers implementan:
+
+health()
+
+latency()
+
+availability()
+
+quota()
+
+limits()
+
+Dashboard
+
+Meta
+
+✔ Online
+
+120 ms
+
+99.99%
+
+Quota OK
+Documento 35 — Observability
+
+Quiero observabilidad de verdad.
+
+Logs
+
+↓
+
+Loki
+
+Métricas
+
+↓
+
+Prometheus
+
+Tracing
+
+↓
+
+Tempo
+
+Dashboard
+
+↓
+
+Grafana
+
+Todo correlacionado.
+
+Ejemplo.
+
+Campaign
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Webhook
+
+↓
+
+Delivery
+
+Todo comparte el mismo CorrelationId.
+
+Documento 36 — Correlation ID
+
+Cada request genera:
+
+CorrelationId
+
+Ese ID vive en:
+
+logs
+eventos
+queue
+webhook
+auditoría
+métricas
+
+Así podemos reconstruir todo.
+
+Documento 37 — Security
+
+No quiero JWT solamente.
+
+Quiero seguridad enterprise.
+
+Autenticación
+
+JWT
+
+Refresh Token
+
+Rotation
+
+Autorización
+
+RBAC
+
+Workspace Roles
+
+Claims
+
+Policies
+
+Secretos
+
+Nunca en BD.
+
+Usaremos:
+
+Vault
+
+o
+
+Secrets Manager
+
+En desarrollo:
+
+.env
+
+Credenciales Provider
+
+Siempre cifradas.
+
+AES-256.
+
+Nunca texto plano.
+
+Documento 38 — Auditoría
+
+No es Logging.
+
+Es otra cosa.
+
+Ejemplo.
+
+Usuario
+
+↓
+
+Canceló campaña
+
+↓
+
+Audit
+
+No importa si Winston falla.
+
+La auditoría debe persistir.
+
+Documento 39 — API Pública
+
+BMP no será solamente un panel.
+
+Será una plataforma.
+
+Endpoints
+
+POST /campaigns
+
+POST /contacts/import
+
+POST /providers/connect
+
+GET /deliveries
+
+GET /analytics
+
+Y además:
+
+SDK TypeScript
+
+SDK Node
+
+CLI
+Documento 40 — Plugin System (Visión futura)
+
+Y acá viene una idea que creo que puede transformar BMP en un producto mucho más potente.
+
+En lugar de que todo esté embebido, el núcleo podría permitir plugins.
+
+Por ejemplo:
+
+BMP Core
+
+│
+
+├── Meta Plugin
+
+├── Evolution Plugin
+
+├── SMTP Plugin
+
+├── Telegram Plugin
+
+├── AI Plugin
+
+├── CRM Plugin
+
+├── ERP Plugin
+
+└── Analytics Plugin
+
+Cada plugin implementaría contratos definidos por el Core.
+
+Eso permitiría desarrollar integraciones sin modificar el núcleo del sistema.
+
+ADR-018 — "The Core Never Knows"
+
+Quiero dejar escrito un principio que podría convertirse en una firma de ingeniería de BROTE:
+
+El Core nunca conoce implementaciones concretas. Solo conoce contratos.
+
+Ese principio aplica a todo:
+
+Providers.
+Persistencia.
+Colas.
+Observabilidad.
+IA.
+Integraciones.
+Almacenamiento.
+Notificaciones.
+
+
+Documento 41 — Core Architecture
+ADR-020
+
+El Core nunca sabe qué está haciendo el negocio.
+
+El Core únicamente coordina.
+
+Es decir...
+
+El Core no envía WhatsApp.
+
+El Core no envía Email.
+
+El Core no sabe qué es Meta.
+
+El Core solamente sabe:
+
+Existe una campaña
+
+↓
+
+Hay un canal
+
+↓
+
+Existe un Provider
+
+↓
+
+Debe entregarse un mensaje
+
+Nada más.
+
+¿Cómo se divide el Core?
+                         BROTE Messaging Platform
+
+                                    │
+
+     ┌──────────────────────────────┼──────────────────────────────┐
+
+     │                              │                              │
+
+ Domain                      Application                 Infrastructure
+
+     │                              │                              │
+
+ Entities                    Use Cases                    Providers
+
+ Events                      Commands                     Persistence
+
+ Aggregates                  Queries                      HTTP
+
+ VO                           DTO                         Queue
+
+ Domain Services              EventBus                    Webhooks
+Documento 42 — Monorepo Final
+
+Quiero que el proyecto sea un verdadero Monorepo Enterprise.
+
+bmp/
+
+apps/
+
+    api/
+
+    admin/
+
+    scheduler/
+
+    worker/
+
+packages/
+
+    domain/
+
+    application/
+
+    infrastructure/
+
+    contracts/
+
+    sdk/
+
+    testing/
+
+    common/
+
+providers/
+
+    meta/
+
+    evolution/
+
+    wppconnect/
+
+    smtp/
+
+    telegram/
+
+    sms/
+
+    fake/
+
+packages/domain/
+
+    workspace/
+
+    contacts/
+
+    campaign/
+
+    delivery/
+
+    messaging/
+
+packages/application/
+
+    commands/
+
+    queries/
+
+    events/
+
+packages/infrastructure/
+
+    prisma/
+
+    redis/
+
+    bullmq/
+
+    logger/
+
+    monitoring/
+
+docker/
+
+docs/
+
+adr/
+
+openapi/
+
+scripts/
+
+.github/
+¿Por qué providers fuera de infrastructure?
+
+Porque quiero que sean completamente independientes.
+
+El día de mañana podríamos publicar:
+
+@brote/provider-meta
+
+@brote/provider-evolution
+
+@brote/provider-smtp
+
+Como paquetes npm privados.
+
+Documento 43 — Domain Modules
+Workspace
+
+Responsable de:
+
+Empresa
+Usuarios
+Configuración
+Billing
+Límites
+
+Nunca conoce campañas.
+
+Contacts
+
+Responsable de:
+
+Contactos
+Etiquetas
+Grupos
+Preferencias
+Consentimiento
+Campaign
+
+Responsable de:
+
+Reglas
+Programación
+Audiencia
+Estado
+
+Nunca envía mensajes.
+
+Messaging
+
+Responsable de:
+
+Construcción del mensaje
+Variables
+Renderizado
+Validación
+Delivery
+
+Responsable de:
+
+Seguimiento
+Intentos
+Resultado
+Timeline
+Provider
+
+Responsable de:
+
+Seleccionar el canal correcto.
+
+Nunca sabe cómo funciona Meta.
+
+Documento 44 — CQRS
+
+No quiero CQRS por moda.
+
+Quiero CQRS donde realmente agrega valor.
+
+Commands
+CreateCampaign
+
+PauseCampaign
+
+ResumeCampaign
+
+CancelCampaign
+
+ImportContacts
+
+CreateWorkspace
+
+ConnectProvider
+
+Todos modifican estado.
+
+Queries
+GetCampaign
+
+GetDashboard
+
+GetAnalytics
+
+GetContacts
+
+SearchContacts
+
+CampaignTimeline
+
+Nunca modifican estado.
+
+ADR-021
+
+Los Commands nunca devolverán entidades.
+
+Sólo:
+
+Success
+
+Error
+
+Identifier
+Documento 45 — Event Bus
+
+Este módulo será el sistema nervioso.
+
+CampaignCreated
+
+↓
+
+Bus
+
+↓
+
+Scheduler
+
+↓
+
+Analytics
+
+↓
+
+Audit
+
+↓
+
+Notifications
+
+↓
+
+Webhook
+
+↓
+
+Logs
+
+Nadie conoce a nadie.
+
+Todos escuchan eventos.
+
+Documento 46 — Dependency Injection
+
+Quiero que absolutamente todo entre por contratos.
+
+Nunca:
+
+new PrismaCampaignRepository()
+
+Siempre:
+
+ICampaignRepository
+
+Y en infraestructura.
+
+container.register(
+ICampaignRepository,
+PrismaCampaignRepository
+)
+Documento 47 — Factories
+
+No quiero:
+
+new Campaign(...)
+
+Quiero:
+
+CampaignFactory.createDraft()
+
+o
+
+CampaignFactory.schedule()
+
+Porque las reglas viven allí.
+
+Documento 48 — Builders
+
+Ejemplo.
+
+CampaignBuilder
+
+.withAudience()
+
+.withMessage()
+
+.withProvider()
+
+.withSchedule()
+
+.build()
+
+Así evitamos constructores gigantes.
+
+Documento 49 — Repository Pattern
+
+No quiero repositorios CRUD.
+
+Quiero repositorios del dominio.
+
+Ejemplo.
+
+NO:
+
+save()
+
+Quiero:
+
+schedule()
+
+archive()
+
+pause()
+
+resume()
+
+findReady()
+
+findRunning()
+
+El repositorio habla el lenguaje del negocio.
+
+Documento 50 — Domain Services
+
+No quiero servicios enormes.
+
+Prefiero muchos pequeños.
+
+CampaignPlanner
+
+DeliveryGenerator
+
+AudienceResolver
+
+MessageRenderer
+
+ProviderResolver
+
+RetryResolver
+
+BatchPlanner
+
+StatisticsCalculator
+
+Cada uno hace una sola cosa.
+
+Documento 51 — Message Pipeline
+
+Este probablemente será el pipeline más importante.
+
+Campaign
+
+↓
+
+Audience Resolver
+
+↓
+
+Template Renderer
+
+↓
+
+Variable Resolver
+
+↓
+
+Message Validator
+
+↓
+
+Delivery Generator
+
+↓
+
+Queue
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Response Parser
+
+↓
+
+Events
+
+↓
+
+Metrics
+Documento 52 — Variable Engine
+
+No quiero hacer simplemente:
+
+Hola {{nombre}}
+
+Quiero un motor.
+
+Ejemplo.
+
+{{contact.name}}
+
+{{workspace.name}}
+
+{{campaign.name}}
+
+{{today}}
+
+{{now}}
+
+{{custom.balance}}
+
+{{custom.invoice}}
+
+Y que sea extensible.
+
+Mañana:
+
+{{ai.summary}}
+
+Sin tocar el Core.
+
+Documento 53 — Template Engine
+
+Un Template no será texto.
+
+Será un Aggregate.
+
+Template
+
+↓
+
+Header
+
+↓
+
+Body
+
+↓
+
+Footer
+
+↓
+
+Buttons
+
+↓
+
+Variables
+
+↓
+
+Validation
+
+Incluso diferentes versiones.
+
+v1
+
+v2
+
+v3
+Documento 54 — Consentimiento (MUY IMPORTANTE)
+
+Acá hay un tema que puede diferenciar a BROTE de muchas herramientas.
+
+ContactPreference
+Acepta campañas
+
+Sí
+
+No
+
+Desconocido
+ConsentSource
+Formulario Web
+
+CRM
+
+Manual
+
+API
+
+Importación
+
+Landing
+
+WhatsApp
+
+Otro
+ConsentDate
+
+Guardar cuándo se obtuvo.
+
+Opt-Out
+
+Todo contacto puede decidir:
+
+No quiero más mensajes
+
+El sistema lo respetará automáticamente.
+
+ADR-022
+
+Nunca enviaremos campañas a contactos marcados como Opt-Out, aunque el usuario los incluya manualmente.
+
+Esto no solo es una buena práctica, sino que protege al cliente frente a políticas de proveedores y futuras regulaciones.
+
+Documento 55 — Roadmap del Producto
+
+A esta altura dejaría de pensar en versiones técnicas y empezaría a pensar como una empresa de producto.
+
+v1
+WhatsApp
+Contactos
+Campañas
+Dashboard
+Estadísticas
+v2
+Email
+Segmentación avanzada
+Adjuntos
+Variables
+v3
+Automatizaciones
+Webhooks
+API pública
+Integraciones CRM
+v4
+IA para generación de campañas
+IA para segmentación
+IA para optimización de horarios
+IA para análisis de resultados
+
+
+PARTE II
+Software Requirements Specification (SRS)
+
+Este documento NO habla de Node.
+
+NO habla de Prisma.
+
+NO habla de Express.
+
+Habla del software.
+
+Y será la fuente de verdad.
+
+Documento 56
+SRS — Introducción
+# Software Requirements Specification
+
+Proyecto:
+
+BROTE Messaging Platform
+
+Versión
+
+1.0
+
+Estado
+
+Draft
+
+---
+
+## Objetivo
+
+Definir el comportamiento funcional completo del sistema.
+
+Este documento será utilizado por:
+
+- Product Owners
+
+- Arquitectos
+
+- Backend
+
+- Frontend
+
+- QA
+
+- DevOps
+
+Toda implementación deberá respetar este documento.
+
+Si el código contradice el SRS, el código es incorrecto.
+
+Documento 57
+Actores
+
+No usuarios.
+
+Actores.
+
+Owner
+
+↓
+
+Admin
+
+↓
+
+Operator
+
+↓
+
+Viewer
+
+↓
+
+Scheduler
+
+↓
+
+Worker
+
+↓
+
+Provider
+
+↓
+
+Webhook
+
+↓
+
+External API
+
+Hay actores humanos.
+
+Y actores del sistema.
+
+Owner
+
+Puede hacer absolutamente todo.
+
+Admin
+
+Gestiona campañas.
+
+Gestiona contactos.
+
+No puede transferir Workspace.
+
+Operator
+
+Puede ejecutar campañas.
+
+No administra usuarios.
+
+Viewer
+
+Solo lectura.
+
+Scheduler
+
+Actor interno.
+
+Dispara campañas.
+
+Worker
+
+Actor interno.
+
+Envía mensajes.
+
+Provider
+
+Meta
+
+Evolution
+
+SMTP
+
+Etc.
+
+Documento 58
+Casos de Uso
+
+Vamos a enumerarlos todos.
+
+No diez.
+
+Todos.
+
+Workspace
+Crear Workspace
+
+Actualizar Workspace
+
+Suspender Workspace
+
+Archivar Workspace
+
+Eliminar Workspace
+
+Transferir Ownership
+
+Cambiar Plan
+Usuarios
+Invitar Usuario
+
+Aceptar Invitación
+
+Cambiar Rol
+
+Eliminar Usuario
+
+Reset Password
+
+Revocar Sesión
+Contactos
+Crear
+
+Editar
+
+Eliminar
+
+Archivar
+
+Importar CSV
+
+Importar Excel
+
+Buscar
+
+Filtrar
+
+Segmentar
+
+Fusionar Duplicados
+
+Exportar
+
+Agregar Etiqueta
+
+Quitar Etiqueta
+
+Agregar Grupo
+
+Eliminar Grupo
+Campañas
+Crear
+
+Duplicar
+
+Editar
+
+Eliminar
+
+Programar
+
+Cancelar
+
+Pausar
+
+Reanudar
+
+Enviar Test
+
+Archivar
+Provider
+Conectar
+
+Desconectar
+
+Validar
+
+Sincronizar
+
+Actualizar Token
+
+Ver Estado
+Analytics
+Dashboard
+
+KPIs
+
+Exportar
+
+Timeline
+
+Errores
+
+Rendimiento
+Documento 59
+Flujo Principal
+
+Ahora describimos absolutamente todo.
+
+Ejemplo.
+
+Crear campaña.
+
+Usuario
+
+↓
+
+Nueva campaña
+
+↓
+
+Completa formulario
+
+↓
+
+Guardar borrador
+
+↓
+
+CampaignCreated
+
+↓
+
+Estado Draft
+
+Después.
+
+Programar
+
+↓
+
+CampaignValidated
+
+↓
+
+CampaignScheduled
+
+↓
+
+Scheduler
+
+↓
+
+CampaignStarted
+
+↓
+
+DeliveryGenerator
+
+↓
+
+Queue
+
+↓
+
+Workers
+
+↓
+
+Provider
+
+↓
+
+Webhook
+
+↓
+
+DeliveryUpdated
+
+↓
+
+StatisticsUpdated
+
+↓
+
+CampaignCompleted
+
+Todo documentado.
+
+Paso por paso.
+
+Documento 60
+Estados
+
+No pueden quedar implícitos.
+
+Campaign.
+
+Draft
+
+↓
+
+Scheduled
+
+↓
+
+Running
+
+↓
+
+Paused
+
+↓
+
+Completed
+
+↓
+
+Archived
+
+Nunca.
+
+Draft
+
+↓
+
+Completed
+
+Debe pasar por reglas.
+
+Delivery.
+
+Pending
+
+↓
+
+Queued
+
+↓
+
+Sending
+
+↓
+
+Sent
+
+↓
+
+Delivered
+
+↓
+
+Read
+
+Errores.
+
+Failed
+
+↓
+
+Retry
+
+↓
+
+Sending
+
+Workspace.
+
+Creating
+
+↓
+
+Active
+
+↓
+
+Suspended
+
+↓
+
+Archived
+Documento 61
+Reglas de Negocio
+
+Acá quiero escribir cientos.
+
+Ejemplos.
+
+BR-001
+
+Una campaña solo puede ejecutarse si existe al menos un Provider conectado.
+
+BR-002
+
+No puede existir más de un Provider activo por canal.
+
+BR-003
+
+Un contacto Opt-Out nunca recibirá campañas.
+
+BR-004
+
+Una campaña finalizada nunca puede editarse.
+
+BR-005
+
+Un Delivery nunca puede volver a Pending.
+
+BR-006
+
+No puede eliminarse un Workspace con campañas activas.
+
+BR-007
+
+Un contacto debe tener al menos un canal válido.
+
+BR-008
+
+Una campaña debe contener al menos un destinatario.
+
+BR-009
+
+Un mensaje vacío nunca será válido.
+
+BR-010
+
+El Scheduler nunca ejecutará campañas suspendidas.
+
+Y así hasta tener más de 200 reglas.
+
+Documento 62
+Errores de Negocio
+
+No quiero Exceptions genéricas.
+
+Quiero errores del dominio.
+
+CampaignAlreadyRunning
+
+CampaignAlreadyCompleted
+
+CampaignWithoutAudience
+
+CampaignWithoutProvider
+
+CampaignPaused
+
+ProviderUnavailable
+
+WorkspaceSuspended
+
+ContactOptOut
+
+DeliveryExpired
+
+InvalidTemplate
+
+TemplateVariablesMissing
+
+Etc.
+
+Documento 63
+Permisos
+
+No simples Roles.
+
+Permisos.
+
+Ejemplo.
+
+campaign:create
+
+campaign:update
+
+campaign:delete
+
+campaign:execute
+
+campaign:pause
+
+campaign:resume
+
+campaign:view
+
+Después.
+
+Roles.
+
+Owner
+
+↓
+
+Todos
+
+Admin
+
+↓
+
+Todos menos Billing.
+
+Operator
+
+↓
+
+Ejecutar.
+
+Viewer
+
+↓
+
+Solo lectura.
+
+Así evitamos hardcodear.
+
+Documento 64
+Auditoría Funcional
+
+Todo cambio importante debe generar:
+
+Quién
+
+Qué
+
+Cuándo
+
+Desde dónde
+
+Valor anterior
+
+Valor nuevo
+
+CorrelationId
+
+IP
+
+UserAgent
+
+No solamente.
+
+Usuario editó campaña.
+Documento 65
+Validaciones
+
+Campaign.
+
+Nombre.
+
+3..120 caracteres
+
+Contacto.
+
+Debe poseer un canal válido.
+
+Template.
+
+Variables balanceadas.
+
+Provider.
+
+Debe responder HealthCheck.
+Documento 66
+Internacionalización
+
+El sistema nunca guardará textos.
+
+Guardará claves.
+
+campaign.created
+
+No.
+
+Campaña creada.
+
+Soportará:
+
+Español.
+
+Inglés.
+
+Portugués.
+
+Documento 67
+Feature Flags
+
+Quiero poder activar.
+
+Email
+
+SMS
+
+Telegram
+
+AI
+
+Automation
+
+Beta UI
+
+Sin desplegar otra versión.
+
+Documento 68
+Configuración
+
+Toda configuración será dinámica.
+
+No recompilar.
+
+Ejemplo.
+
+Máximo contactos.
+
+Máximo campañas.
+
+Rate Limit.
+
+Retry.
+
+Retention.
+
+Timezone.
+
+Todo configurable.
+
+Documento 69
+KPIs
+
+El producto medirá.
+
+Delivery Rate
+
+Read Rate
+
+Reply Rate
+
+Provider Latency
+
+Retry %
+
+Campaign Success
+
+Worker Throughput
+
+Queue Size
+
+Queue Time
+
+Average Delivery
+
+Error %
+
+Documento 70
+La decisión más importante del proyecto
+
+Y acá quiero proponerte un principio que, sinceramente, creo que puede convertirse en la firma de ingeniería de BROTE.
+
+ADR-023 — Product First Engineering
+
+El código no es el producto.
+
+La documentación tampoco es el producto.
+
+El producto es el comportamiento del sistema.
+
+Eso significa que:
+
+El dominio define el comportamiento.
+La documentación explica el comportamiento.
+El código implementa el comportamiento.
+Las pruebas verifican el comportamiento.
+
+Los cuatro deben permanecer sincronizados.
+
+
+ADR-024
+El proyecto deja de ser "Messaging Platform"
+
+Pasa a ser:
+
+BROTE Communication Platform
+
+BCP
+
+¿Por qué?
+
+Porque "Messaging" limita.
+
+Communication no.
+
+El día de mañana podremos tener:
+
+WhatsApp
+Email
+SMS
+Push
+Telegram
+Instagram
+Messenger
+Voice
+IA
+
+Y el dominio sigue siendo exactamente el mismo.
+
+PARTE III
+IMPLEMENTATION SPECIFICATION
+
+Ahora sí empezamos a diseñar el código.
+
+No implementarlo.
+
+Diseñarlo.
+
+Documento 71
+Monorepo Final
+bcp/
+
+│
+
+├── apps/
+│   ├── api/
+│   ├── admin/
+│   ├── worker/
+│   ├── scheduler/
+│   ├── webhook/
+│   └── cli/
+│
+├── packages/
+│
+│   ├── domain/
+│   │
+│   ├── application/
+│   │
+│   ├── infrastructure/
+│   │
+│   ├── sdk/
+│   │
+│   ├── contracts/
+│   │
+│   ├── common/
+│   │
+│   ├── testing/
+│   │
+│   └── ui/
+│
+├── providers/
+│
+│   ├── meta/
+│   ├── evolution/
+│   ├── smtp/
+│   ├── telegram/
+│   ├── sms/
+│   ├── fake/
+│   └── testing/
+│
+├── prisma/
+│
+├── docs/
+│
+├── docker/
+│
+├── scripts/
+│
+├── monitoring/
+│
+└── .github/
+Documento 72
+package.json
+apps/
+
+↓
+
+Aplicaciones
+
+packages/
+
+↓
+
+Librerías internas
+
+providers/
+
+↓
+
+Plugins
+
+
+Cada carpeta debe poder versionarse de manera independiente.
+
+Documento 73
+Apps
+API
+
+Responsabilidad.
+
+Exponer HTTP.
+
+Nada más.
+
+Nunca contiene lógica.
+
+Worker
+
+Consume colas.
+
+Ejecuta Providers.
+
+Scheduler
+
+Detecta campañas.
+
+Genera eventos.
+
+Webhook
+
+Recibe eventos externos.
+
+Nunca ejecuta lógica.
+
+Solo dispara Use Cases.
+
+Admin
+
+Frontend.
+
+CLI
+
+Herramientas internas.
+
+Migraciones.
+
+Testing.
+
+Importaciones.
+
+Documento 74
+Domain Package
+domain/
+
+workspace/
+
+contacts/
+
+campaign/
+
+delivery/
+
+messaging/
+
+provider/
+
+shared/
+
+Cada módulo totalmente independiente.
+
+Ejemplo.
+
+Campaign.
+
+campaign/
+
+entities/
+
+aggregates/
+
+events/
+
+errors/
+
+repositories/
+
+services/
+
+value-objects/
+
+specifications/
+
+factories/
+
+builders/
+
+tests/
+Documento 75
+Application Package
+application/
+
+commands/
+
+queries/
+
+handlers/
+
+dto/
+
+mappers/
+
+validators/
+
+ports/
+
+policies/
+
+Commands.
+
+CreateCampaign
+
+PauseCampaign
+
+ResumeCampaign
+
+CancelCampaign
+
+ImportContacts
+
+Queries.
+
+GetDashboard
+
+SearchContacts
+
+CampaignHistory
+
+GetMetrics
+Documento 76
+Infrastructure
+infrastructure/
+
+prisma/
+
+redis/
+
+bullmq/
+
+logger/
+
+mailer/
+
+monitoring/
+
+security/
+
+cache/
+
+storage/
+
+Nunca importar desde Domain.
+
+Siempre al revés.
+
+Documento 77
+Providers
+
+Cada Provider es un paquete.
+
+Ejemplo.
+
+provider-meta
+
+↓
+
+Controller
+
+↓
+
+Mapper
+
+↓
+
+Adapter
+
+↓
+
+HttpClient
+
+↓
+
+Webhook
+
+↓
+
+Configuration
+
+Todos implementan:
+
+MessagingProvider
+Documento 78
+Contracts
+
+Aquí viven las interfaces.
+
+ICampaignRepository
+
+IContactRepository
+
+IProvider
+
+IEventBus
+
+ILogger
+
+IClock
+
+IQueue
+
+IStorage
+
+ISecretManager
+
+ICache
+Documento 79
+Shared Kernel
+
+Solo cosas realmente compartidas.
+
+Result
+
+Either
+
+Option
+
+Entity
+
+AggregateRoot
+
+DomainEvent
+
+ValueObject
+
+Specification
+
+UniqueId
+
+Clock
+
+Money
+
+PhoneNumber
+
+Email
+
+Locale
+
+Nada más.
+
+Documento 80
+Base Aggregate
+
+Todos los Aggregates heredan.
+
+AggregateRoot
+
+↓
+
+Events
+
+↓
+
+Version
+
+↓
+
+CreatedAt
+
+↓
+
+UpdatedAt
+
+↓
+
+CorrelationId
+
+No queremos repetir código.
+
+Documento 81
+Result Pattern
+
+No Exceptions.
+
+Queremos.
+
+Result.ok()
+
+Result.fail()
+
+Application.
+
+return Result.ok(dto)
+
+Nunca.
+
+throw new Error()
+Documento 82
+Specification Pattern
+
+Ejemplo.
+
+CampaignCanStart
+
+↓
+
+CampaignHasAudience
+
+↓
+
+CampaignHasProvider
+
+↓
+
+WorkspaceIsActive
+
+Todas independientes.
+
+Documento 83
+Policy Pattern
+
+Ejemplo.
+
+RetryPolicy
+
+↓
+
+MetaRetryPolicy
+
+↓
+
+SMTPRetryPolicy
+
+↓
+
+EvolutionRetryPolicy
+
+No IF gigantes.
+
+Documento 84
+Strategy Pattern
+
+Ejemplo.
+
+ProviderSelectionStrategy
+
+↓
+
+MetaFirst
+
+↓
+
+CheapestProvider
+
+↓
+
+FastestProvider
+
+↓
+
+FallbackProvider
+
+El cliente puede elegir.
+
+Documento 85
+Factory Pattern
+CampaignFactory
+
+ContactFactory
+
+WorkspaceFactory
+
+DeliveryFactory
+
+TemplateFactory
+Documento 86
+Builder Pattern
+
+Campaign.
+
+CampaignBuilder
+
+↓
+
+Audience
+
+↓
+
+Message
+
+↓
+
+Schedule
+
+↓
+
+Provider
+
+↓
+
+Validation
+
+↓
+
+Build()
+Documento 87
+Mapper Pattern
+
+Nunca.
+
+Prisma -> Domain
+
+Directo.
+
+Siempre.
+
+Prisma
+
+↓
+
+Mapper
+
+↓
+
+Aggregate
+
+↓
+
+Application
+
+↓
+
+DTO
+
+↓
+
+Controller
+Documento 88
+Testing Strategy
+
+Quiero cuatro niveles.
+
+Unit.
+
+Entity
+
+VO
+
+Domain
+
+Services
+
+Integration.
+
+Repository
+
+Provider
+
+Redis
+
+BullMQ
+
+Contract.
+
+Cada Provider.
+
+E2E.
+
+Flujo completo.
+
+Documento 89
+CI/CD
+
+Pipeline.
+
+Lint
+
+↓
+
+TypeCheck
+
+↓
+
+Unit
+
+↓
+
+Integration
+
+↓
+
+Contract
+
+↓
+
+Build
+
+↓
+
+Docker
+
+↓
+
+Deploy
+
+
+No deploy si falla un test.
+
+Nunca.
+
+Documento 90
+Definition of Done
+
+Una funcionalidad NO está terminada hasta cumplir:
+
+✅ Dominio implementado
+
+✅ Casos de uso
+
+✅ Tests
+
+✅ OpenAPI
+
+✅ Documentación
+
+✅ Métricas
+
+✅ Auditoría
+
+✅ Logs
+
+✅ RBAC
+
+✅ Performance
+
+✅ Cobertura >80%
+
+Documento 91
+OpenAPI First
+
+No quiero escribir controladores.
+
+Primero escribimos.
+
+POST /campaigns
+
+GET /campaigns
+
+PATCH /campaigns/{id}
+
+DELETE /campaigns/{id}
+
+Generamos tipos.
+
+Después implementamos.
+
+Documento 92
+Prisma First? NO.
+
+El flujo correcto será:
+
+DDD
+
+↓
+
+SRS
+
+↓
+
+OpenAPI
+
+↓
+
+Prisma
+
+↓
+
+Repositories
+
+↓
+
+Application
+
+↓
+
+Controllers
+
+↓
+
+Frontend
+
+No al revés.
+
+Documento 93
+Ingeniería de BROTE
+
+Y acá quiero dejar escrita la filosofía que, sinceramente, creo que puede convertirse en el sello del estudio.
+
+Los 10 Principios de Ingeniería de BROTE
+El dominio manda. Ninguna tecnología puede condicionar el negocio.
+Todo reemplazable. Frameworks, ORMs, proveedores y librerías son temporales.
+Documentación viva. La documentación evoluciona junto con el código.
+El código explica el cómo. La documentación explica el porqué.
+La observabilidad no es opcional. Todo sistema debe ser medible.
+La seguridad es transversal. No existe una "fase de seguridad".
+La automatización primero. Si una tarea puede automatizarse, no debería depender de una persona.
+El cliente es dueño de la solución. Sin lock-in innecesario.
+El producto evoluciona por eventos, no por parches. Cada cambio importante debe tener una decisión arquitectónica detrás.
+La simplicidad es una característica. Si una solución necesita demasiadas explicaciones para entenderse, probablemente aún no esté bien diseñada.
+
+
+Documento 101 — Product Specification
+Dashboard
+
+¿Qué ve un usuario cuando entra?
+
+No un dashboard genérico.
+
+Uno pensado para alguien que hace campañas.
+
+------------------------------------------------------
+
+BROTE Campaigns
+
+------------------------------------------------------
+
+Campañas activas
+
+12
+
+Programadas
+
+5
+
+Enviadas hoy
+
+4.532
+
+Entregadas
+
+4.411
+
+Leídas
+
+3.298
+
+Fallidas
+
+121
+
+------------------------------------------------------
+
+Actividad reciente
+
+✓ Campaña "Invierno"
+
+✓ CSV importado
+
+✓ Provider conectado
+
+✓ Campaña finalizada
+
+------------------------------------------------------
+
+Gráfico
+
+Envíos últimos 30 días
+
+------------------------------------------------------
+Documento 102 — Menú lateral
+
+Nada de veinte opciones.
+
+Dashboard
+
+Campañas
+
+Contactos
+
+Segmentos
+
+Plantillas
+
+Canales
+
+Automatizaciones (v2)
+
+Analíticas
+
+Configuración
+
+Simple.
+
+Documento 103 — Módulo Campañas
+
+Este será el corazón del producto.
+
+Dentro de "Campañas" existirán:
+
+Todas
+
+Borradores
+
+Programadas
+
+En ejecución
+
+Pausadas
+
+Finalizadas
+
+Archivadas
+
+Cada campaña mostrará:
+
+Nombre
+
+Canal
+
+Estado
+
+Fecha
+
+Destinatarios
+
+Entregados
+
+Leídos
+
+CTR (futuro)
+
+Proveedor
+
+Acciones
+Documento 104 — Wizard "Nueva Campaña"
+
+No quiero un formulario gigante.
+
+Quiero un asistente.
+
+Paso 1
+
+Información
+
+Nombre
+
+Descripción
+
+Canal
+Paso 2
+
+Audiencia
+
+Segmento
+
+CSV
+
+Filtro
+
+Manual
+Paso 3
+
+Mensaje
+
+Template
+
+Texto
+
+Variables
+
+Vista previa
+Paso 4
+
+Programación
+
+Ahora
+
+Fecha
+
+Hora
+
+Zona horaria
+Paso 5
+
+Confirmación
+
+Resumen completo.
+
+Cantidad estimada.
+
+Proveedor.
+
+Costo estimado (si aplica).
+
+Botón:
+
+Enviar.
+
+Documento 105 — Contactos
+
+Muchísimo más importante de lo que parece.
+
+Quiero que sea parecido a un CRM.
+
+Buscar
+
+Filtros
+
+Etiquetas
+
+Grupos
+
+Importar
+
+Exportar
+
+Duplicados
+
+Opt-Out
+
+Actividad
+
+Cada contacto tendrá su ficha.
+
+Juan Pérez
+
+---------------------
+
+WhatsApp
+
+Email
+
+Etiquetas
+
+Última campaña
+
+Último mensaje
+
+Estado
+
+Consentimiento
+
+Timeline
+Documento 106 — Importador
+
+No es subir un CSV.
+
+Es un proceso guiado.
+
+Paso 1
+
+Subir archivo.
+
+↓
+
+Paso 2
+
+Mapear columnas.
+
+↓
+
+Paso 3
+
+Validar.
+
+↓
+
+Paso 4
+
+Mostrar errores.
+
+↓
+
+Paso 5
+
+Importar.
+
+↓
+
+Paso 6
+
+Resumen.
+
+Documento 107 — Segmentos
+
+No quiero grupos solamente.
+
+Quiero reglas.
+
+Ejemplo.
+
+Clientes Córdoba
+
+AND
+
+Compró últimos 90 días
+
+AND
+
+Tiene WhatsApp
+
+AND
+
+No hizo Opt-Out
+
+Eso genera un segmento dinámico.
+
+Documento 108 — Plantillas
+
+Acá veo una oportunidad enorme.
+
+Las plantillas deberían tener:
+
+Categoría.
+Canal.
+Variables.
+Vista previa.
+Versionado.
+Historial.
+
+Y una prueba rápida.
+
+Botón:
+
+"Enviarme un mensaje de prueba".
+
+Documento 109 — Canales
+
+No mostrar Providers.
+
+Mostrar Canales.
+
+WhatsApp
+
+Estado
+
+Conectado
+
+Proveedor
+
+Meta
+
+Última sincronización
+
+Hace 2 minutos
+
+El usuario no debería preocuparse por si es Meta, Evolution o Twilio.
+
+Solo quiere saber si WhatsApp está conectado.
+
+Documento 110 — Analíticas
+
+No mostrar números sueltos.
+
+Responder preguntas.
+
+Ejemplo:
+
+¿Cuál fue mi mejor campaña?
+
+¿Cuál tuvo más lectura?
+
+¿Cuál tuvo más errores?
+
+¿Cuál funcionó mejor por horario?
+
+¿Cuál segmento responde más?
+
+
+Documento 111 — Campaign Builder
+Filosofía
+
+El usuario nunca debería sentirse "configurando un sistema".
+
+Debe sentir que está preparando una comunicación.
+
+La experiencia debe ser similar a:
+
+Notion
+Linear
+Stripe Dashboard
+Vercel
+
+Pocos pasos.
+
+Mucho contexto.
+
+Cero formularios interminables.
+
+Flujo General
+Campañas
+
+↓
+
+Nueva campaña
+
+↓
+
+Elegir canal
+
+↓
+
+Seleccionar audiencia
+
+↓
+
+Crear mensaje
+
+↓
+
+Vista previa
+
+↓
+
+Programar
+
+↓
+
+Confirmar
+
+↓
+
+Enviar
+
+Siempre se puede volver atrás.
+
+Nunca se pierde información.
+
+Paso 1 — Canal
+
+La primera pregunta no es "¿qué querés decir?"
+
+La primera pregunta es:
+
+¿Dónde querés comunicarte?
+
+○ WhatsApp
+
+○ Email (Próximamente)
+
+○ SMS (Próximamente)
+
+○ Telegram (Próximamente)
+
+Al seleccionar WhatsApp, el sistema verifica automáticamente:
+
+✔ Hay un canal conectado.
+
+✔ Está autenticado.
+
+✔ Tiene permisos.
+
+Si algo falla:
+
+⚠ Tu canal de WhatsApp no está conectado.
+
+[ Conectar ahora ]
+
+No deja avanzar.
+
+Paso 2 — Audiencia
+
+Esta pantalla merece mucho trabajo.
+
+No quiero una lista de contactos.
+
+Quiero una experiencia visual.
+
+¿Quién recibirá esta campaña?
+
+○ Todos los contactos
+
+○ Segmento existente
+
+○ Grupo
+
+○ Importar CSV
+
+○ Selección manual
+
+Si elige Segmento
+
+Clientes Activos
+
+4.521 contactos
+
+Última actualización:
+
+Hace 3 minutos
+
+Debajo
+
+Vista previa
+
+✔ 4521 destinatarios
+
+✔ 4389 tienen WhatsApp
+
+✔ 97 Opt-Out
+
+✔ 35 números inválidos
+
+Se enviará a:
+
+4257 contactos
+
+Eso da confianza.
+
+Paso 3 — Mensaje
+
+Esta pantalla es EL PRODUCTO.
+
+No un textarea.
+
+Layout
+-------------------------------------
+
+Mensaje
+
+-------------------------------------
+
+Nombre
+
+Campaña Invierno
+
+-------------------------------------
+
+Editor
+
+Hola {{nombre}}
+
+Queríamos contarte...
+
+-------------------------------------
+
+Variables
+
++ nombre
+
++ empresa
+
++ saldo
+
+-------------------------------------
+
+Vista previa
+
+Hola Gonzalo
+
+Queríamos contarte...
+
+-------------------------------------
+Vista previa en vivo
+
+Cada vez que escribe.
+
+Se actualiza.
+
+Como Notion.
+
+Variables Inteligentes
+
+No quiero escribir variables.
+
+Quiero insertarlas.
+
+/
+
+↓
+
+Nombre
+
+Empresa
+
+Ciudad
+
+Saldo
+
+Fecha
+
+Hora
+
+
+Tipo Notion.
+
+Entonces el usuario escribe:
+
+Hola /
+
+Y aparece.
+
+nombre
+
+empresa
+
+ciudad
+Validación inmediata
+
+Mientras escribe.
+
+Hola {{nombre
+
+⚠ Variable sin cerrar
+
+O
+
+{{saldo}}
+
+⚠ El contacto no posee ese dato.
+Paso 4 — Prueba
+
+Esto es MUY importante.
+
+Antes de enviar.
+
+Enviar prueba
+
+Número
+
++54 9 ...
+
+[Enviar]
+
+
+Y listo.
+
+Paso 5 — Programación
+
+Muy simple.
+
+○ Enviar ahora
+
+○ Programar
+
+Fecha
+
+Hora
+
+Zona horaria
+
+
+Debajo.
+
+La campaña comenzará
+
+miércoles 14
+
+09:00
+
+Hora Argentina
+Paso 6 — Confirmación
+
+No quiero una pantalla aburrida.
+
+Quiero algo tipo Stripe.
+
+Resumen
+
+Canal
+
+WhatsApp
+
+Audiencia
+
+4257 contactos
+
+Mensaje
+
+154 caracteres
+
+Variables
+
+3
+
+Programación
+
+Hoy
+
+14:00
+
+Proveedor
+
+Meta
+
+Tiempo estimado
+
+11 minutos
+
+Costo estimado
+
+$0
+
+
+Botón enorme.
+
+Enviar campaña
+Después del envío
+
+No mandar al Dashboard.
+
+Ir a la campaña.
+
+Y mostrar.
+
+Preparando campaña...
+
+
+Después.
+
+Generando destinatarios
+
+█████░░░░░
+
+
+Después.
+
+Encolando mensajes
+
+████████░░
+
+
+Después.
+
+Enviando
+
+██████████
+
+
+Y en vivo.
+
+425 enviados
+
+321 entregados
+
+188 leídos
+
+
+Todo Live.
+
+Documento 112 — Campaign Details
+
+La pantalla más usada.
+
+Header
+
+Campaña Invierno
+
+Running
+
+4257 destinatarios
+
+
+Tabs
+
+Resumen
+
+Destinatarios
+
+Actividad
+
+Errores
+
+Configuración
+
+Timeline
+Resumen
+
+Cards.
+
+Enviados
+
+Entregados
+
+Leídos
+
+Fallidos
+
+Pendientes
+
+
+Gráfico.
+
+Entrega por minuto.
+
+Destinatarios
+
+Tabla.
+
+Nombre
+
+Estado
+
+Hora
+
+Provider
+
+Intentos
+
+
+Click.
+
+Abre.
+
+Timeline.
+
+10:01
+
+Queued
+
+↓
+
+10:02
+
+Sent
+
+↓
+
+10:03
+
+Delivered
+
+↓
+
+10:15
+
+Read
+
+Errores
+
+No mostrar.
+
+Error 503
+
+Mostrar.
+
+Proveedor temporalmente no disponible.
+
+Reintentando.
+
+
+O
+
+Número inválido.
+
+
+Mucho más humano.
+
+Timeline
+
+Tipo GitHub.
+
+09:00
+
+Campaña creada
+
+09:03
+
+Programada
+
+14:00
+
+Iniciada
+
+14:02
+
+Primer lote
+
+14:15
+
+1000 mensajes enviados
+
+14:35
+
+Campaña finalizada
+
+Documento 113 — Diseño UX (Principios)
+
+Quiero definir reglas de diseño para TODO el producto.
+
+Regla 1
+
+Nunca más de una acción primaria por pantalla.
+
+Regla 2
+
+Todo cambio importante debe pedir confirmación solo cuando sea irreversible.
+
+Regla 3
+
+Los errores deben explicar el problema y la solución.
+
+❌
+
+Error 500
+
+✅
+
+No pudimos conectar con WhatsApp.
+
+Intentaremos nuevamente en unos segundos.
+
+Regla 4
+
+Mostrar progreso siempre.
+
+Si una tarea tarda más de 500 ms, el usuario debe saber qué está ocurriendo.
+
+Regla 5
+
+Nunca bloquear la interfaz durante envíos.
+
+Todo el procesamiento ocurre en segundo plano.
+
+
+Orden exacto de implementación
+Sprint 0 — Bootstrap (1 semana)
+
+Objetivo: tener el proyecto listo para desarrollar.
+
+Monorepo (Turborepo + pnpm)
+Docker Compose
+PostgreSQL
+Redis
+Prisma
+Express
+TypeScript
+ESLint
+Prettier
+Husky
+Commitlint
+GitHub Actions
+Winston/Pino
+Prometheus
+Grafana
+Swagger/OpenAPI
+Variables de entorno
+Configuración base
+
+Resultado: proyecto vacío, compilando y desplegable.
+
+Sprint 1 — Core (2 semanas)
+
+Objetivo: construir la base del dominio.
+
+Shared Kernel
+Result
+Either
+AggregateRoot
+Entity
+ValueObject
+Domain Events
+EventBus
+Repositories
+DI Container
+Error Handling
+
+Resultado: infraestructura DDD lista.
+
+Sprint 2 — Workspace + Auth (2 semanas)
+Usuarios
+Login
+JWT
+Refresh Token
+Roles
+Permisos
+Workspace
+Configuración
+
+Resultado: plataforma multiusuario funcional.
+
+Sprint 3 — Contactos (2–3 semanas)
+CRUD
+Importador CSV
+Importador Excel
+Duplicados
+Etiquetas
+Grupos
+Timeline
+Opt-Out
+
+Resultado: base de contactos completa.
+
+Sprint 4 — Templates (1 semana)
+CRUD
+Variables
+Preview
+Versionado
+Validaciones
+Sprint 5 — Campañas (3 semanas)
+Campaign Aggregate
+Builder
+Estados
+Programación
+Dashboard
+Timeline
+
+Todavía sin enviar mensajes.
+
+Sprint 6 — Execution Engine (3 semanas)
+BullMQ
+Workers
+Scheduler
+Batch Generator
+Retry Engine
+Rate Limiter
+Sprint 7 — WhatsApp Provider (3 semanas)
+
+Primer y único provider del MVP.
+
+Meta Cloud API o Evolution API (según la decisión comercial)
+Conexión
+Health Check
+Envío
+Estados
+Webhooks
+
+Con esto el producto ya vende.
+
+Sprint 8 — Analytics (2 semanas)
+Dashboard
+KPIs
+Gráficos
+Reportes
+Exportaciones
+Sprint 9 — Hardening (2 semanas)
+Performance
+Caché
+Optimización SQL
+Seguridad
+Logs
+Métricas
+Auditoría
+Backups
+MVP
+
+En este punto BROTE Campaigns ya puede venderse.
+
+Tiene:
+
+Login
+Multiempresa
+Contactos
+Importación
+Segmentos
+Templates
+Campañas
+Envíos
+Dashboard
+Analytics
+
+Y listo.
+
+Nada más.
+
+Versiones futuras
+v1.1
+Automatizaciones
+Respuestas automáticas
+Bandeja de conversaciones
+v1.2
+Email
+SMTP
+Templates HTML
+v1.3
+Telegram
+SMS
+v2
+IA
+A/B Testing
+Optimización automática
+Segmentación inteligente
+
+
+Desde el día uno diseñaría BROTE Campaigns para ser Provider Agnostic.
+
+                    Campaign
+
+                        │
+
+                        ▼
+
+            Provider Orchestrator
+
+                        │
+
+        ┌───────────────┼────────────────┐
+
+        ▼               ▼                ▼
+
+   Meta Provider   Evolution Provider   Twilio Provider
+
+                                          ▼
+
+                                   Future Provider
+
+El dominio nunca sabe quién envía.
+
+El concepto cambia
+
+En lugar de tener un módulo llamado:
+
+WhatsApp
+
+Tendríamos dos conceptos distintos.
+
+Canal
+WhatsApp
+
+Email
+
+SMS
+
+Telegram
+
+Messenger
+Provider
+Meta Cloud API
+
+Evolution API
+
+Twilio
+
+360dialog
+
+WPPConnect
+
+UltraMSG
+
+Otro...
+
+El canal es una cosa.
+
+El proveedor es otra.
+
+Entonces un Workspace podría tener
+Canal
+
+WhatsApp
+
+↓
+
+Provider
+
+Evolution
+
+Y otro cliente
+
+Canal
+
+WhatsApp
+
+↓
+
+Provider
+
+Meta
+
+Y otro
+
+Canal
+
+Email
+
+↓
+
+SMTP
+
+Todo con la misma arquitectura.
+
+Incluso más interesante...
+
+Yo agregaría un nuevo Aggregate.
+
+ChannelConnection
+ChannelConnection
+
+id
+
+workspaceId
+
+channel
+
+provider
+
+status
+
+credentials
+
+configuration
+
+priority
+
+enabled
+
+createdAt
+
+Porque realmente eso es lo que administra el usuario.
+
+No administra Meta.
+
+Administra "su conexión de WhatsApp".
+
+Provider Registry
+
+Crearía un registro central.
+
+ProviderRegistry
+
+register()
+
+unregister()
+
+get()
+
+list()
+
+supports()
+
+Cuando arranca la aplicación.
+
+registry.register(new MetaProvider())
+
+registry.register(new EvolutionProvider())
+
+Y listo.
+
+Cada Provider declara sus capacidades
+interface ProviderCapabilities {
+
+    channel: Channel
+
+    supportsTemplates: boolean
+
+    supportsMedia: boolean
+
+    supportsButtons: boolean
+
+    supportsTyping: boolean
+
+    supportsDeliveryStatus: boolean
+
+    supportsReadReceipts: boolean
+
+    maxMessagesPerMinute: number
+
+}
+
+Entonces el sistema puede decidir automáticamente.
+
+Incluso podríamos tener prioridades
+
+Ejemplo.
+
+Workspace
+
+↓
+
+WhatsApp
+
+↓
+
+Meta
+
+Prioridad 1
+
+↓
+
+Evolution
+
+Prioridad 2
+
+Si Meta falla.
+
+Meta
+
+↓
+
+HealthCheck
+
+↓
+
+Offline
+
+↓
+
+Provider Orchestrator
+
+↓
+
+Evolution
+
+Sin que la campaña lo sepa.
+
+Y acá aparece una funcionalidad MUY poderosa
+Smart Routing
+
+El usuario configura reglas.
+
+Si el canal es WhatsApp
+
+↓
+
+Usar Meta
+
+O
+
+Si Meta responde 429
+
+↓
+
+Esperar
+
+O
+
+Si Meta está caído
+
+↓
+
+Usar Evolution
+
+O
+
+Clientes Premium
+
+↓
+
+Meta
+
+Clientes Standard
+
+↓
+
+Evolution
+
+Eso ya es una plataforma profesional.
+
+Entonces cambiaría completamente el roadmap
+Sprint 7 deja de ser
+
+Integrar Meta
+
+y pasa a ser
+
+Communication Layer
+Provider SDK
+MessagingProvider
+
+HealthProvider
+
+WebhookProvider
+
+ConfigurationProvider
+Provider Registry
+Provider Resolver
+Provider Orchestrator
+Provider Loader
+Primeros Providers
+✅ Meta Cloud API
+✅ Evolution API
+
+Los dos implementan exactamente los mismos contratos.
+
+Y dejaría preparado esto
+providers/
+
+meta/
+
+evolution/
+
+twilio/
+
+360dialog/
+
+wppconnect/
+
+ultramsg/
+
+smtp/
+
+telegram/
+
+sms/
+
+fake/
+
+mock/
+
+Aunque solo existan dos implementados inicialmente.
+
+Creo que esta sería la decisión definitiva (ADR-024)
+
+BROTE Campaigns no soporta proveedores específicos.
+
+BROTE Campaigns soporta un ecosistema de Providers.
+
+Principios
+El Canal (WhatsApp, Email, SMS, etc.) pertenece al dominio.
+El Provider (Meta, Evolution, Twilio, etc.) pertenece a la infraestructura.
+Cada Workspace puede elegir el Provider que mejor se adapte a su negocio.
+Agregar un nuevo Provider no requiere modificar el dominio, solo implementar las interfaces del SDK y registrarlo en el ProviderRegistry.
+Esta decisión tiene un beneficio comercial enorme para BROTE
+
+No vas a vender:
+
+"Una plataforma que funciona con Evolution."
+
+Vas a vender:
+
+"Una plataforma independiente del proveedor."
+
+Si mañana aparece un proveedor mejor, más barato o con nuevas capacidades, no tenés que migrar clientes ni reescribir el sistema. Simplemente desarrollás un nuevo adaptador, lo registrás y pasa a ser una opción más dentro de BROTE Campaigns.
+
+Esa independencia del proveedor, en mi opinión, es una de las características más valiosas que puede tener el producto.
+
+

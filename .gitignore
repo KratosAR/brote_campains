@@ -128,6 +128,12 @@ dist
 # pnpm
 .pnpm-store
 
+# Turbo
+.turbo/
+
+# Test coverage
+coverage/
+
 # yarn v3
 .pnp.*
 .yarn/*
