@@ -1,4 +1,4 @@
-import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js'
+import { parsePhoneNumber, isValidPhoneNumber, type CountryCode } from 'libphonenumber-js'
 import { ValueObject } from '../ValueObject'
 import { Result } from '../Result'
 import { ValidationError } from '../errors/DomainError'
@@ -14,15 +14,18 @@ export class PhoneNumber extends ValueObject<PhoneNumberProps> {
     super(props)
   }
 
-  static create(value: string, defaultCountry = 'AR'): Result<PhoneNumber, ValidationError> {
+  static create(
+    value: string,
+    defaultCountry: CountryCode = 'AR',
+  ): Result<PhoneNumber, ValidationError> {
     if (!value || value.trim().length === 0) {
       return Result.fail(new ValidationError('Phone number cannot be empty', 'phone'))
     }
 
     try {
-      const parsed = parsePhoneNumber(value.trim(), defaultCountry as 'AR')
+      const parsed = parsePhoneNumber(value.trim(), defaultCountry)
 
-      if (!parsed || !isValidPhoneNumber(value.trim(), defaultCountry as 'AR')) {
+      if (!parsed || !isValidPhoneNumber(value.trim(), defaultCountry)) {
         return Result.fail(
           new ValidationError(`"${value}" is not a valid phone number`, 'phone'),
         )
@@ -41,10 +44,6 @@ export class PhoneNumber extends ValueObject<PhoneNumberProps> {
   }
 
   toE164(): string {
-    return this.props.e164
-  }
-
-  toInternational(): string {
     return this.props.e164
   }
 

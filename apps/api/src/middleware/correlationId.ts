@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { ulid } from 'ulid'
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- required by Express's type augmentation pattern
   namespace Express {
     interface Request {
       correlationId: string
