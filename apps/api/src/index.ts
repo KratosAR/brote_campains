@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import { createApp } from './app'
 import { validateEnv } from './config/env'
 
