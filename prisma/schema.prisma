@@ -8,7 +8,7 @@ datasource db {
 }
 
 // Placeholder — modelos reales se agregan en Sprint 2+
-model _Placeholder {
+model Placeholder {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
