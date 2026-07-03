@@ -35,4 +35,20 @@ describe('PhoneNumber', () => {
   it('fails on too short number', () => {
     expect(PhoneNumber.create('123').isFail()).toBe(true)
   })
+
+  it('returns an international format string', () => {
+    const phone = PhoneNumber.create('3511234567').getValue()
+    expect(phone.toInternational()).toBe('+54 351 123 4567')
+  })
+
+  it('toString returns the E.164 value', () => {
+    const phone = PhoneNumber.create('3511234567').getValue()
+    expect(phone.toString()).toBe(phone.toE164())
+  })
+
+  it('fails with a validation error including the field', () => {
+    const result = PhoneNumber.create('not-a-phone')
+    expect(result.isFail()).toBe(true)
+    expect(result.getError().field).toBe('phone')
+  })
 })

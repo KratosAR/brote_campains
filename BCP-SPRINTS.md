@@ -125,16 +125,16 @@ Este documento es el plan de trabajo concreto. Cada sprint tiene tareas, criteri
 
 #### `packages/domain/shared/` — Primitivos
 
-- [ ] `UniqueId` — wrapper sobre ULID. Métodos: `generate()`, `from(string)`, `equals(other)`, `toString()`
-- [ ] `Clock` — interfaz `IClock` con `now(): Date`. Implementación `SystemClock`. Implementación `FixedClock(date)` para tests.
-- [ ] `ValueObject<T>` — clase base abstracta. Dos VOs son iguales si sus propiedades son iguales. Método `equals(other)`.
-- [ ] `Entity<T>` — clase base abstracta con `id: UniqueId`. Dos entidades son iguales si sus IDs son iguales.
-- [ ] `AggregateRoot<T>` — extiende `Entity`. Agrega: lista interna de `DomainEvent[]`, método `addDomainEvent(event)`, método `clearDomainEvents(): DomainEvent[]`, `version: number`, `createdAt: Date`, `updatedAt: Date`.
-- [ ] `DomainEvent` — clase base abstracta. Campos: `eventId: UniqueId`, `occurredAt: Date`, `correlationId: string`, `aggregateId: UniqueId`, `aggregateType: string`, `eventType: string`.
+- [x] `UniqueId` — wrapper sobre ULID. Métodos: `generate()`, `from(string)`, `equals(other)`, `toString()`
+- [x] `Clock` — interfaz `IClock` con `now(): Date`. Implementación `SystemClock`. Implementación `FixedClock(date)` para tests.
+- [x] `ValueObject<T>` — clase base abstracta. Dos VOs son iguales si sus propiedades son iguales. Método `equals(other)`.
+- [x] `Entity<T>` — clase base abstracta con `id: UniqueId`. Dos entidades son iguales si sus IDs son iguales.
+- [x] `AggregateRoot<T>` — extiende `Entity`. Agrega: lista interna de `DomainEvent[]`, método `addDomainEvent(event)`, método `clearDomainEvents(): DomainEvent[]`, `version: number`, `createdAt: Date`, `updatedAt: Date`.
+- [x] `DomainEvent` — clase base abstracta. Campos: `eventId: UniqueId`, `occurredAt: Date`, `correlationId: string`, `aggregateId: UniqueId`, `aggregateType: string`, `eventType: string`.
 
 #### `packages/domain/shared/` — Result Pattern
 
-- [ ] `Result<T, E>` — clase con dos estados: `ok` y `fail`
+- [x] `Result<T, E>` — clase con dos estados: `ok` y `fail`
   - `Result.ok<T>(value: T): Result<T, never>`
   - `Result.fail<E>(error: E): Result<never, E>`
   - `.isOk(): boolean`
@@ -143,60 +143,60 @@ Este documento es el plan de trabajo concreto. Cada sprint tiene tareas, criteri
   - `.getError(): E` (lanza si es ok)
   - `.map<U>(fn: (value: T) => U): Result<U, E>`
   - `.flatMap<U>(fn: (value: T) => Result<U, E>): Result<U, E>`
-- [ ] Tests unitarios completos de `Result`
+- [x] Tests unitarios completos de `Result`
 
 #### `packages/domain/shared/` — Value Objects base
 
-- [ ] `Email` — valida formato RFC 5321. `Email.create(value: string): Result<Email, ValidationError>`. Normaliza a minúsculas.
-- [ ] `PhoneNumber` — acepta múltiples formatos, normaliza a E.164. `PhoneNumber.create(value: string): Result<PhoneNumber, ValidationError>`. Métodos: `toE164()`, `toInternational()`.
-- [ ] Tests unitarios: `PhoneNumber.create("3511234567")`, `PhoneNumber.create("+54 351 1234567")`, `PhoneNumber.create("03511234567")` deben producir el mismo E.164.
+- [x] `Email` — valida formato RFC 5321. `Email.create(value: string): Result<Email, ValidationError>`. Normaliza a minúsculas.
+- [x] `PhoneNumber` — acepta múltiples formatos, normaliza a E.164. `PhoneNumber.create(value: string): Result<PhoneNumber, ValidationError>`. Métodos: `toE164()`, `toInternational()`.
+- [x] Tests unitarios: `PhoneNumber.create("3511234567")`, `PhoneNumber.create("+54 351 1234567")`, `PhoneNumber.create("03511234567")` deben producir el mismo E.164.
 
 #### `packages/domain/shared/` — Errores de dominio
 
-- [ ] `DomainError` — clase base abstracta. Campos: `code: string`, `message: string`.
-- [ ] `ValidationError extends DomainError`
-- [ ] `NotFoundError extends DomainError`
-- [ ] `BusinessRuleViolationError extends DomainError`
-- [ ] `UnauthorizedError extends DomainError`
+- [x] `DomainError` — clase base abstracta. Campos: `code: string`, `message: string`.
+- [x] `ValidationError extends DomainError`
+- [x] `NotFoundError extends DomainError`
+- [x] `BusinessRuleViolationError extends DomainError`
+- [x] `UnauthorizedError extends DomainError`
 
 #### `packages/contracts/` — Interfaces de infraestructura
 
-- [ ] `IRepository<T, ID>` — `findById(id: ID): Promise<Result<T, NotFoundError>>`, `save(entity: T): Promise<Result<void, DomainError>>`, `delete(id: ID): Promise<Result<void, DomainError>>`
-- [ ] `IClock` — `now(): Date`
-- [ ] `ILogger` — `info(message, context?)`, `warn(message, context?)`, `error(message, error?, context?)`, `debug(message, context?)`
-- [ ] `IEventBus` — `publish(events: DomainEvent[]): Promise<void>`, `subscribe(eventType: string, handler: EventHandler): void`
-- [ ] `IQueue` — `add(jobName: string, data: unknown, options?: JobOptions): Promise<void>`
-- [ ] `ICache` — `get<T>(key: string): Promise<T | null>`, `set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>`, `delete(key: string): Promise<void>`
-- [ ] `ISecretManager` — `get(key: string): Promise<string>`
+- [x] `IRepository<T, ID>` — `findById(id: ID): Promise<Result<T, NotFoundError>>`, `save(entity: T): Promise<Result<void, DomainError>>`, `delete(id: ID): Promise<Result<void, DomainError>>`
+- [x] `IClock` — `now(): Date`
+- [x] `ILogger` — `info(message, context?)`, `warn(message, context?)`, `error(message, error?, context?)`, `debug(message, context?)`
+- [x] `IEventBus` — `publish(events: DomainEvent[]): Promise<void>`, `subscribe(eventType: string, handler: EventHandler): void`
+- [x] `IQueue` — `add(jobName: string, data: unknown, options?: JobOptions): Promise<void>`
+- [x] `ICache` — `get<T>(key: string): Promise<T | null>`, `set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>`, `delete(key: string): Promise<void>`
+- [x] `ISecretManager` — `get(key: string): Promise<string>`
 
 #### `packages/infrastructure/` — Implementaciones
 
-- [ ] `PinoLogger implements ILogger` — wrappea Pino, siempre incluye `correlationId` del contexto actual
-- [ ] `InMemoryEventBus implements IEventBus` — para tests y desarrollo
-- [ ] `BullMQQueue implements IQueue` — adaptador sobre BullMQ
-- [ ] `RedisCache implements ICache` — adaptador sobre ioredis
-- [ ] `EnvSecretManager implements ISecretManager` — lee de `process.env`
+- [x] `PinoLogger implements ILogger` — wrappea Pino, siempre incluye `correlationId` del contexto actual
+- [x] `InMemoryEventBus implements IEventBus` — para tests y desarrollo
+- [x] `BullMQQueue implements IQueue` — adaptador sobre BullMQ
+- [x] `RedisCache implements ICache` — adaptador sobre ioredis
+- [x] `EnvSecretManager implements ISecretManager` — lee de `process.env`
 
 #### DI Container
 
-- [ ] Elegir e instalar contenedor de DI (recomendado: `tsyringe` o `awilix`)
-- [ ] Configurar el container en `apps/api/src/container.ts`
-- [ ] Registrar todas las implementaciones de `packages/infrastructure`
-- [ ] Exportar función `resolve<T>(token): T`
+- [x] Elegir e instalar contenedor de DI (recomendado: `tsyringe` o `awilix`)
+- [x] Configurar el container en `apps/api/src/container.ts`
+- [x] Registrar todas las implementaciones de `packages/infrastructure`
+- [x] Exportar función `resolve<T>(token): T`
 
 #### Contexto de request (AsyncLocalStorage)
 
-- [ ] `RequestContext` — usa `AsyncLocalStorage` para propagar `correlationId` y `userId` sin pasarlos explícitamente
-- [ ] Middleware Express que inicializa el contexto en cada request
-- [ ] `RequestContext.getCorrelationId(): string`
-- [ ] `RequestContext.getUserId(): string | null`
+- [x] `RequestContext` — usa `AsyncLocalStorage` para propagar `correlationId` y `userId` sin pasarlos explícitamente
+- [x] Middleware Express que inicializa el contexto en cada request
+- [x] `RequestContext.getCorrelationId(): string`
+- [x] `RequestContext.getUserId(): string | null`
 
 #### Specification Pattern
 
-- [ ] `Specification<T>` — interfaz con `isSatisfiedBy(candidate: T): boolean`
-- [ ] `AndSpecification<T>` — combina dos specs con AND
-- [ ] `OrSpecification<T>` — combina dos specs con OR
-- [ ] `NotSpecification<T>` — niega una spec
+- [x] `Specification<T>` — interfaz con `isSatisfiedBy(candidate: T): boolean`
+- [x] `AndSpecification<T>` — combina dos specs con AND
+- [x] `OrSpecification<T>` — combina dos specs con OR
+- [x] `NotSpecification<T>` — niega una spec
 
 ### Criterios de aceptación
 

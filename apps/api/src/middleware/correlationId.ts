@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { ulid } from 'ulid'
+import { RequestContext } from '@bcp/infrastructure'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace -- required by Express's type augmentation pattern
@@ -11,6 +11,7 @@ declare global {
 }
 
 export function correlationIdMiddleware(req: Request, _res: Response, next: NextFunction) {
-  req.correlationId = (req.headers['x-correlation-id'] as string) || ulid()
-  next()
+  const context = RequestContext.init(req.headers['x-correlation-id'] as string | undefined)
+  req.correlationId = context.correlationId
+  RequestContext.run(context, next)
 }
