@@ -7,10 +7,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Placeholder — modelos reales se agregan en Sprint 2+
-model Placeholder {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+model Workspace {
+  id            String   @id
+  name          String
+  slug          String   @unique
+  status        String
+  timezone      String
+  locale        String
+  maxContacts   Int
+  maxCampaigns  Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  @@map("_placeholder")
+  workspaceUsers WorkspaceUser[]
+  auditLogs      AuditLog[]
+
+  @@map("workspaces")
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspaceUsers WorkspaceUser[]
+  refreshTokens  RefreshToken[]
+  auditLogs      AuditLog[]
+
+  @@map("users")
+}
+
+model WorkspaceUser {
+  workspaceId String
+  userId      String
+  role        String
+  invitedAt   DateTime  @default(now())
+  joinedAt    DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@map("workspace_users")
+}
+
+model RefreshToken {
+  id        String    @id
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id            String   @id
+  workspaceId   String?
+  userId        String?
+  event         String
+  payload       Json?
+  ip            String?
+  userAgent     String?
+  correlationId String?
+  createdAt     DateTime @default(now())
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
 }

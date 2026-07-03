@@ -3,7 +3,7 @@ import { ulid } from 'ulid'
 export class UniqueId {
   private readonly _value: string
 
-  private constructor(value: string) {
+  protected constructor(value: string) {
     if (!value || value.trim().length === 0) {
       throw new Error('UniqueId cannot be empty')
     }

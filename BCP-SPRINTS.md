@@ -219,89 +219,89 @@ Este documento es el plan de trabajo concreto. Cada sprint tiene tareas, criteri
 
 #### Domain — Workspace Aggregate
 
-- [ ] `WorkspaceId extends UniqueId`
-- [ ] `WorkspaceStatus` enum: `Creating`, `Active`, `Suspended`, `Archived`
-- [ ] `WorkspaceSettings` Value Object: `timezone: string`, `locale: string`, `maxContacts: number`, `maxCampaigns: number`
-- [ ] `Workspace` Aggregate Root:
+- [x] `WorkspaceId extends UniqueId`
+- [x] `WorkspaceStatus` enum: `Creating`, `Active`, `Suspended`, `Archived`
+- [x] `WorkspaceSettings` Value Object: `timezone: string`, `locale: string`, `maxContacts: number`, `maxCampaigns: number`
+- [x] `Workspace` Aggregate Root:
   - Campos: `id`, `name`, `slug`, `status`, `settings`, `createdAt`, `updatedAt`
   - `Workspace.create(name, settings): Result<Workspace, DomainError>` — emite `WorkspaceCreated`
   - `workspace.suspend(reason): Result<void, DomainError>` — solo desde `Active`. Emite `WorkspaceSuspended`
   - `workspace.archive(): Result<void, DomainError>` — solo desde `Suspended`. Emite `WorkspaceArchived`. Estado terminal.
   - `workspace.activate(): Result<void, DomainError>` — solo desde `Creating`
   - Invariante: `Archived` no puede pasar a `Active`. Lanza `BusinessRuleViolationError`.
-- [ ] Tests unitarios de todas las transiciones de estado
+- [x] Tests unitarios de todas las transiciones de estado
 
 #### Domain — User y Roles
 
-- [ ] `UserId extends UniqueId`
-- [ ] `UserRole` enum: `Owner`, `Admin`, `Operator`, `Viewer`
-- [ ] `Permission` enum (granular): `campaign:create`, `campaign:update`, `campaign:delete`, `campaign:execute`, `campaign:pause`, `campaign:resume`, `campaign:view`, `contact:import`, `contact:export`, `workspace:transfer`, `billing:view`
-- [ ] `RolePermissions` — mapa estático de `UserRole` → `Permission[]`
-- [ ] `WorkspaceUser` Value Object: `userId`, `workspaceId`, `role`, `invitedAt`, `joinedAt?`
-- [ ] `can(user: WorkspaceUser, permission: Permission): boolean` — función pura en domain
+- [x] `UserId extends UniqueId`
+- [x] `UserRole` enum: `Owner`, `Admin`, `Operator`, `Viewer`
+- [x] `Permission` enum (granular): `campaign:create`, `campaign:update`, `campaign:delete`, `campaign:execute`, `campaign:pause`, `campaign:resume`, `campaign:view`, `contact:import`, `contact:export`, `workspace:transfer`, `billing:view`
+- [x] `RolePermissions` — mapa estático de `UserRole` → `Permission[]`
+- [x] `WorkspaceUser` Value Object: `userId`, `workspaceId`, `role`, `invitedAt`, `joinedAt?`
+- [x] `can(user: WorkspaceUser, permission: Permission): boolean` — función pura en domain
 
 #### Domain — Events de Workspace/Auth
 
-- [ ] `WorkspaceCreated { workspaceId, name, ownerId }`
-- [ ] `WorkspaceSuspended { workspaceId, reason }`
-- [ ] `WorkspaceArchived { workspaceId }`
-- [ ] `UserInvited { workspaceId, userId, email, role }`
-- [ ] `UserJoined { workspaceId, userId }`
-- [ ] `UserRoleChanged { workspaceId, userId, oldRole, newRole }`
-- [ ] `UserRemoved { workspaceId, userId }`
+- [x] `WorkspaceCreated { workspaceId, name, ownerId }`
+- [x] `WorkspaceSuspended { workspaceId, reason }`
+- [x] `WorkspaceArchived { workspaceId }`
+- [x] `UserInvited { workspaceId, userId, email, role }`
+- [x] `UserJoined { workspaceId, userId }`
+- [x] `UserRoleChanged { workspaceId, userId, oldRole, newRole }`
+- [x] `UserRemoved { workspaceId, userId }`
 
 #### Infrastructure — Prisma Schema
 
-- [ ] Modelo `Workspace`: `id`, `name`, `slug`, `status`, `timezone`, `locale`, `maxContacts`, `maxCampaigns`, `createdAt`, `updatedAt`
-- [ ] Modelo `User`: `id`, `email`, `passwordHash`, `name`, `createdAt`, `updatedAt`
-- [ ] Modelo `WorkspaceUser`: `workspaceId`, `userId`, `role`, `invitedAt`, `joinedAt`, PK compuesta
-- [ ] Modelo `RefreshToken`: `id`, `userId`, `token` (hash), `expiresAt`, `revokedAt`, `createdAt`
-- [ ] Modelo `AuditLog`: `id`, `workspaceId`, `userId`, `event`, `payload` (JSON), `ip`, `userAgent`, `correlationId`, `createdAt`
-- [ ] `prisma migrate dev` crea las tablas correctamente
-- [ ] Índices: `workspace(slug)` unique, `user(email)` unique, `refreshToken(token)` unique
+- [x] Modelo `Workspace`: `id`, `name`, `slug`, `status`, `timezone`, `locale`, `maxContacts`, `maxCampaigns`, `createdAt`, `updatedAt`
+- [x] Modelo `User`: `id`, `email`, `passwordHash`, `name`, `createdAt`, `updatedAt`
+- [x] Modelo `WorkspaceUser`: `workspaceId`, `userId`, `role`, `invitedAt`, `joinedAt`, PK compuesta
+- [x] Modelo `RefreshToken`: `id`, `userId`, `token` (hash), `expiresAt`, `revokedAt`, `createdAt`
+- [x] Modelo `AuditLog`: `id`, `workspaceId`, `userId`, `event`, `payload` (JSON), `ip`, `userAgent`, `correlationId`, `createdAt`
+- [x] `prisma migrate dev` crea las tablas correctamente
+- [x] Índices: `workspace(slug)` unique, `user(email)` unique, `refreshToken(token)` unique
 
 #### Infrastructure — Repositories
 
-- [ ] `IWorkspaceRepository extends IRepository<Workspace, WorkspaceId>` — métodos adicionales: `findBySlug(slug): Promise<Result<Workspace, NotFoundError>>`, `existsBySlug(slug): Promise<boolean>`
-- [ ] `PrismaWorkspaceRepository implements IWorkspaceRepository` con `WorkspaceMapper`
-- [ ] `WorkspaceMapper` — convierte entre Prisma model y Workspace aggregate (sin lógica de negocio)
-- [ ] `IUserRepository` — `findByEmail(email): Promise<Result<User, NotFoundError>>`, `findById(id): Promise<...>`
-- [ ] `PrismaUserRepository implements IUserRepository`
-- [ ] Tests de integración de ambos repositories contra DB real (test database)
+- [x] `IWorkspaceRepository extends IRepository<Workspace, WorkspaceId>` — métodos adicionales: `findBySlug(slug): Promise<Result<Workspace, NotFoundError>>`, `existsBySlug(slug): Promise<boolean>`
+- [x] `PrismaWorkspaceRepository implements IWorkspaceRepository` con `WorkspaceMapper`
+- [x] `WorkspaceMapper` — convierte entre Prisma model y Workspace aggregate (sin lógica de negocio)
+- [x] `IUserRepository` — `findByEmail(email): Promise<Result<User, NotFoundError>>`, `findById(id): Promise<...>`
+- [x] `PrismaUserRepository implements IUserRepository`
+- [x] Tests de integración de ambos repositories contra DB real (test database)
 
 #### Application — Auth Use Cases
 
-- [ ] `RegisterWorkspaceCommand { ownerName, ownerEmail, ownerPassword, workspaceName, timezone }` → crea Workspace + User Owner en una sola transacción
-- [ ] `LoginCommand { email, password }` → valida credenciales, retorna `{ accessToken, refreshToken }`
-- [ ] `RefreshTokenCommand { refreshToken }` → invalida el token actual, emite par nuevo (rotación)
-- [ ] `RevokeSessionCommand { userId, refreshToken }` → invalida el refresh token específico
-- [ ] `InviteUserCommand { workspaceId, email, role, invitedByUserId }` → crea invitación, emite `UserInvited`
-- [ ] `AcceptInvitationCommand { token, name, password }` → activa el usuario, emite `UserJoined`
+- [x] `RegisterWorkspaceCommand { ownerName, ownerEmail, ownerPassword, workspaceName, timezone }` → crea Workspace + User Owner en una sola transacción
+- [x] `LoginCommand { email, password }` → valida credenciales, retorna `{ accessToken, refreshToken }`
+- [x] `RefreshTokenCommand { refreshToken }` → invalida el token actual, emite par nuevo (rotación)
+- [x] `RevokeSessionCommand { userId, refreshToken }` → invalida el refresh token específico
+- [x] `InviteUserCommand { workspaceId, email, role, invitedByUserId }` → crea invitación, emite `UserInvited`
+- [x] `AcceptInvitationCommand { token, name, password }` → activa el usuario, emite `UserJoined`
 
 #### Application — Auth: seguridad
 
-- [ ] Hash de passwords con `bcrypt` (cost factor 12)
-- [ ] JWT: `accessToken` expira en 15 minutos, firmado con `JWT_SECRET`
-- [ ] JWT payload: `{ sub: userId, workspaceId, role, permissions[] }`
-- [ ] `refreshToken`: string aleatorio (32 bytes, hex), se guarda el hash en DB, expira en 30 días
-- [ ] Rotación: cada uso de refresh token invalida el anterior y emite uno nuevo
+- [x] Hash de passwords con `bcrypt` (cost factor 12)
+- [x] JWT: `accessToken` expira en 15 minutos, firmado con `JWT_SECRET`
+- [x] JWT payload: `{ sub: userId, workspaceId, role, permissions[] }`
+- [x] `refreshToken`: string aleatorio (32 bytes, hex), se guarda el hash en DB, expira en 30 días
+- [x] Rotación: cada uso de refresh token invalida el anterior y emite uno nuevo
 
 #### Presentation — HTTP
 
-- [ ] `POST /auth/register` — `RegisterWorkspaceCommand`
-- [ ] `POST /auth/login` — `LoginCommand`. Respuesta: `{ accessToken, refreshToken, expiresIn }`
-- [ ] `POST /auth/refresh` — `RefreshTokenCommand`
-- [ ] `POST /auth/logout` — `RevokeSessionCommand`
-- [ ] `POST /workspaces/:id/users/invite` — `InviteUserCommand`
-- [ ] `POST /invitations/:token/accept` — `AcceptInvitationCommand`
-- [ ] `GET /workspaces/:id` — datos del workspace (requiere auth)
-- [ ] Middleware `authenticate` — valida JWT, inyecta `user` en el request
-- [ ] Middleware `authorize(permission)` — verifica que el usuario tenga el permiso requerido
+- [x] `POST /auth/register` — `RegisterWorkspaceCommand`
+- [x] `POST /auth/login` — `LoginCommand`. Respuesta: `{ accessToken, refreshToken, expiresIn }`
+- [x] `POST /auth/refresh` — `RefreshTokenCommand`
+- [x] `POST /auth/logout` — `RevokeSessionCommand`
+- [x] `POST /workspaces/:id/users/invite` — `InviteUserCommand`
+- [x] `POST /invitations/:token/accept` — `AcceptInvitationCommand`
+- [x] `GET /workspaces/:id` — datos del workspace (requiere auth)
+- [x] Middleware `authenticate` — valida JWT, inyecta `user` en el request
+- [x] Middleware `authorize(permission)` — verifica que el usuario tenga el permiso requerido
 
 #### OpenAPI
 
-- [ ] Documentar todos los endpoints de auth en `openapi.yaml`
-- [ ] Schemas: `RegisterRequest`, `LoginRequest`, `LoginResponse`, `InviteUserRequest`
+- [x] Documentar todos los endpoints de auth en `openapi.yaml`
+- [x] Schemas: `RegisterRequest`, `LoginRequest`, `LoginResponse`, `InviteUserRequest`
 
 ### Criterios de aceptación
 

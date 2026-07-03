@@ -3,13 +3,18 @@ import helmet from 'helmet'
 import cors from 'cors'
 import compression from 'compression'
 import path from 'path'
+import { AwilixContainer } from 'awilix'
 
 import { correlationIdMiddleware } from './middleware/correlationId'
 import { requestLoggerMiddleware } from './middleware/requestLogger'
 import { healthRouter } from './routes/health'
 import { metricsRouter } from './routes/metrics'
+import { createAuthRouter } from './routes/auth'
+import { createWorkspacesRouter } from './routes/workspaces'
+import { createInvitationsRouter } from './routes/invitations'
+import { Cradle } from './container'
 
-export function createApp(): Express {
+export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string): Express {
   const app = express()
 
   app.use(helmet())
@@ -21,6 +26,9 @@ export function createApp(): Express {
 
   app.use(healthRouter)
   app.use(metricsRouter)
+  app.use(createAuthRouter(container, jwtSecret))
+  app.use(createWorkspacesRouter(container, jwtSecret))
+  app.use(createInvitationsRouter(container, jwtSecret))
 
   if (process.env.NODE_ENV !== 'production') {
     setupSwagger(app)
