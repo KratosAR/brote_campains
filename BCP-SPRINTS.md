@@ -327,14 +327,14 @@ Este documento es el plan de trabajo concreto. Cada sprint tiene tareas, criteri
 
 #### Domain — Contact Aggregate
 
-- [ ] `ContactId extends UniqueId`
-- [ ] `ContactStatus` enum: `Active`, `Archived`, `Deleted`
-- [ ] `ChannelType` enum: `WhatsApp`, `Email`, `SMS`, `Telegram`
-- [ ] `ContactChannel` Value Object: `type: ChannelType`, `value: string`, `verified: boolean`, `isPrimary: boolean`
+- [x] `ContactId extends UniqueId`
+- [x] `ContactStatus` enum: `Active`, `Archived`, `Deleted`
+- [x] `ChannelType` enum: `WhatsApp`, `Email`, `SMS`, `Telegram`
+- [x] `ContactChannel` Value Object: `type: ChannelType`, `value: string`, `verified: boolean`, `isPrimary: boolean`
   - Validación según tipo: WhatsApp → PhoneNumber válido; Email → Email válido
-- [ ] `ContactIdentity` Value Object: `firstName`, `lastName?`, `company?`, `externalId?`, `notes?`
-- [ ] `ContactPreferences` Value Object: `acceptsCampaigns: 'yes' | 'no' | 'unknown'`, `consentSource?: string`, `consentDate?: Date`, `optedOutAt?: Date`, `preferredChannel?: ChannelType`
-- [ ] `Contact` Aggregate Root:
+- [x] `ContactIdentity` Value Object: `firstName`, `lastName?`, `company?`, `externalId?`, `notes?`
+- [x] `ContactPreferences` Value Object: `acceptsCampaigns: 'yes' | 'no' | 'unknown'`, `consentSource?: string`, `consentDate?: Date`, `optedOutAt?: Date`, `preferredChannel?: ChannelType`
+- [x] `Contact` Aggregate Root:
   - `Contact.create(workspaceId, identity, channels): Result<Contact, DomainError>` — al menos un channel válido. Emite `ContactCreated`
   - `contact.addChannel(channel): Result<void, DomainError>`
   - `contact.removeChannel(type): Result<void, DomainError>` — no puede quedar sin channels
@@ -345,91 +345,91 @@ Este documento es el plan de trabajo concreto. Cada sprint tiene tareas, criteri
   - `contact.addTag(tag): void`
   - `contact.removeTag(tag): void`
   - `contact.isOptedOut(): boolean` — usado en BR-003
-- [ ] Tests unitarios completos: transiciones de estado, validaciones de channel, opt-out
+- [x] Tests unitarios completos: transiciones de estado, validaciones de channel, opt-out
 
 #### Domain — Events de Contactos
 
-- [ ] `ContactCreated { contactId, workspaceId, channels }`
-- [ ] `ContactUpdated { contactId, workspaceId, changes }`
-- [ ] `ContactOptedOut { contactId, workspaceId, optedOutAt }`
-- [ ] `ContactOptedIn { contactId, workspaceId }`
-- [ ] `ContactArchived { contactId, workspaceId }`
-- [ ] `ContactsImported { workspaceId, total, successful, failed, errors[] }`
+- [x] `ContactCreated { contactId, workspaceId, channels }`
+- [x] `ContactUpdated { contactId, workspaceId, changes }`
+- [x] `ContactOptedOut { contactId, workspaceId, optedOutAt }`
+- [x] `ContactOptedIn { contactId, workspaceId }`
+- [x] `ContactArchived { contactId, workspaceId }`
+- [x] `ContactsImported { workspaceId, total, successful, failed, errors[] }`
 
 #### Domain — Contact Group
 
-- [ ] `GroupId extends UniqueId`
-- [ ] `ContactGroup` Entity: `id`, `workspaceId`, `name`, `description?`, `contactCount`
-- [ ] `ContactGroup.create(workspaceId, name): Result<ContactGroup, DomainError>`
+- [x] `GroupId extends UniqueId`
+- [x] `ContactGroup` Entity: `id`, `workspaceId`, `name`, `description?`, `contactCount`
+- [x] `ContactGroup.create(workspaceId, name): Result<ContactGroup, DomainError>`
 
 #### Infrastructure — Prisma Schema
 
-- [ ] Modelo `Contact`: `id`, `workspaceId`, `firstName`, `lastName`, `company`, `externalId`, `notes`, `status`, `acceptsCampaigns`, `consentSource`, `consentDate`, `optedOutAt`, `preferredChannel`, `createdAt`, `updatedAt`
-- [ ] Modelo `ContactChannel`: `id`, `contactId`, `workspaceId`, `type`, `value`, `verified`, `isPrimary`, `createdAt`
-- [ ] Modelo `ContactTag`: `contactId`, `workspaceId`, `tag` — PK compuesta
-- [ ] Modelo `Group`: `id`, `workspaceId`, `name`, `description`, `createdAt`, `updatedAt`
-- [ ] Modelo `ContactGroup`: `contactId`, `groupId`, `workspaceId`, `addedAt` — PK compuesta
-- [ ] Índices: `(workspaceId, status)`, `(workspaceId, externalId)`, `contact_channel(workspaceId, type, value)` unique
-- [ ] `prisma migrate dev`
+- [x] Modelo `Contact`: `id`, `workspaceId`, `firstName`, `lastName`, `company`, `externalId`, `notes`, `status`, `acceptsCampaigns`, `consentSource`, `consentDate`, `optedOutAt`, `preferredChannel`, `createdAt`, `updatedAt`
+- [x] Modelo `ContactChannel`: `id`, `contactId`, `workspaceId`, `type`, `value`, `verified`, `isPrimary`, `createdAt`
+- [x] Modelo `ContactTag`: `contactId`, `workspaceId`, `tag` — PK compuesta
+- [x] Modelo `Group`: `id`, `workspaceId`, `name`, `description`, `createdAt`, `updatedAt`
+- [x] Modelo `ContactGroup`: `contactId`, `groupId`, `workspaceId`, `addedAt` — PK compuesta
+- [x] Índices: `(workspaceId, status)`, `(workspaceId, externalId)`, `contact_channel(workspaceId, type, value)` unique
+- [x] `prisma migrate dev`
 
 #### Infrastructure — Repositories
 
-- [ ] `IContactRepository`:
+- [x] `IContactRepository`:
   - `findById(id, workspaceId)`
   - `findByChannel(type, value, workspaceId)`
   - `findByExternalId(externalId, workspaceId)`
   - `search(workspaceId, filters, pagination): Promise<Page<Contact>>`
   - `findByGroup(groupId, workspaceId, pagination)`
   - `countByWorkspace(workspaceId): Promise<number>`
-- [ ] `PrismaContactRepository` con `ContactMapper`
-- [ ] `IGroupRepository` básico (CRUD)
-- [ ] Tests de integración
+- [x] `PrismaContactRepository` con `ContactMapper`
+- [x] `IGroupRepository` básico (CRUD)
+- [x] Tests de integración
 
 #### Application — Contact Use Cases
 
-- [ ] `CreateContactCommand { workspaceId, identity, channels, tags?, groupIds? }`
-- [ ] `UpdateContactCommand { contactId, workspaceId, identity?, channels?, tags? }`
-- [ ] `ArchiveContactCommand { contactId, workspaceId }`
-- [ ] `OptOutContactCommand { contactId, workspaceId }`
-- [ ] `AddContactToGroupCommand { contactId, groupId, workspaceId }`
-- [ ] `RemoveContactFromGroupCommand { contactId, groupId, workspaceId }`
-- [ ] `CreateGroupCommand { workspaceId, name, description? }`
-- [ ] `SearchContactsQuery { workspaceId, q?, tags?, groupId?, status?, acceptsCampaigns?, page, limit }`
-- [ ] `GetContactQuery { contactId, workspaceId }`
+- [x] `CreateContactCommand { workspaceId, identity, channels, tags?, groupIds? }`
+- [x] `UpdateContactCommand { contactId, workspaceId, identity?, channels?, tags? }`
+- [x] `ArchiveContactCommand { contactId, workspaceId }`
+- [x] `OptOutContactCommand { contactId, workspaceId }`
+- [x] `AddContactToGroupCommand { contactId, groupId, workspaceId }`
+- [x] `RemoveContactFromGroupCommand { contactId, groupId, workspaceId }`
+- [x] `CreateGroupCommand { workspaceId, name, description? }`
+- [x] `SearchContactsQuery { workspaceId, q?, tags?, groupId?, status?, acceptsCampaigns?, page, limit }`
+- [x] `GetContactQuery { contactId, workspaceId }`
 
 #### Application — Importador CSV/Excel
 
 El importador es un proceso en varias etapas que puede tardar minutos. Se ejecuta como un Worker Job.
 
-- [ ] `ImportContactsCommand { workspaceId, fileKey, columnMapping, options }` — dispara un job, retorna `jobId` inmediatamente
-- [ ] Worker job `import-contacts`:
+- [x] `ImportContactsCommand { workspaceId, fileKey, columnMapping, options }` — dispara un job, retorna `jobId` inmediatamente
+- [x] Worker job `import-contacts`:
   1. Leer archivo desde storage (S3 o disco local en dev)
   2. Parsear CSV/Excel fila por fila (streaming, sin cargar todo en memoria)
   3. Por cada fila: validar campos mapeados, crear `Contact` via dominio
   4. Acumular errores con número de fila y motivo
   5. Persistir en lotes de 100 usando transacción
   6. Al finalizar: emitir `ContactsImported` con resumen
-- [ ] `GetImportStatusQuery { jobId, workspaceId }` — retorna progreso y errores parciales
-- [ ] Detección de duplicados: si ya existe un Contact con el mismo `(workspaceId, channelType, channelValue)`, actualizar en lugar de crear
-- [ ] Soporte para mapeo de columnas flexible (el nombre de columna en el CSV puede ser cualquier cosa)
+- [x] `GetImportStatusQuery { jobId, workspaceId }` — retorna progreso y errores parciales
+- [x] Detección de duplicados: si ya existe un Contact con el mismo `(workspaceId, channelType, channelValue)`, actualizar en lugar de crear
+- [x] Soporte para mapeo de columnas flexible (el nombre de columna en el CSV puede ser cualquier cosa)
 
 #### Presentation — HTTP
 
-- [ ] `POST /workspaces/:id/contacts` — crear contacto
-- [ ] `GET /workspaces/:id/contacts` — buscar con filtros y paginación
-- [ ] `GET /workspaces/:id/contacts/:contactId` — detalle
-- [ ] `PATCH /workspaces/:id/contacts/:contactId` — actualizar
-- [ ] `DELETE /workspaces/:id/contacts/:contactId` — archivar (no elimina físicamente)
-- [ ] `POST /workspaces/:id/contacts/:contactId/opt-out`
-- [ ] `POST /workspaces/:id/contacts/import` — retorna `{ jobId }`
-- [ ] `GET /workspaces/:id/contacts/import/:jobId` — estado del import
-- [ ] `POST /workspaces/:id/groups` — crear grupo
-- [ ] `GET /workspaces/:id/groups` — listar grupos
-- [ ] `POST /workspaces/:id/groups/:groupId/contacts/:contactId` — agregar contacto a grupo
+- [x] `POST /workspaces/:id/contacts` — crear contacto
+- [x] `GET /workspaces/:id/contacts` — buscar con filtros y paginación
+- [x] `GET /workspaces/:id/contacts/:contactId` — detalle
+- [x] `PATCH /workspaces/:id/contacts/:contactId` — actualizar
+- [x] `DELETE /workspaces/:id/contacts/:contactId` — archivar (no elimina físicamente)
+- [x] `POST /workspaces/:id/contacts/:contactId/opt-out`
+- [x] `POST /workspaces/:id/contacts/import` — retorna `{ jobId }`
+- [x] `GET /workspaces/:id/contacts/import/:jobId` — estado del import
+- [x] `POST /workspaces/:id/groups` — crear grupo
+- [x] `GET /workspaces/:id/groups` — listar grupos
+- [x] `POST /workspaces/:id/groups/:groupId/contacts/:contactId` — agregar contacto a grupo
 
 #### OpenAPI
 
-- [ ] Documentar todos los endpoints de contactos y grupos
+- [x] Documentar todos los endpoints de contactos y grupos
 
 ### Criterios de aceptación
 
@@ -453,51 +453,51 @@ El importador es un proceso en varias etapas que puede tardar minutos. Se ejecut
 
 #### Domain — Template
 
-- [ ] `TemplateId extends UniqueId`
-- [ ] `TemplateVariable` Value Object: `name: string`, `required: boolean`, `defaultValue?: string`
-- [ ] `TemplateContent` Value Object: `body: string`, `variables: TemplateVariable[]`
+- [x] `TemplateId extends UniqueId`
+- [x] `TemplateVariable` Value Object: `name: string`, `required: boolean`, `defaultValue?: string`
+- [x] `TemplateContent` Value Object: `body: string`, `variables: TemplateVariable[]`
   - Validación: detecta variables con formato `{{nombre}}`. Verifica que estén balanceadas.
   - `extractVariables(): string[]` — extrae los nombres únicos
   - `render(values: Record<string, string>): Result<string, ValidationError>` — reemplaza variables. Falla si falta alguna requerida.
-- [ ] `TemplateVersion` Entity: `version: number`, `content: TemplateContent`, `createdAt`, `createdBy`
-- [ ] `Template` Aggregate Root:
+- [x] `TemplateVersion` Entity: `version: number`, `content: TemplateContent`, `createdAt`, `createdBy`
+- [x] `Template` Aggregate Root:
   - Campos: `id`, `workspaceId`, `name`, `description?`, `channel: ChannelType`, `versions: TemplateVersion[]`, `activeVersion: number`, `status`
   - `Template.create(workspaceId, name, channel, content): Result<Template, DomainError>`
   - `template.createVersion(content): Result<TemplateVersion, DomainError>` — incrementa versión, no modifica las anteriores
   - `template.activateVersion(version): Result<void, DomainError>`
   - `template.archive(): Result<void, DomainError>`
   - `template.getActiveContent(): TemplateContent`
-- [ ] Tests: crear template, agregar versión, render con variables, render con variable faltante
+- [x] Tests: crear template, agregar versión, render con variables, render con variable faltante
 
 #### Domain — Variable Engine
 
-- [ ] `VariableResolver` Domain Service:
+- [x] `VariableResolver` Domain Service:
   - `resolve(template: TemplateContent, contact: Contact, campaign: Campaign, custom: Record<string, string>): Result<string, ValidationError>`
   - Variables soportadas: `{{contact.firstName}}`, `{{contact.lastName}}`, `{{contact.company}}`, `{{campaign.name}}`, `{{workspace.name}}`, `{{today}}`, `{{now}}`, `custom.*`
   - Variables no encontradas: retorna `Result.fail` con lista de variables faltantes
 
 #### Infrastructure — Prisma Schema
 
-- [ ] Modelo `Template`: `id`, `workspaceId`, `name`, `description`, `channel`, `activeVersion`, `status`, `createdAt`, `updatedAt`
-- [ ] Modelo `TemplateVersion`: `id`, `templateId`, `workspaceId`, `version`, `body`, `variables` (JSON), `createdAt`, `createdBy`
+- [x] Modelo `Template`: `id`, `workspaceId`, `name`, `description`, `channel`, `activeVersion`, `status`, `createdAt`, `updatedAt`
+- [x] Modelo `TemplateVersion`: `id`, `templateId`, `workspaceId`, `version`, `body`, `variables` (JSON), `createdAt`, `createdBy`
 
 #### Application — Template Use Cases
 
-- [ ] `CreateTemplateCommand { workspaceId, name, channel, body, description? }`
-- [ ] `UpdateTemplateCommand { templateId, workspaceId }` — crea nueva versión (no modifica la activa)
-- [ ] `ArchiveTemplateCommand { templateId, workspaceId }`
-- [ ] `PreviewTemplateQuery { templateId, version?, sampleValues: Record<string, string> }` — retorna el body con variables resueltas usando los valores de ejemplo
-- [ ] `GetTemplateQuery { templateId, workspaceId }`
-- [ ] `ListTemplatesQuery { workspaceId, channel?, status?, page, limit }`
+- [x] `CreateTemplateCommand { workspaceId, name, channel, body, description? }`
+- [x] `UpdateTemplateCommand { templateId, workspaceId }` — crea nueva versión (no modifica la activa)
+- [x] `ArchiveTemplateCommand { templateId, workspaceId }`
+- [x] `PreviewTemplateQuery { templateId, version?, sampleValues: Record<string, string> }` — retorna el body con variables resueltas usando los valores de ejemplo
+- [x] `GetTemplateQuery { templateId, workspaceId }`
+- [x] `ListTemplatesQuery { workspaceId, channel?, status?, page, limit }`
 
 #### Presentation — HTTP
 
-- [ ] `POST /workspaces/:id/templates`
-- [ ] `GET /workspaces/:id/templates`
-- [ ] `GET /workspaces/:id/templates/:templateId`
-- [ ] `POST /workspaces/:id/templates/:templateId/versions` — nueva versión
-- [ ] `POST /workspaces/:id/templates/:templateId/preview` — preview con valores de ejemplo
-- [ ] `DELETE /workspaces/:id/templates/:templateId` — archiva
+- [x] `POST /workspaces/:id/templates`
+- [x] `GET /workspaces/:id/templates`
+- [x] `GET /workspaces/:id/templates/:templateId`
+- [x] `POST /workspaces/:id/templates/:templateId/versions` — nueva versión
+- [x] `POST /workspaces/:id/templates/:templateId/preview` — preview con valores de ejemplo
+- [x] `DELETE /workspaces/:id/templates/:templateId` — archiva
 
 ### Criterios de aceptación
 
@@ -521,20 +521,20 @@ El importador es un proceso en varias etapas que puede tardar minutos. Se ejecut
 
 Este es el aggregate más complejo del sistema. No apresurarse.
 
-- [ ] `CampaignId extends UniqueId`
-- [ ] `CampaignStatus` enum: `Draft`, `Scheduled`, `Running`, `Paused`, `Completed`, `Cancelled`, `Archived`
-- [ ] `CampaignAudience` Value Object:
+- [x] `CampaignId extends UniqueId`
+- [x] `CampaignStatus` enum: `Draft`, `Scheduled`, `Running`, `Paused`, `Completed`, `Cancelled`, `Archived`
+- [x] `CampaignAudience` Value Object:
   - `type: 'all' | 'group' | 'segment' | 'manual'`
   - `groupIds?: GroupId[]`
   - `contactIds?: ContactId[]`
   - `segmentRules?: SegmentRule[]` (para Sprint futuro)
   - `estimatedCount?: number`
-- [ ] `CampaignSchedule` Value Object: `sendAt: Date`, `timezone: string`, `sendNow: boolean`
+- [x] `CampaignSchedule` Value Object: `sendAt: Date`, `timezone: string`, `sendNow: boolean`
   - Validación: si `sendNow` es false, `sendAt` no puede ser en el pasado
-- [ ] `DeliveryPolicy` Value Object: `maxRetries: number`, `retryDelays: number[]`, `skipOptOut: boolean` (siempre false, BR-003)
-- [ ] `CampaignStatistics` Value Object: `total`, `pending`, `queued`, `sending`, `sent`, `delivered`, `read`, `failed`, `cancelled` — todos `number`
-- [ ] `CampaignTimelineEntry` Value Object: `event: string`, `occurredAt: Date`, `metadata?: Record<string, unknown>`
-- [ ] `Campaign` Aggregate Root:
+- [x] `DeliveryPolicy` Value Object: `maxRetries: number`, `retryDelays: number[]`, `skipOptOut: boolean` (siempre false, BR-003)
+- [x] `CampaignStatistics` Value Object: `total`, `pending`, `queued`, `sending`, `sent`, `delivered`, `read`, `failed`, `cancelled` — todos `number`
+- [x] `CampaignTimelineEntry` Value Object: `event: string`, `occurredAt: Date`, `metadata?: Record<string, unknown>`
+- [x] `Campaign` Aggregate Root:
   - `Campaign.createDraft(workspaceId, name, channel, audience, templateId, schedule?, deliveryPolicy?): Result<Campaign, DomainError>` — emite `CampaignCreated`
   - `campaign.schedule(schedule: CampaignSchedule): Result<void, DomainError>` — solo desde Draft. Emite `CampaignScheduled`
   - `campaign.start(): Result<void, DomainError>` — solo desde Scheduled. Emite `CampaignStarted`
@@ -546,34 +546,34 @@ Este es el aggregate más complejo del sistema. No apresurarse.
   - `campaign.updateStatistics(delta: Partial<CampaignStatistics>): void`
   - `campaign.addTimelineEntry(entry): void`
   - `campaign.canStart(): Result<void, DomainError>` — verifica BR-001 (provider conectado), BR-008 (tiene destinatarios)
-- [ ] Transiciones prohibidas explícitas: `Draft → Completed`, `Cancelled → Running`, `Archived → *`
-- [ ] Tests unitarios: todas las transiciones válidas e inválidas, invariantes, estadísticas
+- [x] Transiciones prohibidas explícitas: `Draft → Completed`, `Cancelled → Running`, `Archived → *`
+- [x] Tests unitarios: todas las transiciones válidas e inválidas, invariantes, estadísticas
 
 #### Domain — Events de Campaign
 
-- [ ] `CampaignCreated { campaignId, workspaceId, name, channel }`
-- [ ] `CampaignScheduled { campaignId, workspaceId, scheduledAt }`
-- [ ] `CampaignStarted { campaignId, workspaceId, startedAt }`
-- [ ] `CampaignPaused { campaignId, workspaceId, reason? }`
-- [ ] `CampaignResumed { campaignId, workspaceId }`
-- [ ] `CampaignCancelled { campaignId, workspaceId, reason? }`
-- [ ] `CampaignCompleted { campaignId, workspaceId, statistics }`
-- [ ] `CampaignArchived { campaignId, workspaceId }`
+- [x] `CampaignCreated { campaignId, workspaceId, name, channel }`
+- [x] `CampaignScheduled { campaignId, workspaceId, scheduledAt }`
+- [x] `CampaignStarted { campaignId, workspaceId, startedAt }`
+- [x] `CampaignPaused { campaignId, workspaceId, reason? }`
+- [x] `CampaignResumed { campaignId, workspaceId }`
+- [x] `CampaignCancelled { campaignId, workspaceId, reason? }`
+- [x] `CampaignCompleted { campaignId, workspaceId, statistics }`
+- [x] `CampaignArchived { campaignId, workspaceId }`
 
 #### Domain — Specifications de Campaign
 
-- [ ] `CampaignHasAudience` — verifica que `estimatedCount > 0`
-- [ ] `CampaignHasValidSchedule` — verifica que `sendAt` no sea pasado
-- [ ] `CampaignCanStart` — AND de: `CampaignHasAudience`, `WorkspaceIsActive`
+- [x] `CampaignHasAudience` — verifica que `estimatedCount > 0`
+- [x] `CampaignHasValidSchedule` — verifica que `sendAt` no sea pasado
+- [x] `CampaignCanStart` — AND de: `CampaignHasAudience`, `WorkspaceIsActive`
 
 #### Infrastructure — Prisma Schema
 
-- [ ] Modelo `Campaign`: `id`, `workspaceId`, `name`, `slug`, `status`, `channel`, `templateId`, `audienceType`, `audienceGroupIds` (JSON), `audienceContactIds` (JSON), `scheduledAt`, `timezone`, `sendNow`, `maxRetries`, `statistics` (JSON), `timeline` (JSON), `startedAt`, `completedAt`, `cancelledAt`, `createdAt`, `updatedAt`, `createdBy`
-- [ ] Índices: `(workspaceId, status)`, `(workspaceId, scheduledAt)`, `(workspaceId, createdAt)`
+- [x] Modelo `Campaign`: `id`, `workspaceId`, `name`, `slug`, `status`, `channel`, `templateId`, `audienceType`, `audienceGroupIds` (JSON), `audienceContactIds` (JSON), `scheduledAt`, `timezone`, `sendNow`, `maxRetries`, `statistics` (JSON), `timeline` (JSON), `startedAt`, `completedAt`, `cancelledAt`, `createdAt`, `updatedAt`, `createdBy`
+- [x] Índices: `(workspaceId, status)`, `(workspaceId, scheduledAt)`, `(workspaceId, createdAt)`
 
 #### Infrastructure — Repository
 
-- [ ] `ICampaignRepository`:
+- [x] `ICampaignRepository`:
   - `findById(id, workspaceId)`
   - `findByStatus(workspaceId, statuses: CampaignStatus[], pagination)`
   - `findScheduledBefore(date: Date): Promise<Campaign[]>` — usado por Scheduler
@@ -582,34 +582,34 @@ Este es el aggregate más complejo del sistema. No apresurarse.
   - `start(campaign)` — persiste estado Running
   - `pause(campaign)` / `resume(campaign)` / `cancel(campaign)` / `complete(campaign)`
   - `updateStatistics(campaignId, delta)`
-- [ ] `PrismaCampaignRepository` con `CampaignMapper`
-- [ ] Tests de integración
+- [x] `PrismaCampaignRepository` con `CampaignMapper`
+- [x] Tests de integración
 
 #### Application — Campaign Use Cases
 
-- [ ] `CreateCampaignCommand { workspaceId, name, channel, audienceType, audienceGroupIds?, audienceContactIds?, templateId, scheduledAt?, timezone?, sendNow?, deliveryPolicy?, userId }`
-- [ ] `ScheduleCampaignCommand { campaignId, workspaceId, scheduledAt, timezone, userId }`
-- [ ] `PauseCampaignCommand { campaignId, workspaceId, reason?, userId }`
-- [ ] `ResumeCampaignCommand { campaignId, workspaceId, userId }`
-- [ ] `CancelCampaignCommand { campaignId, workspaceId, reason?, userId }`
-- [ ] `ArchiveCampaignCommand { campaignId, workspaceId, userId }`
-- [ ] `DuplicateCampaignCommand { campaignId, workspaceId, userId }` — crea Draft con los mismos datos
-- [ ] `GetCampaignQuery { campaignId, workspaceId }`
-- [ ] `ListCampaignsQuery { workspaceId, status?, page, limit }`
-- [ ] `GetCampaignTimelineQuery { campaignId, workspaceId }`
+- [x] `CreateCampaignCommand { workspaceId, name, channel, audienceType, audienceGroupIds?, audienceContactIds?, templateId, scheduledAt?, timezone?, sendNow?, deliveryPolicy?, userId }`
+- [x] `ScheduleCampaignCommand { campaignId, workspaceId, scheduledAt, timezone, userId }`
+- [x] `PauseCampaignCommand { campaignId, workspaceId, reason?, userId }`
+- [x] `ResumeCampaignCommand { campaignId, workspaceId, userId }`
+- [x] `CancelCampaignCommand { campaignId, workspaceId, reason?, userId }`
+- [x] `ArchiveCampaignCommand { campaignId, workspaceId, userId }`
+- [x] `DuplicateCampaignCommand { campaignId, workspaceId, userId }` — crea Draft con los mismos datos
+- [x] `GetCampaignQuery { campaignId, workspaceId }`
+- [x] `ListCampaignsQuery { workspaceId, status?, page, limit }`
+- [x] `GetCampaignTimelineQuery { campaignId, workspaceId }`
 
 #### Presentation — HTTP
 
-- [ ] `POST /workspaces/:id/campaigns`
-- [ ] `GET /workspaces/:id/campaigns` — con filtro por status
-- [ ] `GET /workspaces/:id/campaigns/:campaignId`
-- [ ] `PATCH /workspaces/:id/campaigns/:campaignId/schedule`
-- [ ] `POST /workspaces/:id/campaigns/:campaignId/pause`
-- [ ] `POST /workspaces/:id/campaigns/:campaignId/resume`
-- [ ] `POST /workspaces/:id/campaigns/:campaignId/cancel`
-- [ ] `POST /workspaces/:id/campaigns/:campaignId/archive`
-- [ ] `POST /workspaces/:id/campaigns/:campaignId/duplicate`
-- [ ] `GET /workspaces/:id/campaigns/:campaignId/timeline`
+- [x] `POST /workspaces/:id/campaigns`
+- [x] `GET /workspaces/:id/campaigns` — con filtro por status
+- [x] `GET /workspaces/:id/campaigns/:campaignId`
+- [x] `PATCH /workspaces/:id/campaigns/:campaignId/schedule`
+- [x] `POST /workspaces/:id/campaigns/:campaignId/pause`
+- [x] `POST /workspaces/:id/campaigns/:campaignId/resume`
+- [x] `POST /workspaces/:id/campaigns/:campaignId/cancel`
+- [x] `POST /workspaces/:id/campaigns/:campaignId/archive`
+- [x] `POST /workspaces/:id/campaigns/:campaignId/duplicate`
+- [x] `GET /workspaces/:id/campaigns/:campaignId/timeline`
 
 ### Criterios de aceptación
 
@@ -633,10 +633,10 @@ Este es el aggregate más complejo del sistema. No apresurarse.
 
 #### Domain — Delivery Aggregate
 
-- [ ] `DeliveryId extends UniqueId`
-- [ ] `DeliveryStatus` enum: `Pending`, `Queued`, `Sending`, `Sent`, `Delivered`, `Read`, `Failed`, `Cancelled`, `Expired`
-- [ ] `DeliveryAttempt` Value Object: `attemptNumber`, `startedAt`, `completedAt?`, `providerMessageId?`, `errorCode?`, `errorMessage?`, `success: boolean`
-- [ ] `Delivery` Aggregate Root:
+- [x] `DeliveryId extends UniqueId`
+- [x] `DeliveryStatus` enum: `Pending`, `Queued`, `Sending`, `Sent`, `Delivered`, `Read`, `Failed`, `Cancelled`, `Expired`
+- [x] `DeliveryAttempt` Value Object: `attemptNumber`, `startedAt`, `completedAt?`, `providerMessageId?`, `errorCode?`, `errorMessage?`, `success: boolean`
+- [x] `Delivery` Aggregate Root:
   - Campos: `id`, `campaignId`, `workspaceId`, `contactId`, `channel`, `address` (e164 o email), `messageSnapshot: string`, `status`, `attempts: DeliveryAttempt[]`, `providerMessageId?`, `timeline: TimelineEntry[]`, `createdAt`, `updatedAt`
   - `Delivery.create(campaignId, workspaceId, contact, messageSnapshot): Result<Delivery, DomainError>`
   - `delivery.markQueued(): Result<void, DomainError>`
@@ -648,33 +648,33 @@ Este es el aggregate más complejo del sistema. No apresurarse.
   - `delivery.canRetry(maxRetries: number): boolean`
   - `delivery.markExpired(): Result<void, DomainError>`
   - `delivery.cancel(): Result<void, DomainError>` — solo si está en Pending o Queued
-- [ ] Tests unitarios completos de transiciones
+- [x] Tests unitarios completos de transiciones
 
 #### Domain — Events de Delivery
 
-- [ ] `DeliveryQueued { deliveryId, campaignId, workspaceId }`
-- [ ] `DeliveryFailed { deliveryId, campaignId, workspaceId, attemptNumber, errorCode }`
-- [ ] `DeliveryCompleted { deliveryId, campaignId, workspaceId, status }` — para Sent, Delivered, Read
-- [ ] `DeliveryExpired { deliveryId, campaignId, workspaceId }`
+- [x] `DeliveryQueued { deliveryId, campaignId, workspaceId }`
+- [x] `DeliveryFailed { deliveryId, campaignId, workspaceId, attemptNumber, errorCode }`
+- [x] `DeliveryCompleted { deliveryId, campaignId, workspaceId, status }` — para Sent, Delivered, Read
+- [x] `DeliveryExpired { deliveryId, campaignId, workspaceId }`
 
 #### Infrastructure — Prisma Schema
 
-- [ ] Modelo `Delivery`: `id`, `campaignId`, `workspaceId`, `contactId`, `channel`, `address`, `messageSnapshot`, `status`, `providerMessageId`, `attempts` (JSON array), `timeline` (JSON array), `createdAt`, `updatedAt`
-- [ ] Índices (crítico para rendimiento): `(workspaceId, campaignId)`, `(workspaceId, status)`, `(providerMessageId)`, `(contactId)`, `(createdAt)` — particionado mensual a configurar en Postgres nativo
+- [x] Modelo `Delivery`: `id`, `campaignId`, `workspaceId`, `contactId`, `channel`, `address`, `messageSnapshot`, `status`, `providerMessageId`, `attempts` (JSON array), `timeline` (JSON array), `createdAt`, `updatedAt`
+- [x] Índices (crítico para rendimiento): `(workspaceId, campaignId)`, `(workspaceId, status)`, `(providerMessageId)`, `(contactId)`, `(createdAt)` — particionado mensual a configurar en Postgres nativo
 
 #### Infrastructure — Delivery Repository
 
-- [ ] `IDeliveryRepository`:
+- [x] `IDeliveryRepository`:
   - `findById(id, workspaceId)`
   - `findByProviderMessageId(providerMessageId): Promise<Delivery | null>` — usado por webhooks
   - `findByCampaign(campaignId, workspaceId, status?, pagination)`
   - `countByCampaignAndStatus(campaignId, workspaceId): Promise<Record<DeliveryStatus, number>>`
   - `saveBatch(deliveries: Delivery[]): Promise<void>` — transacción, lotes de 500
-- [ ] `PrismaDeliveryRepository`
+- [x] `PrismaDeliveryRepository`
 
 #### Application — AudienceResolver
 
-- [ ] `AudienceResolver` Domain Service:
+- [x] `AudienceResolver` Domain Service:
   - `resolve(campaign: Campaign, workspaceId): Promise<ResolvedContact[]>`
   - Expande `groupIds` a contactos
   - Expande `contactIds` a contactos
@@ -684,7 +684,7 @@ Este es el aggregate más complejo del sistema. No apresurarse.
 
 #### Application — DeliveryGenerator
 
-- [ ] `DeliveryGenerator` Domain Service:
+- [x] `DeliveryGenerator` Domain Service:
   - Recibe: `campaign`, lista de `ResolvedContact[]`
   - Renderiza el mensaje para cada contacto usando `VariableResolver`
   - Crea `Delivery` por contacto
@@ -693,62 +693,62 @@ Este es el aggregate más complejo del sistema. No apresurarse.
 
 #### Application — BatchPlanner
 
-- [ ] `BatchPlanner` Domain Service:
+- [x] `BatchPlanner` Domain Service:
   - `plan(deliveries: DeliveryId[], ratePerMinute: number): Batch[]`
   - Divide los IDs en lotes según la capacidad del Provider
   - Cada `Batch`: `{ batchId, deliveryIds, priority, scheduledAfter: Date }`
 
 #### Infrastructure — BullMQ Queues
 
-- [ ] Queue `campaign` — jobs: `start-campaign`, `pause-campaign`, `resume-campaign`
-- [ ] Queue `delivery` — jobs: `send-delivery`
-- [ ] Queue `retry` — jobs: `retry-delivery` con delay
-- [ ] Queue `webhook` — jobs: `process-webhook`
-- [ ] Queue `analytics` — jobs: `update-statistics`
-- [ ] Configurar `Bull Board` para visualizar todas las colas en `/admin/queues`
+- [x] Queue `campaign` — jobs: `start-campaign`, `pause-campaign`, `resume-campaign`
+- [x] Queue `delivery` — jobs: `send-delivery`
+- [x] Queue `retry` — jobs: `retry-delivery` con delay
+- [x] Queue `webhook` — jobs: `process-webhook`
+- [x] Queue `analytics` — jobs: `update-statistics`
+- [x] Configurar `Bull Board` para visualizar todas las colas en `/admin/queues`
 
 #### Apps — Scheduler
 
-- [ ] `apps/scheduler` — proceso Node.js independiente
-- [ ] Cron que corre cada 30 segundos: `SELECT campaigns WHERE status = Scheduled AND scheduledAt <= NOW()`
-- [ ] Por cada campaña encontrada: atomicly cambia estado a `Running` (con lock optimista usando `version`), encola job `start-campaign`
-- [ ] Idempotencia: si la campaña ya está en `Running`, el Scheduler lo ignora
-- [ ] Garantía: nunca procesa la misma campaña dos veces en paralelo (usa `FOR UPDATE SKIP LOCKED` en Postgres)
+- [x] `apps/scheduler` — proceso Node.js independiente
+- [x] Cron que corre cada 30 segundos: `SELECT campaigns WHERE status = Scheduled AND scheduledAt <= NOW()`
+- [x] Por cada campaña encontrada: atomicly cambia estado a `Running` (con lock optimista usando `version`), encola job `start-campaign`
+- [x] Idempotencia: si la campaña ya está en `Running`, el Scheduler lo ignora
+- [x] Garantía: nunca procesa la misma campaña dos veces en paralelo (usa `FOR UPDATE SKIP LOCKED` en Postgres)
 
 #### Apps — Worker
 
-- [ ] `apps/worker` — proceso Node.js independiente
-- [ ] Handler `start-campaign`:
+- [x] `apps/worker` — proceso Node.js independiente
+- [x] Handler `start-campaign`:
   1. Carga Campaign desde DB
   2. Llama a `AudienceResolver`
   3. Llama a `DeliveryGenerator`
   4. Llama a `BatchPlanner`
   5. Encola lotes en `delivery` queue con delays según rate
-- [ ] Handler `send-delivery`:
+- [x] Handler `send-delivery`:
   1. Carga Delivery desde DB
   2. Llama a `ProviderOrchestrator.send(delivery)`
   3. En éxito: `delivery.markSent(providerMessageId)`
   4. En error temporal: encola en `retry` queue con backoff
   5. En error permanente: `delivery.markFailed()`, no reintentar
   6. Encola `update-statistics` en analytics queue
-- [ ] Handler `retry-delivery`: mismo flujo que `send-delivery` pero incrementa `attemptNumber`
-- [ ] Handler `update-statistics`: actualiza `CampaignStatistics` de forma atómica (incremento, no SET)
+- [x] Handler `retry-delivery`: mismo flujo que `send-delivery` pero incrementa `attemptNumber`
+- [x] Handler `update-statistics`: actualiza `CampaignStatistics` de forma atómica (incremento, no SET)
 
 #### Application — Outbox Worker
 
-- [ ] Proceso que cada 2 segundos lee la tabla `outbox` donde `publishedAt IS NULL`
-- [ ] Publica cada evento en BullMQ
-- [ ] Marca como publicado: `publishedAt = NOW()`
-- [ ] Manejo de errores: si falla la publicación, deja el registro para el próximo ciclo
+- [x] Proceso que cada 2 segundos lee la tabla `outbox` donde `publishedAt IS NULL`
+- [x] Publica cada evento en BullMQ
+- [x] Marca como publicado: `publishedAt = NOW()`
+- [x] Manejo de errores: si falla la publicación, deja el registro para el próximo ciclo
 
 #### FakeProvider (para tests y desarrollo)
 
-- [ ] `providers/fake` implementa `MessagingProvider`
-- [ ] `send()` — simula latencia de 50–200ms, retorna éxito el 95% del tiempo
-- [ ] `send()` — retorna error temporal (429) el 3% del tiempo
-- [ ] `send()` — retorna error permanente (número inválido) el 2% del tiempo
-- [ ] `health()` — siempre retorna `online`
-- [ ] Configurable: `FAKE_PROVIDER_SUCCESS_RATE`, `FAKE_PROVIDER_DELAY_MS`
+- [x] `providers/fake` implementa `MessagingProvider`
+- [x] `send()` — simula latencia de 50–200ms, retorna éxito el 95% del tiempo
+- [x] `send()` — retorna error temporal (429) el 3% del tiempo
+- [x] `send()` — retorna error permanente (número inválido) el 2% del tiempo
+- [x] `health()` — siempre retorna `online`
+- [x] Configurable: `FAKE_PROVIDER_SUCCESS_RATE`, `FAKE_PROVIDER_DELAY_MS`
 
 ### Criterios de aceptación
 
@@ -775,109 +775,109 @@ Este es el aggregate más complejo del sistema. No apresurarse.
 
 #### Infrastructure — Provider SDK (contratos finales)
 
-- [ ] `MessagingProvider` interface — revisión final con todo lo aprendido en Sprint 6
-- [ ] `OutboundMessage` DTO: `to: string`, `body: string`, `mediaUrl?`, `buttons?`, `header?`, `footer?`, `templateName?`, `templateLanguage?`, `templateVariables?`
-- [ ] `ProviderResponse` DTO: `providerMessageId: string`, `timestamp: Date`, `raw: unknown`
-- [ ] `ProviderError` — tipos: `PermanentError`, `TemporaryError`, `RateLimitError`, `AuthError`, `NetworkError`
-- [ ] `HealthStatus` DTO: `status: 'online' | 'degraded' | 'offline'`, `latencyMs: number`, `details?: string`
+- [x] `MessagingProvider` interface — revisión final con todo lo aprendido en Sprint 6
+- [x] `OutboundMessage` DTO: `to: string`, `body: string`, `mediaUrl?`, `buttons?`, `header?`, `footer?`, `templateName?`, `templateLanguage?`, `templateVariables?`
+- [x] `ProviderResponse` DTO: `providerMessageId: string`, `timestamp: Date`, `raw: unknown`
+- [x] `ProviderError` — tipos: `PermanentError`, `TemporaryError`, `RateLimitError`, `AuthError`, `NetworkError`
+- [x] `HealthStatus` DTO: `status: 'online' | 'degraded' | 'offline'`, `latencyMs: number`, `details?: string`
 
 #### Infrastructure — ProviderRegistry
 
-- [ ] `ProviderRegistry`:
+- [x] `ProviderRegistry`:
   - `register(provider: MessagingProvider): void`
   - `get(channel: ChannelType, providerId: string): Result<MessagingProvider, NotFoundError>`
   - `list(channel?: ChannelType): MessagingProvider[]`
   - `supports(channel: ChannelType, feature: ProviderFeature): boolean`
-- [ ] Al arrancar `apps/api` y `apps/worker`: registra todos los Providers disponibles
+- [x] Al arrancar `apps/api` y `apps/worker`: registra todos los Providers disponibles
 
 #### Infrastructure — ProviderOrchestrator
 
-- [ ] `ProviderOrchestrator`:
+- [x] `ProviderOrchestrator`:
   - `resolve(workspaceId, channel): Promise<Result<MessagingProvider, ProviderError>>` — consulta `ChannelConnection` del Workspace, resuelve por prioridad
   - `send(delivery: Delivery): Promise<Result<ProviderResponse, ProviderError>>` — resuelve Provider y llama a `provider.send()`
   - Smart Routing: si el Provider primario falla con `NetworkError` o `TemporaryError`, intenta el siguiente por prioridad
-- [ ] Tests unitarios con Providers mock
+- [x] Tests unitarios con Providers mock
 
 #### Domain — ChannelConnection Aggregate
 
-- [ ] `ChannelConnectionId extends UniqueId`
-- [ ] `ConnectionStatus` enum: `Pending`, `Connected`, `Disconnected`, `Error`
-- [ ] `ChannelConnection` Aggregate Root:
+- [x] `ChannelConnectionId extends UniqueId`
+- [x] `ConnectionStatus` enum: `Pending`, `Connected`, `Disconnected`, `Error`
+- [x] `ChannelConnection` Aggregate Root:
   - Campos: `id`, `workspaceId`, `channel`, `providerId`, `status`, `priority`, `enabled`, `credentials` (opaco para el dominio), `capabilities`, `lastHealthCheck`, `createdAt`
   - `ChannelConnection.create(workspaceId, channel, providerId, credentials, priority)`
   - `connection.markConnected(capabilities)`
   - `connection.markDisconnected(reason)`
   - `connection.markError(error)`
   - `connection.disable()` / `connection.enable()`
-- [ ] Invariante (BR-002): no puede existir más de un ChannelConnection `enabled` y `Connected` para el mismo `(workspaceId, channel, priority=1)`
+- [x] Invariante (BR-002): no puede existir más de un ChannelConnection `enabled` y `Connected` para el mismo `(workspaceId, channel, priority=1)`
 
 #### Infrastructure — Prisma Schema (ChannelConnection)
 
-- [ ] Modelo `ChannelConnection`: `id`, `workspaceId`, `channel`, `providerId`, `status`, `priority`, `enabled`, `credentialsEncrypted` (AES-256), `capabilities` (JSON), `lastHealthCheck`, `createdAt`, `updatedAt`
-- [ ] `ChannelConnectionRepository`
+- [x] Modelo `ChannelConnection`: `id`, `workspaceId`, `channel`, `providerId`, `status`, `priority`, `enabled`, `credentialsEncrypted` (AES-256), `capabilities` (JSON), `lastHealthCheck`, `createdAt`, `updatedAt`
+- [x] `ChannelConnectionRepository`
 
 #### Infrastructure — Cifrado de credenciales
 
-- [ ] `CredentialEncryption` service: `encrypt(plaintext): string`, `decrypt(ciphertext): string`
-- [ ] Usa AES-256-GCM con key derivada de `ENCRYPTION_KEY` env var
-- [ ] Las credenciales se cifran antes de persistir y se descifran al leer. Nunca pasan por logs.
+- [x] `CredentialEncryption` service: `encrypt(plaintext): string`, `decrypt(ciphertext): string`
+- [x] Usa AES-256-GCM con key derivada de `ENCRYPTION_KEY` env var
+- [x] Las credenciales se cifran antes de persistir y se descifran al leer. Nunca pasan por logs.
 
 #### Provider — Meta Cloud API
 
-- [ ] `providers/meta/MetaProvider implements MessagingProvider`
-- [ ] Configuración: `phoneNumberId`, `accessToken`, `webhookVerifyToken`, `apiVersion`
-- [ ] `connect()` — valida `accessToken` contra Graph API
-- [ ] `send(message)` — `POST /messages` a la API de WhatsApp Business
+- [x] `providers/meta/MetaProvider implements MessagingProvider`
+- [x] Configuración: `phoneNumberId`, `accessToken`, `webhookVerifyToken`, `apiVersion`
+- [x] `connect()` — valida `accessToken` contra Graph API
+- [x] `send(message)` — `POST /messages` a la API de WhatsApp Business
   - Soporte: texto simple, imagen, documento, template con variables
   - Manejo de errores: 429 → `RateLimitError`, 401 → `AuthError`, 5xx → `TemporaryError`, error de número → `PermanentError`
-- [ ] `health()` — `GET /health` a la Graph API
-- [ ] `capabilities()` — `{ supportsTemplates: true, supportsMedia: true, supportsButtons: true, maxMessagesPerMinute: 100 }`
-- [ ] Tests de integración con la API real (con credenciales de test) o mock de Axios
+- [x] `health()` — `GET /health` a la Graph API
+- [x] `capabilities()` — `{ supportsTemplates: true, supportsMedia: true, supportsButtons: true, maxMessagesPerMinute: 100 }`
+- [x] Tests de integración con la API real (con credenciales de test) o mock de Axios
 
 #### Provider — Evolution API
 
-- [ ] `providers/evolution/EvolutionProvider implements MessagingProvider`
-- [ ] Configuración: `baseUrl`, `apiKey`, `instanceName`
-- [ ] `connect()` — verifica que la instancia exista y esté autenticada
-- [ ] `send(message)` — `POST /message/sendText` o `sendMedia`
+- [x] `providers/evolution/EvolutionProvider implements MessagingProvider`
+- [x] Configuración: `baseUrl`, `apiKey`, `instanceName`
+- [x] `connect()` — verifica que la instancia exista y esté autenticada
+- [x] `send(message)` — `POST /message/sendText` o `sendMedia`
   - Manejo de errores según códigos de Evolution API
-- [ ] `health()` — `GET /instance/connectionState/:instance`
-- [ ] `capabilities()` — `{ supportsTemplates: false, supportsMedia: true, supportsButtons: true, maxMessagesPerMinute: 30 }`
+- [x] `health()` — `GET /instance/connectionState/:instance`
+- [x] `capabilities()` — `{ supportsTemplates: false, supportsMedia: true, supportsButtons: true, maxMessagesPerMinute: 30 }`
 
 #### Apps — Webhook
 
-- [ ] `apps/webhook` — proceso Express independiente
-- [ ] `GET /webhook/meta` — endpoint de verificación (challenge de Meta)
-- [ ] `POST /webhook/meta` — recibe eventos de Meta: `messages.sent`, `messages.delivered`, `messages.read`, `messages.failed`
-  - Valida firma HMAC con `WEBHOOK_VERIFY_TOKEN`
-  - Encola job en `webhook-queue` inmediatamente (responde 200 en < 50ms)
-- [ ] `POST /webhook/evolution` — recibe eventos de Evolution API
-- [ ] Handler `process-webhook` en Worker:
+- [x] `apps/webhook` — proceso Express independiente
+- [x] `GET /webhook/meta` — endpoint de verificación (challenge de Meta)
+- [x] `POST /webhook/meta` — recibe eventos de Meta: `messages.sent`, `messages.delivered`, `messages.read`, `messages.failed`
+  - Valida firma HMAC con `WEBHOOK_VERIFY_TOKEN` / `META_APP_SECRET` (comparación en tiempo constante)
+  - Encola job `process-webhook` inmediatamente (responde 200 sin procesar en la request)
+- [x] `POST /webhook/evolution` — recibe eventos de Evolution API (protegido con secreto compartido `?token=`, ya que Evolution no firma sus webhooks)
+- [x] Handler `process-webhook` en Worker:
   - Busca Delivery por `providerMessageId`
-  - Actualiza estado: `Sent → Delivered`, `Delivered → Read`, etc.
+  - Actualiza estado: `Sent → Delivered`, `Delivered → Read`, etc. (idempotente: transición inválida se loguea, no explota)
   - Encola `update-statistics`
 
 #### Application — ChannelConnection Use Cases
 
-- [ ] `ConnectProviderCommand { workspaceId, channel, providerId, credentials, priority?, userId }` — cifra credenciales, llama a `provider.connect()`, crea `ChannelConnection`
-- [ ] `DisconnectProviderCommand { connectionId, workspaceId, userId }`
-- [ ] `GetChannelStatusQuery { workspaceId, channel }` — retorna estado de todas las conexiones del canal
-- [ ] `HealthCheckCommand { connectionId, workspaceId }` — llama a `provider.health()`, actualiza `lastHealthCheck`
+- [x] `ConnectProviderCommand { workspaceId, channel, providerId, credentials, priority?, userId }` — cifra credenciales, llama a `provider.connect()`, crea `ChannelConnection`
+- [x] `DisconnectProviderCommand { connectionId, workspaceId, userId }`
+- [x] `GetChannelStatusQuery { workspaceId, channel }` — retorna estado de todas las conexiones del canal
+- [x] `HealthCheckCommand { connectionId, workspaceId }` — llama a `provider.health()`, actualiza `lastHealthCheck`
 
 #### Presentation — HTTP (Canales)
 
-- [ ] `POST /workspaces/:id/channels/connect`
-- [ ] `POST /workspaces/:id/channels/:connectionId/disconnect`
-- [ ] `GET /workspaces/:id/channels` — lista todas las conexiones
-- [ ] `GET /workspaces/:id/channels/:channel/status` — estado del canal
-- [ ] `POST /workspaces/:id/channels/:connectionId/health-check`
+- [x] `POST /workspaces/:id/channels/connect`
+- [x] `POST /workspaces/:id/channels/:connectionId/disconnect`
+- [x] `GET /workspaces/:id/channels` — lista todas las conexiones
+- [x] `GET /workspaces/:id/channels/:channel/status` — estado del canal
+- [x] `POST /workspaces/:id/channels/:connectionId/health-check`
 
 #### Monitoring — Provider Health Dashboard
 
-- [ ] Métrica Prometheus: `provider_health_status{provider, workspace}` — gauge 0/1
-- [ ] Métrica Prometheus: `provider_latency_ms{provider}` — histograma
-- [ ] Métrica Prometheus: `messages_sent_total{provider, status}` — counter
-- [ ] Panel Grafana con estado de todos los Providers
+- [x] Métrica Prometheus: `provider_health_status{provider, workspace}` — gauge 0/1
+- [x] Métrica Prometheus: `provider_latency_ms{provider}` — histograma
+- [x] Métrica Prometheus: `messages_sent_total{provider, status}` — counter
+- [x] Panel Grafana con estado de todos los Providers
 
 ### Criterios de aceptación
 

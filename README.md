@@ -48,10 +48,10 @@ pnpm db:generate    # Generar cliente de Prisma
 | Sprint 0 | Bootstrap — monorepo, Docker, CI/CD | ✅ Completo |
 | Sprint 1 | Shared Kernel y Core DDD | ✅ Completo |
 | Sprint 2 | Workspace y Auth | ✅ Completo |
-| Sprint 3 | Contactos | ⏳ Pendiente |
-| Sprint 4 | Templates | ⏳ Pendiente |
-| Sprint 5 | Campañas | ⏳ Pendiente |
-| Sprint 6 | Execution Engine | ⏳ Pendiente |
+| Sprint 3 | Contactos | ✅ Completo |
+| Sprint 4 | Templates | ✅ Completo |
+| Sprint 5 | Campañas | ✅ Completo |
+| Sprint 6 | Execution Engine | ✅ Completo |
 | Sprint 7 | Communication Layer | ⏳ Pendiente |
 | Sprint 8 | Analytics | ⏳ Pendiente |
 | Sprint 9 | Hardening | ⏳ Pendiente |

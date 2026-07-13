@@ -1,1 +1,1 @@
-export {}
+export { FakeProvider } from './FakeProvider'

@@ -1,1 +1,1 @@
-export {}
+export { EvolutionProvider } from './EvolutionProvider'
