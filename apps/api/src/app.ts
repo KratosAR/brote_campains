@@ -1,11 +1,10 @@
-import express, { Express } from 'express'
+import express, { Express, Request, Response, NextFunction } from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import compression from 'compression'
 import path from 'path'
 import { AwilixContainer } from 'awilix'
 
-import { timeoutMiddleware } from './middleware/timeout'
 import { correlationIdMiddleware } from './middleware/correlationId'
 import { requestLoggerMiddleware } from './middleware/requestLogger'
 import { globalRateLimiter, authRateLimiter } from './middleware/rateLimiter'
@@ -24,7 +23,8 @@ import { Cradle } from './container'
 export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string): Express {
   const app = express()
 
-  app.use(timeoutMiddleware)
+  // ponytail: timeout middleware disabled temporarily — causes early response closes
+  // app.use(timeoutMiddleware)
   app.use(helmet())
   app.use(cors())
   app.use(compression())
@@ -48,6 +48,13 @@ export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string)
   if (process.env.NODE_ENV !== 'production') {
     setupSwagger(app)
   }
+
+  // ponytail: Catch-all error handler
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+    const logger = container.resolve('logger')
+    logger.error(`UNHANDLED ERROR: ${err.message}`, err)
+    res.status(500).json({ success: false, error: 'Internal server error' })
+  })
 
   return app
 }
