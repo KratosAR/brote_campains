@@ -959,21 +959,21 @@ Las queries de analytics no deben impactar las tablas transaccionales. Estrategi
 
 #### Performance
 
-- [ ] Revisar todas las queries con `EXPLAIN ANALYZE` — ninguna debe hacer Seq Scan en tablas grandes
-- [ ] Caché Redis para: datos del Workspace (TTL 5min), permisos del usuario (TTL 5min), templates (TTL 10min)
-- [ ] Paginación cursor-based en lugar de offset para listas grandes (contacts, deliveries)
-- [ ] Compression middleware en Express (gzip)
-- [ ] Rate limiting en todos los endpoints: 100 req/min por IP, 1000 req/min por workspace
+- [x] Revisar todas las queries con `EXPLAIN ANALYZE` — ninguna debe hacer Seq Scan en tablas grandes
+- [x] Caché Redis para: datos del Workspace (TTL 5min), permisos del usuario (TTL 5min), templates (TTL 10min)
+- [x] Paginación cursor-based en lugar de offset para listas grandes (contacts, deliveries)
+- [x] Compression middleware en Express (gzip)
+- [x] Rate limiting en todos los endpoints: 100 req/min por IP, 1000 req/min por workspace
 
 #### Seguridad
 
-- [ ] Audit de dependencias: `pnpm audit` — resolver vulnerabilidades críticas y altas
-- [ ] Headers de seguridad con `helmet`
-- [ ] Validación de todos los inputs de entrada con `zod` (ya debería estar, revisión final)
-- [ ] SQL injection: verificar que Prisma usa queries parametrizadas en todos los casos (sí lo hace, pero verificar raw queries)
-- [ ] CORS configurado correctamente para producción
-- [ ] Secrets: verificar que ningún secret aparece en logs (revisar toda la codebase)
-- [ ] Test de sesiones: revocar refresh token, verificar que no se puede usar
+- [x] Audit de dependencias: `pnpm audit` — resolver vulnerabilidades críticas y altas
+- [x] Headers de seguridad con `helmet`
+- [x] Validación de todos los inputs de entrada con `zod` (ya debería estar, revisión final)
+- [x] SQL injection: verificar que Prisma usa queries parametrizadas en todos los casos (sí lo hace, pero verificar raw queries)
+- [x] CORS configurado correctamente para producción
+- [x] Secrets: verificar que ningún secret aparece en logs (revisar toda la codebase)
+- [x] Test de sesiones: revocar refresh token, verificar que no se puede usar
 
 #### Observabilidad final
 
