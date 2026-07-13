@@ -15,6 +15,8 @@
     "@bcp/contracts": "workspace:*",
     "@bcp/domain": "workspace:*",
     "@bcp/infrastructure": "workspace:*",
+    "@bcp/provider-evolution": "workspace:*",
+    "@bcp/provider-meta": "workspace:*",
     "@prisma/client": "^6.19.3",
     "awilix": "^12.0.4",
     "bullmq": "^5.34.6",

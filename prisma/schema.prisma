@@ -83,3 +83,190 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+model Contact {
+  id               String    @id
+  workspaceId      String
+  firstName        String
+  lastName         String?
+  company          String?
+  externalId       String?
+  notes            String?
+  status           String
+  acceptsCampaigns String
+  consentSource    String?
+  consentDate      DateTime?
+  optedOutAt       DateTime?
+  preferredChannel String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  channels ContactChannel[]
+  tags     ContactTag[]
+  groups   ContactGroupMembership[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, externalId])
+  @@map("contacts")
+}
+
+model ContactChannel {
+  id          String   @id
+  contactId   String
+  workspaceId String
+  type        String
+  value       String
+  verified    Boolean  @default(false)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, type, value])
+  @@map("contact_channels")
+}
+
+model ContactTag {
+  contactId   String
+  workspaceId String
+  tag         String
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, tag])
+  @@map("contact_tags")
+}
+
+model Group {
+  id          String   @id
+  workspaceId String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members ContactGroupMembership[]
+
+  @@map("groups")
+}
+
+// ponytail: llamado ContactGroupMembership en Prisma (tabla contact_groups) para no
+// pisar el aggregate de dominio ContactGroup, que representa otro concepto.
+model ContactGroupMembership {
+  contactId   String
+  groupId     String
+  workspaceId String
+  addedAt     DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, groupId])
+  @@map("contact_groups")
+}
+
+model Template {
+  id            String   @id
+  workspaceId   String
+  name          String
+  description   String?
+  channel       String
+  activeVersion Int
+  status        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  versions TemplateVersion[]
+
+  @@map("templates")
+}
+
+model TemplateVersion {
+  id          String   @id
+  templateId  String
+  workspaceId String
+  version     Int
+  body        String
+  variables   Json
+  createdAt   DateTime @default(now())
+  createdBy   String?
+
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, version])
+  @@map("template_versions")
+}
+
+model Campaign {
+  id                 String    @id
+  workspaceId        String
+  name               String
+  slug               String
+  status             String
+  channel            String
+  templateId         String
+  audienceType       String
+  audienceGroupIds   Json
+  audienceContactIds Json
+  scheduledAt        DateTime?
+  timezone           String?
+  sendNow            Boolean   @default(false)
+  maxRetries         Int
+  retryDelays        Json
+  statistics         Json
+  timeline           Json
+  startedAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  createdBy          String?
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, scheduledAt])
+  @@index([workspaceId, createdAt])
+  @@map("campaigns")
+}
+
+// ponytail: el spec pide particionado mensual nativo de Postgres sobre createdAt —
+// fuera de alcance de Prisma/migración, se agrega con una migración manual si el volumen lo justifica.
+model Delivery {
+  id                String    @id
+  campaignId        String
+  workspaceId       String
+  contactId         String
+  channel           String
+  address           String
+  messageSnapshot   String
+  status            String
+  providerMessageId String?
+  attempts          Json
+  timeline          Json
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([workspaceId, campaignId])
+  @@index([workspaceId, status])
+  @@index([providerMessageId])
+  @@index([contactId])
+  @@index([createdAt])
+  @@map("deliveries")
+}
+
+model ChannelConnection {
+  id                   String    @id
+  workspaceId          String
+  channel              String
+  providerId           String
+  status               String
+  priority             Int
+  enabled              Boolean   @default(true)
+  credentialsEncrypted String
+  capabilities         Json?
+  lastHealthCheck      DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([workspaceId, channel])
+  @@map("channel_connections")
+}

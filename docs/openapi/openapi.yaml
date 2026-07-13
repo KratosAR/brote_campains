@@ -41,3 +41,887 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /workspaces/{id}/contacts:
+    post:
+      summary: Crear contacto
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactRequest'
+      responses:
+        '201':
+          description: Contacto creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      contactId: { type: string }
+        '400':
+          description: Error de validación (ej. sin channels)
+    get:
+      summary: Buscar contactos
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: q, in: query, schema: { type: string } }
+        - { name: tags, in: query, schema: { type: string } }
+        - { name: groupId, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: acceptsCampaigns, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        '200':
+          description: Página de contactos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchContactsResponse'
+
+  /workspaces/{id}/contacts/{contactId}:
+    get:
+      summary: Obtener contacto
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: contactId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Contacto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ContactResponse' }
+        '404':
+          description: Contacto no encontrado
+    patch:
+      summary: Actualizar contacto
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: contactId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContactRequest'
+      responses:
+        '200':
+          description: Contacto actualizado
+    delete:
+      summary: Archivar contacto (no borra)
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: contactId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Contacto archivado
+
+  /workspaces/{id}/contacts/{contactId}/opt-out:
+    post:
+      summary: Opt-out de un contacto
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: contactId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Contacto marcado como opt-out
+
+  /workspaces/{id}/contacts/import:
+    post:
+      summary: Importar contactos en batch (job asíncrono)
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileKey, columnMapping]
+              properties:
+                fileKey: { type: string }
+                columnMapping: { type: object, additionalProperties: { type: string } }
+                options:
+                  type: object
+                  properties:
+                    hasHeader: { type: boolean }
+      responses:
+        '202':
+          description: Job de importación encolado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      jobId: { type: string }
+
+  /workspaces/{id}/contacts/import/{jobId}:
+    get:
+      summary: Estado de un job de importación
+      tags: [Contacts]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: jobId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Progreso del job
+        '404':
+          description: Job no encontrado (o expirado)
+
+  /workspaces/{id}/groups:
+    post:
+      summary: Crear grupo
+      tags: [Groups]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Grupo creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      groupId: { type: string }
+    get:
+      summary: Listar grupos del workspace
+      tags: [Groups]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: Lista de grupos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/GroupResponse' }
+
+  /workspaces/{id}/groups/{groupId}/contacts/{contactId}:
+    post:
+      summary: Agregar contacto a un grupo
+      tags: [Groups]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: groupId, in: path, required: true, schema: { type: string } }
+        - { name: contactId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Contacto agregado al grupo
+
+  /workspaces/{id}/templates:
+    post:
+      summary: Crear template
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateRequest'
+      responses:
+        '201':
+          description: Template creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      templateId: { type: string }
+        '400':
+          description: Error de validación (ej. body con llaves desbalanceadas)
+    get:
+      summary: Listar templates
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: channel, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        '200':
+          description: Página de templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTemplatesResponse'
+
+  /workspaces/{id}/templates/{templateId}:
+    get:
+      summary: Obtener template
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: templateId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Template
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/TemplateResponse' }
+        '404':
+          description: Template no encontrado
+    delete:
+      summary: Archivar template (no borra)
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: templateId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Template archivado
+        '409':
+          description: Template ya estaba archivado
+
+  /workspaces/{id}/templates/{templateId}/versions:
+    post:
+      summary: Crear nueva versión del template (la versión activa no cambia)
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: templateId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVersionRequest'
+      responses:
+        '201':
+          description: Versión creada
+
+  /workspaces/{id}/templates/{templateId}/preview:
+    post:
+      summary: Previsualizar el render de una versión del template
+      tags: [Templates]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: templateId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewTemplateRequest'
+      responses:
+        '200':
+          description: Contenido renderizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      rendered: { type: string }
+        '400':
+          description: Faltan variables requeridas
+        '404':
+          description: Template o versión no encontrada
+
+  /workspaces/{id}/campaigns:
+    post:
+      summary: Crear campaña (nace en Draft)
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCampaignRequest'
+      responses:
+        '201':
+          description: Campaña creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      campaignId: { type: string }
+        '400':
+          description: Error de validación
+    get:
+      summary: Listar campañas
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        '200':
+          description: Página de campañas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCampaignsResponse'
+
+  /workspaces/{id}/campaigns/{campaignId}:
+    get:
+      summary: Obtener campaña
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Campaña
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/CampaignResponse' }
+        '404':
+          description: Campaña no encontrada
+
+  /workspaces/{id}/campaigns/{campaignId}/timeline:
+    get:
+      summary: Obtener línea de tiempo de eventos de la campaña
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Timeline de la campaña
+        '404':
+          description: Campaña no encontrada
+
+  /workspaces/{id}/campaigns/{campaignId}/schedule:
+    patch:
+      summary: Programar una campaña en Draft
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleCampaignRequest'
+      responses:
+        '200':
+          description: Campaña programada
+        '409':
+          description: La campaña no está en un estado que permita programarla
+
+  /workspaces/{id}/campaigns/{campaignId}/pause:
+    post:
+      summary: Pausar una campaña en Running
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Campaña pausada
+        '409':
+          description: La campaña no está en Running
+
+  /workspaces/{id}/campaigns/{campaignId}/resume:
+    post:
+      summary: Reanudar una campaña pausada
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Campaña reanudada
+        '409':
+          description: La campaña no está en Paused
+
+  /workspaces/{id}/campaigns/{campaignId}/cancel:
+    post:
+      summary: Cancelar una campaña
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+      responses:
+        '200':
+          description: Campaña cancelada
+        '409':
+          description: La campaña no está en un estado cancelable
+
+  /workspaces/{id}/campaigns/{campaignId}/archive:
+    post:
+      summary: Archivar una campaña
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Campaña archivada
+        '409':
+          description: La campaña no está en un estado archivable
+
+  /workspaces/{id}/campaigns/{campaignId}/duplicate:
+    post:
+      summary: Duplicar una campaña como nuevo Draft
+      tags: [Campaigns]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201':
+          description: Campaña duplicada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      campaignId: { type: string }
+        '404':
+          description: Campaña original no encontrada
+
+  /workspaces/{id}/channels/connect:
+    post:
+      summary: Conectar un proveedor de mensajería a un canal del workspace
+      tags: [Channels]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectChannelRequest'
+      responses:
+        '201':
+          description: Conexión creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/ChannelConnectionResponse' }
+        '400':
+          description: Credenciales inválidas o error de validación
+        '409':
+          description: Ya existe una conexión primaria activa para el canal (BR-002)
+
+  /workspaces/{id}/channels:
+    get:
+      summary: Listar conexiones de canal del workspace
+      tags: [Channels]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: Lista de conexiones
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ChannelConnectionResponse' }
+
+  /workspaces/{id}/channels/{channel}/status:
+    get:
+      summary: Ver el estado de las conexiones de un canal
+      tags: [Channels]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: channel, in: path, required: true, schema: { type: string, enum: [WhatsApp, Email, SMS, Telegram] } }
+      responses:
+        '200':
+          description: Conexiones del canal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ChannelConnectionResponse' }
+
+  /workspaces/{id}/channels/{connectionId}/disconnect:
+    post:
+      summary: Desconectar una conexión de canal
+      tags: [Channels]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: connectionId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Conexión desconectada
+        '404':
+          description: Conexión no encontrada
+
+  /workspaces/{id}/channels/{connectionId}/health-check:
+    post:
+      summary: Ejecutar un health check sobre el proveedor de una conexión
+      tags: [Channels]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - { name: connectionId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Resultado del health check
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      status: { type: string, enum: [online, degraded, offline] }
+                      latencyMs: { type: number }
+                      details: { type: string }
+        '404':
+          description: Conexión no encontrada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    workspaceId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  schemas:
+    ContactChannel:
+      type: object
+      required: [type, value]
+      properties:
+        type: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        value: { type: string }
+        verified: { type: boolean }
+        isPrimary: { type: boolean }
+    CreateContactRequest:
+      type: object
+      required: [identity, channels]
+      properties:
+        identity:
+          type: object
+          required: [firstName]
+          properties:
+            firstName: { type: string }
+            lastName: { type: string }
+            company: { type: string }
+            externalId: { type: string }
+            notes: { type: string }
+        channels:
+          type: array
+          items: { $ref: '#/components/schemas/ContactChannel' }
+        tags:
+          type: array
+          items: { type: string }
+        groupIds:
+          type: array
+          items: { type: string }
+    UpdateContactRequest:
+      type: object
+      properties:
+        identity:
+          $ref: '#/components/schemas/CreateContactRequest/properties/identity'
+        channels:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ContactChannel'
+              - type: object
+                properties:
+                  remove: { type: boolean }
+        tags:
+          type: array
+          items: { type: string }
+    ContactResponse:
+      type: object
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        identity: { type: object }
+        channels:
+          type: array
+          items: { $ref: '#/components/schemas/ContactChannel' }
+        tags:
+          type: array
+          items: { type: string }
+        status: { type: string, enum: [Active, Archived, Deleted] }
+        optedOut: { type: boolean }
+    SearchContactsResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ContactResponse' }
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+    CreateGroupRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+    CreateTemplateRequest:
+      type: object
+      required: [name, channel, body]
+      properties:
+        name: { type: string }
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        body: { type: string, description: 'Soporta variables {{name}}' }
+        createdBy: { type: string }
+        description: { type: string }
+    CreateVersionRequest:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string }
+        createdBy: { type: string }
+    PreviewTemplateRequest:
+      type: object
+      required: [sampleValues]
+      properties:
+        version: { type: integer, description: 'Si se omite, usa la versión activa' }
+        sampleValues:
+          type: object
+          additionalProperties: { type: string }
+    TemplateVersionResponse:
+      type: object
+      properties:
+        version: { type: integer }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        createdBy: { type: string }
+    TemplateResponse:
+      type: object
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        name: { type: string }
+        description: { type: string }
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        status: { type: string, enum: [Active, Archived] }
+        activeVersion: { type: integer }
+        versions:
+          type: array
+          items: { $ref: '#/components/schemas/TemplateVersionResponse' }
+    ListTemplatesResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/TemplateResponse' }
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+    GroupResponse:
+      type: object
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        name: { type: string }
+        description: { type: string }
+        contactCount: { type: integer }
+    CreateCampaignRequest:
+      type: object
+      required: [name, channel, audienceType, templateId]
+      properties:
+        name: { type: string }
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        audienceType: { type: string, enum: [all, group, segment, manual] }
+        audienceGroupIds:
+          type: array
+          items: { type: string }
+        audienceContactIds:
+          type: array
+          items: { type: string }
+        templateId: { type: string }
+        scheduledAt: { type: string, format: date-time }
+        timezone: { type: string }
+        sendNow: { type: boolean }
+        deliveryPolicy:
+          type: object
+          properties:
+            maxRetries: { type: integer }
+            retryDelays: { type: array, items: { type: integer } }
+    ScheduleCampaignRequest:
+      type: object
+      required: [scheduledAt, timezone]
+      properties:
+        scheduledAt: { type: string, format: date-time }
+        timezone: { type: string }
+    ReasonRequest:
+      type: object
+      properties:
+        reason: { type: string }
+    CampaignResponse:
+      type: object
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        name: { type: string }
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        status: { type: string, enum: [Draft, Scheduled, Running, Paused, Completed, Cancelled, Archived] }
+        templateId: { type: string }
+        audience:
+          type: object
+          properties:
+            type: { type: string, enum: [all, group, segment, manual] }
+            groupIds: { type: array, items: { type: string } }
+            contactIds: { type: array, items: { type: string } }
+        schedule:
+          type: object
+          properties:
+            sendAt: { type: string, format: date-time }
+            timezone: { type: string }
+    ListCampaignsResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/CampaignResponse' }
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+    ConnectChannelRequest:
+      type: object
+      required: [channel, providerId, credentials]
+      properties:
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        providerId: { type: string, description: 'ej. meta, evolution' }
+        credentials: { type: object, additionalProperties: true }
+        priority: { type: integer, minimum: 1 }
+    ChannelConnectionResponse:
+      type: object
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        channel: { type: string, enum: [WhatsApp, Email, SMS, Telegram] }
+        providerId: { type: string }
+        status: { type: string, enum: [Pending, Connected, Disconnected, Error] }
+        priority: { type: integer }
+        enabled: { type: boolean }
+        capabilities: { type: object, additionalProperties: true }
+        lastHealthCheck: { type: string, format: date-time }
