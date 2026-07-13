@@ -2,6 +2,9 @@
   "name": "@bcp/cli",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "bcp": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
