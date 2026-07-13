@@ -1,0 +1,164 @@
+apiVersion: 1
+groups:
+  - name: BCP Alerting Rules
+    interval: 1m
+    rules:
+      # Critical: Queue size exceeds 10,000 jobs
+      - uid: queue_size_critical
+        title: Queue size exceeds 10,000 jobs
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            model:
+              expr: bullmq_queue_size{workspace_id!=""}
+              interval: ''
+              refId: A
+          - refId: B
+            queryType: instant
+            model:
+              expr: '10000'
+              interval: ''
+              refId: B
+          - refId: C
+            queryType: instant
+            model:
+              conditions:
+                - evaluator:
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                      - B
+                  reducer:
+                    type: last
+                  type: query
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: Queue size {{ $value }} exceeds threshold (10,000 jobs)
+          description: The job queue has {{ $value }} pending jobs. Check worker pod status and scaling.
+
+      # Critical: Provider offline > 5 minutes
+      - uid: provider_offline_critical
+        title: Provider offline for more than 5 minutes
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            model:
+              expr: 'time() - provider_last_health_check_timestamp{status="offline"} > 300'
+              interval: ''
+              refId: A
+          - refId: B
+            queryType: instant
+            model:
+              expr: '1'
+              interval: ''
+              refId: B
+          - refId: C
+            queryType: instant
+            model:
+              conditions:
+                - evaluator:
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                      - B
+                  reducer:
+                    type: count
+                  type: query
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: Provider {{ $labels.provider }} is offline for more than 5 minutes
+          description: Provider has been unreachable since {{ $labels.last_health_check }}. Check provider status and credentials.
+
+      # High: Error rate > 5% in last 10 minutes
+      - uid: error_rate_high
+        title: Error rate exceeds 5% (10 min window)
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            model:
+              expr: 'rate(http_requests_total{status=~"5.."}[10m]) / rate(http_requests_total[10m])'
+              interval: ''
+              refId: A
+          - refId: B
+            queryType: instant
+            model:
+              expr: '0.05'
+              interval: ''
+              refId: B
+          - refId: C
+            queryType: instant
+            model:
+              conditions:
+                - evaluator:
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                      - B
+                  reducer:
+                    type: mean
+                  type: query
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: Error rate {{ printf "%.2f" $value }}% exceeds threshold (5%)
+          description: API error rate is elevated. Check recent logs and deployment status.
+
+      # High: Delivery failed rate > 10%
+      - uid: delivery_failed_rate_high
+        title: Delivery failed rate exceeds 10%
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            model:
+              expr: 'sum(rate(deliveries_total{status="failed"}[10m])) / sum(rate(deliveries_total[10m]))'
+              interval: ''
+              refId: A
+          - refId: B
+            queryType: instant
+            model:
+              expr: '0.10'
+              interval: ''
+              refId: B
+          - refId: C
+            queryType: instant
+            model:
+              conditions:
+                - evaluator:
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                      - B
+                  reducer:
+                    type: mean
+                  type: query
+              type: threshold
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          summary: Delivery failed rate {{ printf "%.2f" $value }}% exceeds threshold (10%)
+          description: High message delivery failure rate detected. Check provider connectivity and contact list quality.
