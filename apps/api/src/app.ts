@@ -16,6 +16,7 @@ import { createContactsRouter } from './routes/contacts'
 import { createTemplatesRouter } from './routes/templates'
 import { createCampaignsRouter } from './routes/campaigns'
 import { createChannelsRouter } from './routes/channels'
+import { createAnalyticsRouter } from './routes/analytics'
 import { Cradle } from './container'
 
 export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string): Express {
@@ -37,6 +38,7 @@ export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string)
   app.use(createTemplatesRouter(container, jwtSecret))
   app.use(createCampaignsRouter(container, jwtSecret))
   app.use(createChannelsRouter(container, jwtSecret))
+  app.use(createAnalyticsRouter(container))
 
   if (process.env.NODE_ENV !== 'production') {
     setupSwagger(app)

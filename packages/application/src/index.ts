@@ -130,3 +130,6 @@ export { generate as generateDeliveries } from './delivery/DeliveryGenerator'
 
 export { plan as planBatches } from './delivery/BatchPlanner'
 export type { DeliveryBatch } from './delivery/BatchPlanner'
+
+export { GetDashboardQuery, GetCampaignStatsQuery, CompareCampaignsQuery, GetTopCampaignsQuery, GetDeliveryBreakdownQuery } from './analytics'
+export type { DashboardStats, CampaignStats, ComparableCampaign, TopCampaign, DeliveryBreakdown } from './analytics'
