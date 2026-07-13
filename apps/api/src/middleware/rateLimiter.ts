@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 
 export const globalRateLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -27,10 +27,14 @@ export const apiRateLimiter = rateLimit({
   message: { success: false, error: 'Workspace rate limit exceeded' },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    // Rate limit by workspace ID if available, otherwise by IP
+  keyGenerator: (req, res) => {
+    // Rate limit by workspace ID if available, otherwise by IP (with IPv6 support)
     const workspaceId = Array.isArray(req.params.workspaceId) ? req.params.workspaceId[0] : req.params.workspaceId
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-    return (workspaceId || id || req.ip || 'unknown') as string
+    if (workspaceId || id) {
+      return (workspaceId || id) as string
+    }
+    // Use the ipKeyGenerator helper for IPv6-safe IP-based rate limiting
+    return ipKeyGenerator(req, res)
   },
 })

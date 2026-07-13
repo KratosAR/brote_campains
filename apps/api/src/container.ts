@@ -19,6 +19,7 @@ import {
   ITemplateRepository,
   ICampaignRepository,
   IChannelConnectionRepository,
+  IDeliveryRepository,
 } from '@bcp/contracts'
 import {
   PinoLogger,
@@ -33,6 +34,7 @@ import {
   PrismaTemplateRepository,
   PrismaCampaignRepository,
   PrismaChannelConnectionRepository,
+  PrismaDeliveryRepository,
   CredentialEncryption,
   ProviderRegistry,
   ProviderOrchestrator,
@@ -62,6 +64,7 @@ export interface Cradle {
   groupRepository: IGroupRepository
   templateRepository: ITemplateRepository
   campaignRepository: ICampaignRepository
+  deliveryRepository: IDeliveryRepository
   channelConnectionRepository: IChannelConnectionRepository
   credentialEncryption: CredentialEncryption
   providerRegistry: ProviderRegistry
@@ -113,6 +116,7 @@ export function createDiContainer(env: Env): AwilixContainer<Cradle> {
     groupRepository: asValue(new PrismaGroupRepository(prisma)),
     templateRepository: asValue(new PrismaTemplateRepository(prisma)),
     campaignRepository: asValue(new PrismaCampaignRepository(prisma)),
+    deliveryRepository: asValue(new PrismaDeliveryRepository(prisma)),
     channelConnectionRepository: asValue(channelConnectionRepository),
     credentialEncryption: asValue(credentialEncryption),
     providerRegistry: asValue(providerRegistry),
