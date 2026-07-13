@@ -56,5 +56,5 @@ pnpm db:generate    # Generar cliente de Prisma
 | Sprint 8 | Analytics | ✅ Completo |
 | Sprint 9.1 | Hardening (Security) | ✅ Completo |
 | Sprint 9.2 | Performance (Caching & Pagination) | ✅ Completo |
-| Sprint 9.3 | Observability (Monitoring & Tracing) | 🔄 Próximo |
-| Sprint 9.4 | CLI + E2E Tests | 🔄 Próximo |
+| Sprint 9.3 | Observability (Monitoring & Tracing) | ✅ Completo |
+| Sprint 9.4 | CLI + E2E Tests | ✅ Completo |

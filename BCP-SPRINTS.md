@@ -977,32 +977,32 @@ Las queries de analytics no deben impactar las tablas transaccionales. Estrategi
 
 #### Observabilidad final
 
-- [ ] Alertas en Grafana:
+- [x] Alertas en Grafana:
   - Queue size > 10.000 jobs → alerta crítica
   - Provider offline > 5 minutos → alerta crítica
   - Error rate > 5% en últimos 10 minutos → alerta alta
   - Delivery failed rate > 10% → alerta alta
-- [ ] Logs de auditoría para todas las acciones del catálogo (Sprint 2 sentó la base — completar lo que falta)
-- [ ] Tracing con OpenTelemetry: cada request tiene trace que atraviesa API → Worker → Provider
+- [x] Logs de auditoría para todas las acciones del catálogo (Sprint 2 sentó la base — completar lo que falta)
+- [x] Tracing con OpenTelemetry: cada request tiene trace que atraviesa API → Worker → Provider
 
 #### Backups y operaciones
 
 - [ ] Script de backup de PostgreSQL a S3 (o local en dev)
 - [ ] Script de restauración probado
-- [ ] `apps/cli` con comandos: `bcp workspace:list`, `bcp campaign:status <id>`, `bcp delivery:retry <campaignId>`, `bcp db:migrate`, `bcp db:seed` (datos de demostración)
-- [ ] Documentación de operaciones: cómo levantar, cómo escalar Workers, cómo agregar un Provider
+- [x] `apps/cli` con comandos: `bcp workspace:list`, `bcp campaign:status <id>`, `bcp delivery:retry <campaignId>`, `bcp db:migrate`, `bcp db:seed` (datos de demostración)
+- [x] Documentación de operaciones: cómo levantar, cómo escalar Workers, cómo agregar un Provider
 
 #### Documentación final
 
-- [ ] `README.md` en raíz: qué es BCP, cómo levantar el proyecto, cómo correr tests
-- [ ] `docs/OPERATIONS.md`: guía de operaciones para el comprador (levantar, escalar, monitorear)
+- [x] `README.md` en raíz: qué es BCP, cómo levantar el proyecto, cómo correr tests
+- [x] `docs/OPERATIONS.md`: guía de operaciones para el comprador (levantar, escalar, monitorear)
 - [ ] `docs/PROVIDERS.md`: cómo agregar un nuevo Provider (paso a paso con código de ejemplo)
-- [ ] `docs/openapi/openapi.yaml`: completo y actualizado
+- [x] `docs/openapi/openapi.yaml`: completo y actualizado
 - [ ] Cada Provider tiene su propio `README.md` con: qué necesita, cómo configurar, limitaciones conocidas
 
 #### Tests E2E finales
 
-- [ ] Flujo completo: `register → login → connect provider → import contacts → create campaign → send campaign → verify deliveries`
+- [x] Flujo completo: `register → login → connect provider → import contacts → create campaign → send campaign → verify deliveries`
 - [ ] Flujo de error: Provider caído → retry → recovery
 - [ ] Flujo de opt-out: marcar contacto → lanzar campaña → verificar que no recibió mensaje
 
