@@ -5,7 +5,10 @@ import type {
   ContactSearchFilters,
   Pagination,
   Page,
+  CursorPaginationInput,
+  CursorPaginationResult,
 } from '@bcp/contracts'
+import { CursorEncoder } from '@bcp/contracts'
 
 import { ContactMapper } from './ContactMapper'
 
@@ -91,6 +94,52 @@ export class PrismaContactRepository implements IContactRepository {
     pagination: Pagination,
   ): Promise<Page<Contact>> {
     return this.search(workspaceId, { groupId }, pagination)
+  }
+
+  async searchCursor(
+    workspaceId: string,
+    filters: ContactSearchFilters,
+    pagination: CursorPaginationInput,
+  ): Promise<CursorPaginationResult<Contact>> {
+    const where: Prisma.ContactWhereInput = { workspaceId }
+
+    if (filters.q) {
+      where.OR = [
+        { firstName: { contains: filters.q, mode: 'insensitive' } },
+        { lastName: { contains: filters.q, mode: 'insensitive' } },
+        { company: { contains: filters.q, mode: 'insensitive' } },
+      ]
+    }
+    if (filters.status) where.status = filters.status
+    if (filters.acceptsCampaigns) where.acceptsCampaigns = filters.acceptsCampaigns
+    if (filters.tags && filters.tags.length > 0) {
+      where.tags = { some: { tag: { in: filters.tags } } }
+    }
+    if (filters.groupId) {
+      where.groups = { some: { groupId: filters.groupId } }
+    }
+
+    const cursor = pagination.cursor ? CursorEncoder.decode(pagination.cursor) : undefined
+
+    const records = await this.prisma.contact.findMany({
+      where,
+      include,
+      take: pagination.limit + 1,
+      cursor: cursor ? { id: cursor.id } : undefined,
+      skip: cursor ? 1 : 0,
+      orderBy: { id: 'asc' },
+    })
+
+    const hasMore = records.length > pagination.limit
+    const items = hasMore ? records.slice(0, -1) : records
+    const nextCursor = hasMore ? CursorEncoder.encode(items[items.length - 1]!.id, new Date()) : undefined
+
+    return {
+      items: items.map((r) => ContactMapper.toDomain(r)),
+      nextCursor,
+      hasMore,
+      limit: pagination.limit,
+    }
   }
 
   async countByWorkspace(workspaceId: string): Promise<number> {

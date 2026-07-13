@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { Result, Delivery, DeliveryId, DeliveryStatus, NotFoundError } from '@bcp/domain'
-import type { IDeliveryRepository, Pagination, Page } from '@bcp/contracts'
+import type { IDeliveryRepository, Pagination, Page, CursorPaginationInput, CursorPaginationResult } from '@bcp/contracts'
+import { CursorEncoder } from '@bcp/contracts'
 
 import { DeliveryMapper } from './DeliveryMapper'
 
@@ -36,6 +37,35 @@ export class PrismaDeliveryRepository implements IDeliveryRepository {
       items: records.map((r) => DeliveryMapper.toDomain(r)),
       total,
       page: pagination.page,
+      limit: pagination.limit,
+    }
+  }
+
+  async findByCampaignCursor(
+    campaignId: string,
+    workspaceId: string,
+    status: DeliveryStatus | undefined,
+    pagination: CursorPaginationInput,
+  ): Promise<CursorPaginationResult<Delivery>> {
+    const where = { campaignId, workspaceId, ...(status ? { status } : {}) }
+    const cursor = pagination.cursor ? CursorEncoder.decode(pagination.cursor) : undefined
+
+    const records = await this.prisma.delivery.findMany({
+      where,
+      take: pagination.limit + 1,
+      cursor: cursor ? { id: cursor.id } : undefined,
+      skip: cursor ? 1 : 0,
+      orderBy: { id: 'asc' },
+    })
+
+    const hasMore = records.length > pagination.limit
+    const items = hasMore ? records.slice(0, -1) : records
+    const nextCursor = hasMore ? CursorEncoder.encode(items[items.length - 1]!.id, new Date()) : undefined
+
+    return {
+      items: items.map((r) => DeliveryMapper.toDomain(r)),
+      nextCursor,
+      hasMore,
       limit: pagination.limit,
     }
   }

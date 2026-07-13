@@ -31,3 +31,5 @@ export type {
 } from './MessagingProvider'
 export { ProviderError } from './MessagingProvider'
 export { providerHealthStatus, providerLatencyMs, messagesSentTotal } from './metrics/ProviderMetrics'
+export type { CursorPaginationInput, CursorPaginationResult } from './CursorPagination'
+export { CursorEncoder } from './CursorPagination'
