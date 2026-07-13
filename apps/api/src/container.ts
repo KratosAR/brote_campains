@@ -74,7 +74,12 @@ export interface Cradle {
 export function createDiContainer(env: Env): AwilixContainer<Cradle> {
   const container = createContainer<Cradle>({ injectionMode: InjectionMode.PROXY })
 
-  const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null })
+  const redis = new Redis(env.REDIS_URL, {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    enableOfflineQueue: true,
+    lazyConnect: false,
+  })
   const bullQueue = new Queue('default', { connection: redis })
   const prisma = new PrismaClient({ datasourceUrl: env.DATABASE_URL })
 

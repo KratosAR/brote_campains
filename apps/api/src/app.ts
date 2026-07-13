@@ -5,6 +5,7 @@ import compression from 'compression'
 import path from 'path'
 import { AwilixContainer } from 'awilix'
 
+import { timeoutMiddleware } from './middleware/timeout'
 import { correlationIdMiddleware } from './middleware/correlationId'
 import { requestLoggerMiddleware } from './middleware/requestLogger'
 import { globalRateLimiter, authRateLimiter } from './middleware/rateLimiter'
@@ -23,6 +24,7 @@ import { Cradle } from './container'
 export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string): Express {
   const app = express()
 
+  app.use(timeoutMiddleware)
   app.use(helmet())
   app.use(cors())
   app.use(compression())
