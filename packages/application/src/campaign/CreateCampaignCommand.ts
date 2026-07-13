@@ -8,7 +8,7 @@ import {
   Result,
   DomainError,
 } from '@bcp/domain'
-import { ICampaignRepository } from '@bcp/contracts'
+import { ICampaignRepository, IEventBus } from '@bcp/contracts'
 
 export interface CreateCampaignInput {
   workspaceId: string
@@ -31,7 +31,7 @@ export interface CreateCampaignOutput {
 }
 
 export class CreateCampaignCommand {
-  constructor(private readonly campaignRepository: ICampaignRepository) {}
+  constructor(private readonly campaignRepository: ICampaignRepository, private readonly eventBus?: IEventBus) {}
 
   async execute(input: CreateCampaignInput): Promise<Result<CreateCampaignOutput, DomainError>> {
     const audienceResult = CampaignAudience.create({
@@ -66,8 +66,19 @@ export class CreateCampaignCommand {
     if (campaignResult.isFail()) return Result.fail(campaignResult.getError())
     const campaign = campaignResult.getValue()
 
+    // ponytail: If sendNow is true, immediately start the campaign
+    if (input.sendNow) {
+      const startResult = campaign.start()
+      if (startResult.isFail()) return Result.fail(startResult.getError())
+    }
+
     const saveResult = await this.campaignRepository.save(campaign)
     if (saveResult.isFail()) return Result.fail(saveResult.getError())
+
+    // Publish domain events so worker picks up CampaignStarted
+    if (this.eventBus) {
+      await this.eventBus.publish(campaign.clearDomainEvents())
+    }
 
     return Result.ok({ campaignId: campaign.campaignId.toString() })
   }

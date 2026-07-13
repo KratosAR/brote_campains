@@ -74,7 +74,10 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
 
-    const command = new CreateCampaignCommand(container.resolve('campaignRepository'))
+    const command = new CreateCampaignCommand(
+      container.resolve('campaignRepository'),
+      container.resolve('eventBus'),
+    )
     const result = await command.execute({
       workspaceId: String(req.params.id),
       name: parsed.data.name,
