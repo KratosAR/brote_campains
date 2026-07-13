@@ -52,6 +52,6 @@ pnpm db:generate    # Generar cliente de Prisma
 | Sprint 4 | Templates | ✅ Completo |
 | Sprint 5 | Campañas | ✅ Completo |
 | Sprint 6 | Execution Engine | ✅ Completo |
-| Sprint 7 | Communication Layer | ⏳ Pendiente |
-| Sprint 8 | Analytics | ⏳ Pendiente |
-| Sprint 9 | Hardening | ⏳ Pendiente |
+| Sprint 7 | Communication Layer | ✅ Completo |
+| Sprint 8 | Analytics | ✅ Completo |
+| Sprint 9 | Hardening | 🔄 En progreso |
