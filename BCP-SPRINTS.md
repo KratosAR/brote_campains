@@ -987,8 +987,8 @@ Las queries de analytics no deben impactar las tablas transaccionales. Estrategi
 
 #### Backups y operaciones
 
-- [ ] Script de backup de PostgreSQL a S3 (o local en dev)
-- [ ] Script de restauración probado
+- [x] Script de backup de PostgreSQL a S3 (o local en dev)
+- [x] Script de restauración probado
 - [x] `apps/cli` con comandos: `bcp workspace:list`, `bcp campaign:status <id>`, `bcp delivery:retry <campaignId>`, `bcp db:migrate`, `bcp db:seed` (datos de demostración)
 - [x] Documentación de operaciones: cómo levantar, cómo escalar Workers, cómo agregar un Provider
 
@@ -996,15 +996,15 @@ Las queries de analytics no deben impactar las tablas transaccionales. Estrategi
 
 - [x] `README.md` en raíz: qué es BCP, cómo levantar el proyecto, cómo correr tests
 - [x] `docs/OPERATIONS.md`: guía de operaciones para el comprador (levantar, escalar, monitorear)
-- [ ] `docs/PROVIDERS.md`: cómo agregar un nuevo Provider (paso a paso con código de ejemplo)
+- [x] `docs/PROVIDERS.md`: cómo agregar un nuevo Provider (paso a paso con código de ejemplo)
 - [x] `docs/openapi/openapi.yaml`: completo y actualizado
 - [ ] Cada Provider tiene su propio `README.md` con: qué necesita, cómo configurar, limitaciones conocidas
 
 #### Tests E2E finales
 
 - [x] Flujo completo: `register → login → connect provider → import contacts → create campaign → send campaign → verify deliveries`
-- [ ] Flujo de error: Provider caído → retry → recovery
-- [ ] Flujo de opt-out: marcar contacto → lanzar campaña → verificar que no recibió mensaje
+- [x] Flujo de error: Provider caído → retry → recovery
+- [x] Flujo de opt-out: marcar contacto → lanzar campaña → verificar que no recibió mensaje
 
 ### Criterios de aceptación
 
