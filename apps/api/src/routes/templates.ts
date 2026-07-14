@@ -15,6 +15,7 @@ import { Template, ChannelType, DomainError } from '@bcp/domain'
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const createTemplateSchema = z.object({
@@ -58,7 +59,7 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
 
   router.use('/workspaces/:id', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/templates', async (req, res) => {
+  router.post('/workspaces/:id/templates', asyncHandler(async (req, res) => {
     const parsed = createTemplateSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -79,9 +80,9 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.get('/workspaces/:id/templates', async (req, res) => {
+  router.get('/workspaces/:id/templates', asyncHandler(async (req, res) => {
     const query = new ListTemplatesQuery(container.resolve('templateRepository'))
     const page = await query.execute({
       workspaceId: String(req.params.id),
@@ -95,9 +96,9 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       data: page.items.map(templateToJson),
       meta: { total: page.total, page: page.page, limit: page.limit },
     })
-  })
+  }))
 
-  router.get('/workspaces/:id/templates/:templateId', async (req, res) => {
+  router.get('/workspaces/:id/templates/:templateId', asyncHandler(async (req, res) => {
     const query = new GetTemplateQuery(container.resolve('templateRepository'))
     const result = await query.execute({
       templateId: String(req.params.templateId),
@@ -108,9 +109,9 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true, data: templateToJson(result.getValue()) })
-  })
+  }))
 
-  router.post('/workspaces/:id/templates/:templateId/versions', async (req, res) => {
+  router.post('/workspaces/:id/templates/:templateId/versions', asyncHandler(async (req, res) => {
     const parsed = createVersionSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -129,9 +130,9 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(201).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/templates/:templateId/preview', async (req, res) => {
+  router.post('/workspaces/:id/templates/:templateId/preview', asyncHandler(async (req, res) => {
     const parsed = previewTemplateSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -150,9 +151,9 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true, data: { rendered: result.getValue() } })
-  })
+  }))
 
-  router.delete('/workspaces/:id/templates/:templateId', async (req, res) => {
+  router.delete('/workspaces/:id/templates/:templateId', asyncHandler(async (req, res) => {
     const command = new ArchiveTemplateCommand(container.resolve('templateRepository'))
     const result = await command.execute({
       templateId: String(req.params.templateId),
@@ -163,7 +164,7 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
   return router
 }

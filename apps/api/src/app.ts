@@ -7,7 +7,7 @@ import { AwilixContainer } from 'awilix'
 
 import { correlationIdMiddleware } from './middleware/correlationId'
 import { requestLoggerMiddleware } from './middleware/requestLogger'
-import { globalRateLimiter, authRateLimiter } from './middleware/rateLimiter'
+import { globalRateLimiter } from './middleware/rateLimit'
 import { healthRouter } from './routes/health'
 import { metricsRouter } from './routes/metrics'
 import { createAuthRouter } from './routes/auth'
@@ -35,7 +35,6 @@ export function createApp(container: AwilixContainer<Cradle>, jwtSecret: string)
 
   app.use(healthRouter)
   app.use(metricsRouter)
-  app.use(authRateLimiter)
   app.use(createAuthRouter(container, jwtSecret))
   app.use(createWorkspacesRouter(container, jwtSecret))
   app.use(createInvitationsRouter(container, jwtSecret))

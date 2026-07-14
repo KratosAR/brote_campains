@@ -8,6 +8,7 @@ import { WorkspaceId, UserRole, DomainError } from '@bcp/domain'
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const inviteSchema = z.object({
@@ -24,7 +25,7 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
   // IDOR patch that used to live inline in GET /workspaces/:id).
   router.use('/workspaces/:id', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.get('/workspaces/:id', async (req, res) => {
+  router.get('/workspaces/:id', asyncHandler(async (req, res) => {
     const workspaceId = WorkspaceId.from(String(req.params.id))
     const result = await container.resolve('workspaceRepository').findById(workspaceId)
     if (result.isFail()) {
@@ -48,9 +49,9 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
         },
       },
     })
-  })
+  }))
 
-  router.post('/workspaces/:id/users/invite', async (req, res) => {
+  router.post('/workspaces/:id/users/invite', asyncHandler(async (req, res) => {
     const parsed = inviteSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -74,7 +75,7 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
   return router
 }

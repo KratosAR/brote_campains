@@ -8,6 +8,7 @@ import { ChannelConnection, ChannelType, DomainError, ValidationError } from '@b
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const connectSchema = z.object({
@@ -36,7 +37,7 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
 
   router.use('/workspaces/:id/channels', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/channels/connect', async (req, res) => {
+  router.post('/workspaces/:id/channels/connect', asyncHandler(async (req, res) => {
     const parsed = connectSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -57,14 +58,14 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(201).json({ success: true, data: channelConnectionToJson(result.getValue()) })
-  })
+  }))
 
-  router.get('/workspaces/:id/channels', async (req, res) => {
+  router.get('/workspaces/:id/channels', asyncHandler(async (req, res) => {
     const connections = await container.resolve('channelConnectionRepository').findByWorkspace(String(req.params.id))
     res.status(200).json({ success: true, data: connections.map(channelConnectionToJson) })
-  })
+  }))
 
-  router.get('/workspaces/:id/channels/:channel/status', async (req, res) => {
+  router.get('/workspaces/:id/channels/:channel/status', asyncHandler(async (req, res) => {
     const channelParsed = z.nativeEnum(ChannelType).safeParse(req.params.channel)
     if (!channelParsed.success) {
       sendDomainError(res, new ValidationError(`Unknown channel "${req.params.channel}"`, 'channel'))
@@ -74,9 +75,9 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
     const query = new GetChannelStatusQuery(container.resolve('channelConnectionRepository'))
     const connections = await query.execute({ workspaceId: String(req.params.id), channel: channelParsed.data })
     res.status(200).json({ success: true, data: connections.map(channelConnectionToJson) })
-  })
+  }))
 
-  router.post('/workspaces/:id/channels/:connectionId/disconnect', async (req, res) => {
+  router.post('/workspaces/:id/channels/:connectionId/disconnect', asyncHandler(async (req, res) => {
     const command = new DisconnectProviderCommand(container.resolve('channelConnectionRepository'))
     const result = await command.execute({
       connectionId: String(req.params.connectionId),
@@ -88,9 +89,9 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/channels/:connectionId/health-check', async (req, res) => {
+  router.post('/workspaces/:id/channels/:connectionId/health-check', asyncHandler(async (req, res) => {
     const command = new HealthCheckCommand(container.resolve('channelConnectionRepository'), container.resolve('providerRegistry'))
     const result = await command.execute({
       connectionId: String(req.params.connectionId),
@@ -101,7 +102,7 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true, data: result.getValue() })
-  })
+  }))
 
   return router
 }

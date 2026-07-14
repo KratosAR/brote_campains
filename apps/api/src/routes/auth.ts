@@ -7,6 +7,7 @@ import { DomainError } from '@bcp/domain'
 import { authenticate } from '../middleware/authenticate'
 import { authRateLimiter } from '../middleware/rateLimit'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 import { AwilixContainer } from 'awilix'
 
@@ -32,7 +33,7 @@ export function createAuthRouter(container: AwilixContainer<Cradle>, jwtSecret: 
 
   router.use('/auth', authRateLimiter)
 
-  router.post('/auth/register', async (req, res) => {
+  router.post('/auth/register', asyncHandler(async (req, res) => {
     const parsed = registerSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -53,9 +54,9 @@ export function createAuthRouter(container: AwilixContainer<Cradle>, jwtSecret: 
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.post('/auth/login', async (req, res) => {
+  router.post('/auth/login', asyncHandler(async (req, res) => {
     const parsed = loginSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: 'Invalid email or password' })
@@ -74,9 +75,9 @@ export function createAuthRouter(container: AwilixContainer<Cradle>, jwtSecret: 
       return
     }
     res.status(200).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.post('/auth/refresh', async (req, res) => {
+  router.post('/auth/refresh', asyncHandler(async (req, res) => {
     const parsed = refreshSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: 'refreshToken is required' })
@@ -94,9 +95,9 @@ export function createAuthRouter(container: AwilixContainer<Cradle>, jwtSecret: 
       return
     }
     res.status(200).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.post('/auth/logout', authenticate(jwtSecret), async (req, res) => {
+  router.post('/auth/logout', authenticate(jwtSecret), asyncHandler(async (req, res) => {
     const parsed = refreshSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: 'refreshToken is required' })
@@ -110,7 +111,7 @@ export function createAuthRouter(container: AwilixContainer<Cradle>, jwtSecret: 
       return
     }
     res.status(204).send()
-  })
+  }))
 
   return router
 }

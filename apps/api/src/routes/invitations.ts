@@ -7,6 +7,7 @@ import { DomainError } from '@bcp/domain'
 
 import { authRateLimiter } from '../middleware/rateLimit'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const acceptSchema = z.object({
@@ -17,7 +18,7 @@ const acceptSchema = z.object({
 export function createInvitationsRouter(container: AwilixContainer<Cradle>, jwtSecret: string): Router {
   const router = Router()
 
-  router.post('/invitations/:token/accept', authRateLimiter, async (req, res) => {
+  router.post('/invitations/:token/accept', authRateLimiter, asyncHandler(async (req, res) => {
     const parsed = acceptSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -42,7 +43,7 @@ export function createInvitationsRouter(container: AwilixContainer<Cradle>, jwtS
       return
     }
     res.status(200).json({ success: true, data: result.getValue() })
-  })
+  }))
 
   return router
 }

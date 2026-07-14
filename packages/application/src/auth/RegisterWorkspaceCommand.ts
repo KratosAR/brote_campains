@@ -77,8 +77,8 @@ export class RegisterWorkspaceCommand {
     })
     if (settingsResult.isFail()) return Result.fail(settingsResult.getError())
 
+    // Check for duplicate slug before creating workspace
     const userId = UserId.generate()
-
     const workspaceResult = Workspace.create(
       input.workspaceName,
       settingsResult.getValue(),
@@ -86,6 +86,11 @@ export class RegisterWorkspaceCommand {
     )
     if (workspaceResult.isFail()) return Result.fail(workspaceResult.getError())
     const workspace = workspaceResult.getValue()
+
+    const slugExists = await this.workspaceRepository.existsBySlug(workspace.slug.toString())
+    if (slugExists) {
+      return Result.fail(new ValidationError('Workspace name already taken', 'workspaceName'))
+    }
 
     const passwordHash = await hashPassword(input.ownerPassword)
     const now = new Date()

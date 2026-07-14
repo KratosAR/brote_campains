@@ -19,6 +19,7 @@ import { Contact, ContactGroup, ChannelType, DomainError } from '@bcp/domain'
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const channelSchema = z.object({
@@ -100,7 +101,7 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
   // once for everything nested under :id, instead of per-handler.
   router.use('/workspaces/:id', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/contacts', async (req, res) => {
+  router.post('/workspaces/:id/contacts', asyncHandler(async (req, res) => {
     const parsed = createContactSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -123,9 +124,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.get('/workspaces/:id/contacts', async (req, res) => {
+  router.get('/workspaces/:id/contacts', asyncHandler(async (req, res) => {
     const query = new SearchContactsQuery(container.resolve('contactRepository'))
     const tags = req.query.tags
     const page = await query.execute({
@@ -143,9 +144,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       data: page.items.map(contactToJson),
       meta: { total: page.total, page: page.page, limit: page.limit },
     })
-  })
+  }))
 
-  router.get('/workspaces/:id/contacts/import/:jobId', async (req, res) => {
+  router.get('/workspaces/:id/contacts/import/:jobId', asyncHandler(async (req, res) => {
     const query = new GetImportStatusQuery(container.resolve('cache'))
     const result = await query.execute({
       jobId: String(req.params.jobId),
@@ -156,9 +157,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.get('/workspaces/:id/contacts/:contactId', async (req, res) => {
+  router.get('/workspaces/:id/contacts/:contactId', asyncHandler(async (req, res) => {
     const query = new GetContactQuery(container.resolve('contactRepository'))
     const result = await query.execute({
       contactId: String(req.params.contactId),
@@ -169,9 +170,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true, data: contactToJson(result.getValue()) })
-  })
+  }))
 
-  router.patch('/workspaces/:id/contacts/:contactId', async (req, res) => {
+  router.patch('/workspaces/:id/contacts/:contactId', asyncHandler(async (req, res) => {
     const parsed = updateContactSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -194,9 +195,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.delete('/workspaces/:id/contacts/:contactId', async (req, res) => {
+  router.delete('/workspaces/:id/contacts/:contactId', asyncHandler(async (req, res) => {
     const command = new ArchiveContactCommand(
       container.resolve('contactRepository'),
       container.resolve('eventBus'),
@@ -210,9 +211,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/contacts/:contactId/opt-out', async (req, res) => {
+  router.post('/workspaces/:id/contacts/:contactId/opt-out', asyncHandler(async (req, res) => {
     const command = new OptOutContactCommand(
       container.resolve('contactRepository'),
       container.resolve('eventBus'),
@@ -226,9 +227,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/contacts/import', async (req, res) => {
+  router.post('/workspaces/:id/contacts/import', asyncHandler(async (req, res) => {
     const parsed = importContactsSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -247,9 +248,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(202).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.post('/workspaces/:id/groups', async (req, res) => {
+  router.post('/workspaces/:id/groups', asyncHandler(async (req, res) => {
     const parsed = createGroupSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -267,16 +268,16 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
   // ponytail: no dedicated "list groups" Query exists — the repo method is
   // enough for a flat list, add a Query only if this needs richer filtering.
-  router.get('/workspaces/:id/groups', async (req, res) => {
+  router.get('/workspaces/:id/groups', asyncHandler(async (req, res) => {
     const groups = await container.resolve('groupRepository').findByWorkspace(String(req.params.id))
     res.status(200).json({ success: true, data: groups.map(groupToJson) })
-  })
+  }))
 
-  router.post('/workspaces/:id/groups/:groupId/contacts/:contactId', async (req, res) => {
+  router.post('/workspaces/:id/groups/:groupId/contacts/:contactId', asyncHandler(async (req, res) => {
     const command = new AddContactToGroupCommand(container.resolve('groupRepository'))
     const result = await command.execute({
       contactId: String(req.params.contactId),
@@ -288,7 +289,7 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
   return router
 }

@@ -19,6 +19,7 @@ import { Campaign, ChannelType, CampaignStatus, DomainError } from '@bcp/domain'
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
 import { sendDomainError } from '../utils/httpError'
+import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const createCampaignSchema = z.object({
@@ -67,7 +68,7 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
 
   router.use('/workspaces/:id/campaigns', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/campaigns', async (req, res) => {
+  router.post('/workspaces/:id/campaigns', asyncHandler(async (req, res) => {
     const parsed = createCampaignSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -97,9 +98,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
-  router.get('/workspaces/:id/campaigns', async (req, res) => {
+  router.get('/workspaces/:id/campaigns', asyncHandler(async (req, res) => {
     const query = new ListCampaignsQuery(container.resolve('campaignRepository'))
     const page = await query.execute({
       workspaceId: String(req.params.id),
@@ -112,9 +113,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       data: page.items.map(campaignToJson),
       meta: { total: page.total, page: page.page, limit: page.limit },
     })
-  })
+  }))
 
-  router.get('/workspaces/:id/campaigns/:campaignId', async (req, res) => {
+  router.get('/workspaces/:id/campaigns/:campaignId', asyncHandler(async (req, res) => {
     const query = new GetCampaignQuery(container.resolve('campaignRepository'))
     const result = await query.execute({
       campaignId: String(req.params.campaignId),
@@ -125,9 +126,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true, data: campaignToJson(result.getValue()) })
-  })
+  }))
 
-  router.get('/workspaces/:id/campaigns/:campaignId/timeline', async (req, res) => {
+  router.get('/workspaces/:id/campaigns/:campaignId/timeline', asyncHandler(async (req, res) => {
     const query = new GetCampaignTimelineQuery(container.resolve('campaignRepository'))
     const result = await query.execute({
       campaignId: String(req.params.campaignId),
@@ -141,9 +142,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       success: true,
       data: result.getValue().map((entry) => ({ event: entry.event, occurredAt: entry.occurredAt, metadata: entry.metadata })),
     })
-  })
+  }))
 
-  router.patch('/workspaces/:id/campaigns/:campaignId/schedule', async (req, res) => {
+  router.patch('/workspaces/:id/campaigns/:campaignId/schedule', asyncHandler(async (req, res) => {
     const parsed = scheduleCampaignSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -163,9 +164,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/pause', async (req, res) => {
+  router.post('/workspaces/:id/campaigns/:campaignId/pause', asyncHandler(async (req, res) => {
     const parsed = reasonSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -184,9 +185,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/resume', async (req, res) => {
+  router.post('/workspaces/:id/campaigns/:campaignId/resume', asyncHandler(async (req, res) => {
     const command = new ResumeCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
@@ -198,9 +199,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/cancel', async (req, res) => {
+  router.post('/workspaces/:id/campaigns/:campaignId/cancel', asyncHandler(async (req, res) => {
     const parsed = reasonSchema.safeParse(req.body)
     if (!parsed.success) {
       res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
@@ -219,9 +220,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/archive', async (req, res) => {
+  router.post('/workspaces/:id/campaigns/:campaignId/archive', asyncHandler(async (req, res) => {
     const command = new ArchiveCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
@@ -233,9 +234,9 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(200).json({ success: true })
-  })
+  }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/duplicate', async (req, res) => {
+  router.post('/workspaces/:id/campaigns/:campaignId/duplicate', asyncHandler(async (req, res) => {
     const command = new DuplicateCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
@@ -247,7 +248,7 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
       return
     }
     res.status(201).json({ success: true, data: result.getValue() })
-  })
+  }))
 
   return router
 }
