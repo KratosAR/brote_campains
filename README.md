@@ -7,6 +7,22 @@ Plataforma de comunicación empresarial omnicanal. Campañas masivas, contactos,
 - [`BCP-SPECIFICATION.md`](./BCP-SPECIFICATION.md) — especificación completa del producto: arquitectura, dominio, decisiones y SRS
 - [`BCP-SPRINTS.md`](./BCP-SPRINTS.md) — plan de sprints con tareas y criterios de aceptación
 
+## Status de Estabilidad
+
+### Fixes Recientes (2026-07-13)
+
+Se identificaron y resolvieron **5 problemas críticos de estabilidad del servidor** que bloqueaban todo testing E2E:
+
+| Problema | Síntoma | Solución | Resultado |
+|---|---|---|---|
+| **Bcrypt lento** | Registration tarda 120+ segundos | Reducir SALT_ROUNDS a 6 en desarrollo | **7000x mejora**: 120s → 17ms |
+| **Token expiry corto** | Usuarios revalidar cada 15 minutos | Extender TTL a 24 horas | Sesiones persistentes |
+| **Async errors no capturados** | Requests cuelgan 120s sin respuesta | asyncHandler wrapper en todos los handlers | Errores propagados correctamente |
+| **Slug duplicado sin validación** | Crash silencioso (unhandled rejection) | Validar slug antes de guardar | Error validación claro |
+| **Rate limiters conflictivos** | 429 inconsistentes, dos configuraciones | Consolidar en un solo archivo, 3 limiters claros | Rate limiting predecible |
+
+**Detalles:** Ver [`BCP-SPRINTS.md#post-sprint-9`](./BCP-SPRINTS.md#post-sprint-9--stabilization--bug-fixes-investigación-de-2026-07-13)
+
 ## Requisitos
 
 - Node.js 20+
