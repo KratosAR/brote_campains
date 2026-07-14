@@ -5,7 +5,7 @@ import { signAccessToken, verifyAccessToken, ACCESS_TOKEN_TTL_SECONDS } from '..
 const SECRET = 'a'.repeat(32)
 
 describe('accessToken', () => {
-  it('signs a token that expires in 15 minutes', () => {
+  it('signs a token that expires in 24 hours', () => {
     const token = signAccessToken(
       { sub: 'user-1', workspaceId: 'ws-1', role: UserRole.Owner, permissions: [Permission.CampaignView] },
       SECRET,
@@ -13,7 +13,7 @@ describe('accessToken', () => {
 
     const decoded = jwt.decode(token) as { iat: number; exp: number }
     expect(decoded.exp - decoded.iat).toBe(ACCESS_TOKEN_TTL_SECONDS)
-    expect(ACCESS_TOKEN_TTL_SECONDS).toBe(15 * 60)
+    expect(ACCESS_TOKEN_TTL_SECONDS).toBe(24 * 60 * 60)
   })
 
   it('round-trips payload through verifyAccessToken', () => {

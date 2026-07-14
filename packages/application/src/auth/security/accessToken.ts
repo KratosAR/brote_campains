@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { UserRole, Permission } from '@bcp/domain'
 
-export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60
+export const ACCESS_TOKEN_TTL_SECONDS = 24 * 60 * 60
 
 // Pin the algorithm on both sign and verify to rule out "alg: none" and
 // algorithm-confusion attacks, regardless of jsonwebtoken defaults.
