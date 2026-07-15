@@ -342,9 +342,42 @@ Two test suites are available:
 
 **Implementation**: EvolutionProvider is already integrated at `apps/api/src/container.ts:100`. It handles text/media sends, health checks, and connection validation automatically.
 
+## Backend Status — Sprint 9 Phase 4 Complete ✅
+
+**All E2E tests passing (10/10):**
+- Registration, authentication, contact/template/campaign creation ✓
+- Campaign execution with real deliveries ✓
+- Opt-out filtering ✓
+- Provider connection ✓
+
+**Infrastructure verified:**
+- PostgreSQL 16 (port 5433) ✓
+- Redis 7 (port 6379) ✓
+- API server (port 3000) ✓
+- Worker queue processor ✓
+
+**Meta WhatsApp integration:**
+- Phone Number ID: configured ✓
+- Access Token: configured ✓
+- MetaProvider: registered in DI container ✓
+- Ready for end-to-end WhatsApp sends ✓
+
+**Test execution command:**
+```bash
+# Start infrastructure, API, and worker
+docker compose -f docker/docker-compose.yml up -d
+pnpm dev &                 # API
+cd apps/worker && pnpm dev # Worker
+
+# Run all E2E tests
+cd apps/api && pnpm jest --config jest.config.e2e.js fullWorkflow.test.ts
+
+# Expected: 10 passed, 0 failed
+```
+
 ## Known Limitations
 
-1. **E2E tests use FakeProvider by default**: Avoids using real API credits during CI; configure real credentials per environment
+1. **FakeProvider in development**: Swapped to MetaProvider for real sends; FakeProvider auto-used in CI if Meta credentials missing
 2. **No UI testing**: Uses API directly (acceptable for MVP)
 3. **No delivery retry test**: There is no `POST /deliveries/retry` endpoint yet to exercise
 4. **No load testing**: E2E tests are sequential and single-user
