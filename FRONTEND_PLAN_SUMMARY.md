@@ -166,7 +166,7 @@ pnpm create next-app apps/web --typescript --tailwind --app --no-src-dir
 # - Create middleware.ts (protects /dashboard routes)
 
 # 5. Verify
-pnpm --filter @bcp/web dev  # Should start on port 3001
+pnpm --filter @bcp/web dev  # Should start on port 3002
 pnpm typecheck              # Should pass
 ```
 

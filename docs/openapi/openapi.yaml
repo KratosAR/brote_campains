@@ -42,6 +42,117 @@ paths:
               schema:
                 type: string
 
+  /auth/register:
+    post:
+      summary: Registrar workspace y usuario dueño
+      description: 'Password must meet complexity requirements: minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character'
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Workspace y usuario creados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/AuthTokensWithIds' }
+        '400':
+          description: Error de validación (campos faltantes, inválidos, o business rules)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Credenciales válidas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/AuthTokens' }
+        '400':
+          description: Error de validación (email o password faltantes/inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Email o password inválidos (credenciales rechazadas)
+
+  /auth/refresh:
+    post:
+      summary: Renovar access token usando el refresh token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: Tokens renovados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/AuthTokens' }
+        '400':
+          description: Error de validación (refreshToken faltante o inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: Revocar una sesión (refresh token)
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '204':
+          description: Sesión revocada
+        '400':
+          description: Error de validación (refreshToken faltante o inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
   /workspaces/{id}/contacts:
     post:
       summary: Crear contacto
@@ -69,7 +180,11 @@ paths:
                     properties:
                       contactId: { type: string }
         '400':
-          description: Error de validación (ej. sin channels)
+          description: Error de validación (campos faltantes, inválidos, o business rules)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     get:
       summary: Buscar contactos
       tags: [Contacts]
@@ -126,6 +241,12 @@ paths:
       responses:
         '200':
           description: Contacto actualizado
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     delete:
       summary: Archivar contacto (no borra)
       tags: [Contacts]
@@ -183,6 +304,12 @@ paths:
                     type: object
                     properties:
                       jobId: { type: string }
+        '400':
+          description: Error de validación (fileKey o columnMapping faltantes)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
   /workspaces/{id}/contacts/import/{jobId}:
     get:
@@ -224,6 +351,12 @@ paths:
                     type: object
                     properties:
                       groupId: { type: string }
+        '400':
+          description: Error de validación (name faltante o vacío)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     get:
       summary: Listar grupos del workspace
       tags: [Groups]
@@ -283,7 +416,11 @@ paths:
                     properties:
                       templateId: { type: string }
         '400':
-          description: Error de validación (ej. body con llaves desbalanceadas)
+          description: Error de validación (campos faltantes o inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     get:
       summary: Listar templates
       tags: [Templates]
@@ -352,6 +489,12 @@ paths:
       responses:
         '201':
           description: Versión creada
+        '400':
+          description: Error de validación (body faltante o vacío)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
   /workspaces/{id}/templates/{templateId}/preview:
     post:
@@ -381,7 +524,11 @@ paths:
                     properties:
                       rendered: { type: string }
         '400':
-          description: Faltan variables requeridas
+          description: Error de validación (version o sampleValues inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '404':
           description: Template o versión no encontrada
 
@@ -412,7 +559,11 @@ paths:
                     properties:
                       campaignId: { type: string }
         '400':
-          description: Error de validación
+          description: Error de validación (campos faltantes o inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
     get:
       summary: Listar campañas
       tags: [Campaigns]
@@ -482,6 +633,12 @@ paths:
       responses:
         '200':
           description: Campaña programada
+        '400':
+          description: Error de validación (scheduledAt o timezone faltantes/inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '409':
           description: La campaña no está en un estado que permita programarla
 
@@ -501,6 +658,12 @@ paths:
       responses:
         '200':
           description: Campaña pausada
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '409':
           description: La campaña no está en Running
 
@@ -534,6 +697,12 @@ paths:
       responses:
         '200':
           description: Campaña cancelada
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '409':
           description: La campaña no está en un estado cancelable
 
@@ -575,6 +744,78 @@ paths:
         '404':
           description: Campaña original no encontrada
 
+  /workspaces/{id}/users/invite:
+    post:
+      summary: Invitar usuario al workspace
+      tags: [Workspaces]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role: { type: string, enum: [Owner, Admin, Member] }
+      responses:
+        '201':
+          description: Invitación creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      invitationId: { type: string }
+                      email: { type: string }
+        '400':
+          description: Error de validación (email o role inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /invitations/{token}/accept:
+    post:
+      summary: Aceptar invitación
+      description: 'Password must meet complexity requirements: minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character'
+      tags: [Invitations]
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string }, description: Invitation token }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, password]
+              properties:
+                name: { type: string }
+                password: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Invitación aceptada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: '#/components/schemas/AuthTokensWithIds' }
+        '400':
+          description: Error de validación (name o password inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
   /workspaces/{id}/channels/connect:
     post:
       summary: Conectar un proveedor de mensajería a un canal del workspace
@@ -599,7 +840,11 @@ paths:
                   success: { type: boolean }
                   data: { $ref: '#/components/schemas/ChannelConnectionResponse' }
         '400':
-          description: Credenciales inválidas o error de validación
+          description: Error de validación (channel, providerId, o credentials inválidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
         '409':
           description: Ya existe una conexión primaria activa para el canal (BR-002)
 
@@ -684,6 +929,37 @@ paths:
         '404':
           description: Conexión no encontrada
 
+  /workspaces/{workspaceId}/analytics/campaigns/{campaignId}/deliveries:
+    get:
+      summary: Breakdown de deliveries de una campaña (por status, hora o proveedor)
+      tags: [Analytics]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: workspaceId, in: path, required: true, schema: { type: string } }
+        - { name: campaignId, in: path, required: true, schema: { type: string } }
+        - { name: groupBy, in: query, schema: { type: string, enum: [status, hour, provider], default: status } }
+      responses:
+        '200':
+          description: Breakdown de deliveries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      campaignId: { type: string }
+                      total: { type: integer }
+                      byStatus:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key: { type: string }
+                            count: { type: integer }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -697,6 +973,56 @@ components:
       required: true
       schema: { type: string }
   schemas:
+    ValidationError:
+      type: object
+      properties:
+        field: { type: string, description: 'Campo con error' }
+        message: { type: string, description: 'Mensaje de error específico' }
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: string
+          description: 'Mensaje de error único (si solo hay un error)'
+        errors:
+          type: array
+          description: 'Array de errores por campo (si hay múltiples errores)'
+          items: { $ref: '#/components/schemas/ValidationError' }
+      example:
+        success: false
+        error: 'ownerPassword must be at least 8 characters'
+    RegisterRequest:
+      type: object
+      required: [ownerName, ownerEmail, ownerPassword, workspaceName]
+      properties:
+        ownerName: { type: string }
+        ownerEmail: { type: string, format: email }
+        ownerPassword:
+          type: string
+          minLength: 8
+          description: 'Must contain: uppercase + lowercase + number + special character'
+          example: 'MyPassword123!'
+        workspaceName: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, description: 'Must meet complexity requirements (uppercase + lowercase + number + special character)' }
+    AuthTokens:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer, description: 'Segundos hasta la expiración del access token' }
+    AuthTokensWithIds:
+      allOf:
+        - $ref: '#/components/schemas/AuthTokens'
+        - type: object
+          properties:
+            workspaceId: { type: string }
+            userId: { type: string }
     ContactChannel:
       type: object
       required: [type, value]
