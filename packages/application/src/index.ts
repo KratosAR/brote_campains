@@ -20,6 +20,9 @@ export type { TokenPair } from './auth/security/issueTokenPair'
 export { ACCESS_TOKEN_TTL_SECONDS, verifyAccessToken } from './auth/security/accessToken'
 export type { AccessTokenPayload } from './auth/security/accessToken'
 
+export { validatePasswordComplexity } from './auth/security/passwordValidator'
+export type { PasswordValidationResult } from './auth/security/passwordValidator'
+
 export { ImportContactsCommand, IMPORT_CONTACTS_JOB } from './contact/ImportContactsCommand'
 export type {
   ImportContactsInput,

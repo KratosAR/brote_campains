@@ -10,11 +10,10 @@ export function formatValidationErrors(error: ZodError): ValidationError[] {
     const field = issue.path.join('.')
     let message = issue.message
 
-    // More user-friendly messages
     if (issue.code === 'too_small') {
       const minLength = (issue as any).minimum
       message = `${field} must be at least ${minLength} character${minLength > 1 ? 's' : ''}`
-    } else if (issue.code === 'invalid_email') {
+    } else if ((issue as any).code === 'invalid_email') {
       message = `${field} must be a valid email address`
     } else if (issue.code === 'invalid_string') {
       message = `${field} is invalid`
