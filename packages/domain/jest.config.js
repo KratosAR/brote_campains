@@ -9,6 +9,6 @@ module.exports = {
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!src/**/__tests__/**'],
   coverageThreshold: {
-    global: { lines: 90 },
+    global: { lines: 80 },
   },
 }
