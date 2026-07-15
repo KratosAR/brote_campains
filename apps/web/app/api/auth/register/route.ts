@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
+interface RegisterResponse {
+  success: boolean
+  data?: {
+    workspaceId: string
+    userId: string
+    accessToken: string
+    refreshToken?: string
+  }
+  error?: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -20,7 +31,7 @@ export async function POST(request: NextRequest) {
     console.log(`[REGISTER] Calling backend: ${API_BASE}/auth/register`)
 
     // Build request body - only include timezone if provided
-    const backendBody: any = {
+    const backendBody: Record<string, string> = {
       ownerName,
       ownerEmail,
       ownerPassword,
@@ -39,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     console.log('[REGISTER] Backend response status:', backendResponse.status)
 
-    const result = await backendResponse.json()
+    const result = await backendResponse.json() as RegisterResponse
     console.log('[REGISTER] Backend response:', JSON.stringify(result))
 
     if (!backendResponse.ok) {

@@ -19,7 +19,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     try {
       await logout()
       addToast('Logged out successfully', 'success')
-    } catch (error) {
+    } catch {
       addToast('Logout failed', 'error')
     } finally {
       setIsLoggingOut(false)

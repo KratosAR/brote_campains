@@ -7,7 +7,7 @@ import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useToast } from '@/lib/toast'
-import { registerSchema, type RegisterInput } from '@/lib/schemas'
+import { registerSchema } from '@/lib/schemas'
 import { ZodError } from 'zod'
 
 export default function RegisterPage() {
@@ -22,12 +22,9 @@ export default function RegisterPage() {
   })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = React.useState(false)
-  const [detectedTimezone, setDetectedTimezone] = React.useState('')
-
-  React.useEffect(() => {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    setDetectedTimezone(timezone)
-  }, [])
+  const [detectedTimezone] = React.useState(() =>
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  )
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

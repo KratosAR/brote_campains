@@ -7,7 +7,7 @@ import { AuthLayout } from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useToast } from '@/lib/toast'
-import { loginSchema, type LoginInput } from '@/lib/schemas'
+import { loginSchema } from '@/lib/schemas'
 import { ZodError } from 'zod'
 
 export default function LoginPage() {
@@ -98,7 +98,7 @@ export default function LoginPage() {
         </Button>
 
         <p className="text-center text-sm text-slate-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="text-blue-600 hover:underline">
             Sign up
           </Link>

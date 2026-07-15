@@ -21,7 +21,6 @@ const inviteSchema = z.object({
   path: ['confirmPassword']
 })
 
-type InviteInput = z.infer<typeof inviteSchema>
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
@@ -94,7 +93,7 @@ export default function InvitePage() {
     <AuthLayout title="Accept Invitation">
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-600 mb-4">
-          You've been invited to join a workspace. Set your password to get started.
+          You&apos;ve been invited to join a workspace. Set your password to get started.
         </p>
 
         <Input
