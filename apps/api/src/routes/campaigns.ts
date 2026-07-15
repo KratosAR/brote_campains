@@ -18,17 +18,20 @@ import { Campaign, ChannelType, CampaignStatus, DomainError } from '@bcp/domain'
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const createCampaignSchema = z.object({
-  name: z.string().min(1),
-  channel: z.nativeEnum(ChannelType),
-  audienceType: z.enum(['all', 'group', 'segment', 'manual']),
+  name: z.string({ required_error: 'name is required' })
+    .min(1, 'name cannot be empty'),
+  channel: z.nativeEnum(ChannelType, { errorMap: () => ({ message: 'channel must be one of: WhatsApp, Email, SMS, Telegram' }) }),
+  audienceType: z.enum(['all', 'group', 'segment', 'manual'], { errorMap: () => ({ message: 'audienceType must be one of: all, group, segment, manual' }) }),
   audienceGroupIds: z.array(z.string()).optional(),
   audienceContactIds: z.array(z.string()).optional(),
-  templateId: z.string().min(1),
+  templateId: z.string({ required_error: 'templateId is required' })
+    .min(1, 'templateId cannot be empty'),
   scheduledAt: z.coerce.date().optional(),
   timezone: z.string().optional(),
   sendNow: z.boolean().optional(),
@@ -36,8 +39,9 @@ const createCampaignSchema = z.object({
 })
 
 const scheduleCampaignSchema = z.object({
-  scheduledAt: z.coerce.date(),
-  timezone: z.string().min(1),
+  scheduledAt: z.coerce.date({ invalid_type_error: 'scheduledAt must be a valid date' }),
+  timezone: z.string({ required_error: 'timezone is required' })
+    .min(1, 'timezone cannot be empty'),
 })
 
 const reasonSchema = z.object({
@@ -68,29 +72,25 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
 
   router.use('/workspaces/:id/campaigns', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/campaigns', asyncHandler(async (req, res) => {
-    const parsed = createCampaignSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/campaigns', validateRequest(createCampaignSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new CreateCampaignCommand(
       container.resolve('campaignRepository'),
       container.resolve('eventBus'),
+      container.resolve('queue'),
     )
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      name: parsed.data.name,
-      channel: parsed.data.channel,
-      audienceType: parsed.data.audienceType,
-      audienceGroupIds: parsed.data.audienceGroupIds,
-      audienceContactIds: parsed.data.audienceContactIds,
-      templateId: parsed.data.templateId,
-      scheduledAt: parsed.data.scheduledAt,
-      timezone: parsed.data.timezone,
-      sendNow: parsed.data.sendNow,
-      deliveryPolicy: parsed.data.deliveryPolicy,
+      name: data.name,
+      channel: data.channel,
+      audienceType: data.audienceType,
+      audienceGroupIds: data.audienceGroupIds,
+      audienceContactIds: data.audienceContactIds,
+      templateId: data.templateId,
+      scheduledAt: data.scheduledAt,
+      timezone: data.timezone,
+      sendNow: data.sendNow,
+      deliveryPolicy: data.deliveryPolicy,
       userId: req.user!.sub,
     })
     if (result.isFail()) {
@@ -144,19 +144,14 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
     })
   }))
 
-  router.patch('/workspaces/:id/campaigns/:campaignId/schedule', asyncHandler(async (req, res) => {
-    const parsed = scheduleCampaignSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.patch('/workspaces/:id/campaigns/:campaignId/schedule', validateRequest(scheduleCampaignSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new ScheduleCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
       workspaceId: String(req.params.id),
-      scheduledAt: parsed.data.scheduledAt,
-      timezone: parsed.data.timezone,
+      scheduledAt: data.scheduledAt,
+      timezone: data.timezone,
       userId: req.user!.sub,
     })
     if (result.isFail()) {
@@ -166,18 +161,13 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
     res.status(200).json({ success: true })
   }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/pause', asyncHandler(async (req, res) => {
-    const parsed = reasonSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/campaigns/:campaignId/pause', validateRequest(reasonSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new PauseCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
       workspaceId: String(req.params.id),
-      reason: parsed.data.reason,
+      reason: data.reason,
       userId: req.user!.sub,
     })
     if (result.isFail()) {
@@ -201,18 +191,13 @@ export function createCampaignsRouter(container: AwilixContainer<Cradle>, jwtSec
     res.status(200).json({ success: true })
   }))
 
-  router.post('/workspaces/:id/campaigns/:campaignId/cancel', asyncHandler(async (req, res) => {
-    const parsed = reasonSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/campaigns/:campaignId/cancel', validateRequest(reasonSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new CancelCampaignCommand(container.resolve('campaignRepository'))
     const result = await command.execute({
       campaignId: String(req.params.campaignId),
       workspaceId: String(req.params.id),
-      reason: parsed.data.reason,
+      reason: data.reason,
       userId: req.user!.sub,
     })
     if (result.isFail()) {

@@ -7,13 +7,15 @@ import { WorkspaceId, UserRole, DomainError } from '@bcp/domain'
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const inviteSchema = z.object({
-  email: z.string().email(),
-  role: z.nativeEnum(UserRole),
+  email: z.string({ required_error: 'email is required' })
+    .email('email must be a valid email address'),
+  role: z.nativeEnum(UserRole, { errorMap: () => ({ message: 'role must be one of: Owner, Admin, Member' }) }),
 })
 
 export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSecret: string): Router {
@@ -51,13 +53,8 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
     })
   }))
 
-  router.post('/workspaces/:id/users/invite', asyncHandler(async (req, res) => {
-    const parsed = inviteSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/users/invite', validateRequest(inviteSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new InviteUserCommand(
       container.resolve('userRepository'),
       container.resolve('workspaceUserRepository'),
@@ -66,8 +63,8 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
     )
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      email: parsed.data.email,
-      role: parsed.data.role,
+      email: data.email,
+      role: data.role,
       invitedByUserId: req.user!.sub,
     })
     if (result.isFail()) {

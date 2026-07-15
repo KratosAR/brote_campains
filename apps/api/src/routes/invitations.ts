@@ -2,29 +2,33 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { AwilixContainer } from 'awilix'
 
-import { AcceptInvitationCommand } from '@bcp/application'
+import { AcceptInvitationCommand, validatePasswordComplexity } from '@bcp/application'
 import { DomainError } from '@bcp/domain'
 
 import { authRateLimiter } from '../middleware/rateLimit'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const acceptSchema = z.object({
-  name: z.string().min(1),
-  password: z.string().min(8),
+  name: z.string({ required_error: 'name is required' })
+    .min(1, 'name cannot be empty'),
+  password: z.string({ required_error: 'password is required' })
+    .refine(
+      pwd => validatePasswordComplexity(pwd).isValid,
+      pwd => {
+        const validation = validatePasswordComplexity(pwd)
+        return { message: validation.errors[0] || 'Invalid password' }
+      },
+    ),
 })
 
 export function createInvitationsRouter(container: AwilixContainer<Cradle>, jwtSecret: string): Router {
   const router = Router()
 
-  router.post('/invitations/:token/accept', authRateLimiter, asyncHandler(async (req, res) => {
-    const parsed = acceptSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/invitations/:token/accept', authRateLimiter, validateRequest(acceptSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new AcceptInvitationCommand(
       container.resolve('userRepository'),
       container.resolve('workspaceUserRepository'),
@@ -35,8 +39,8 @@ export function createInvitationsRouter(container: AwilixContainer<Cradle>, jwtS
     )
     const result = await command.execute({
       token: String(req.params.token),
-      name: parsed.data.name,
-      password: parsed.data.password,
+      name: data.name,
+      password: data.password,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)

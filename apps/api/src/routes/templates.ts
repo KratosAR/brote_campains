@@ -14,25 +14,29 @@ import { Template, ChannelType, DomainError } from '@bcp/domain'
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const createTemplateSchema = z.object({
-  name: z.string().min(1),
-  channel: z.nativeEnum(ChannelType),
-  body: z.string().min(1),
+  name: z.string({ required_error: 'name is required' })
+    .min(1, 'name cannot be empty'),
+  channel: z.nativeEnum(ChannelType, { errorMap: () => ({ message: 'channel must be one of: WhatsApp, Email, SMS, Telegram' }) }),
+  body: z.string({ required_error: 'body is required' })
+    .min(1, 'body cannot be empty'),
   createdBy: z.string().optional(),
   description: z.string().optional(),
 })
 
 const createVersionSchema = z.object({
-  body: z.string().min(1),
+  body: z.string({ required_error: 'body is required' })
+    .min(1, 'body cannot be empty'),
   createdBy: z.string().optional(),
 })
 
 const previewTemplateSchema = z.object({
-  version: z.number().int().positive().optional(),
+  version: z.number().int().positive('version must be a positive integer').optional(),
   sampleValues: z.record(z.string()).default({}),
 })
 
@@ -59,21 +63,16 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
 
   router.use('/workspaces/:id', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/templates', asyncHandler(async (req, res) => {
-    const parsed = createTemplateSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/templates', validateRequest(createTemplateSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new CreateTemplateCommand(container.resolve('templateRepository'))
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      name: parsed.data.name,
-      channel: parsed.data.channel,
-      body: parsed.data.body,
-      createdBy: parsed.data.createdBy,
-      description: parsed.data.description,
+      name: data.name,
+      channel: data.channel,
+      body: data.body,
+      createdBy: data.createdBy,
+      description: data.description,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)
@@ -111,19 +110,14 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
     res.status(200).json({ success: true, data: templateToJson(result.getValue()) })
   }))
 
-  router.post('/workspaces/:id/templates/:templateId/versions', asyncHandler(async (req, res) => {
-    const parsed = createVersionSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/templates/:templateId/versions', validateRequest(createVersionSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new UpdateTemplateCommand(container.resolve('templateRepository'))
     const result = await command.execute({
       templateId: String(req.params.templateId),
       workspaceId: String(req.params.id),
-      body: parsed.data.body,
-      createdBy: parsed.data.createdBy,
+      body: data.body,
+      createdBy: data.createdBy,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)
@@ -132,19 +126,14 @@ export function createTemplatesRouter(container: AwilixContainer<Cradle>, jwtSec
     res.status(201).json({ success: true })
   }))
 
-  router.post('/workspaces/:id/templates/:templateId/preview', asyncHandler(async (req, res) => {
-    const parsed = previewTemplateSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/templates/:templateId/preview', validateRequest(previewTemplateSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const query = new PreviewTemplateQuery(container.resolve('templateRepository'))
     const result = await query.execute({
       templateId: String(req.params.templateId),
       workspaceId: String(req.params.id),
-      version: parsed.data.version,
-      sampleValues: parsed.data.sampleValues,
+      version: data.version,
+      sampleValues: data.sampleValues,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)

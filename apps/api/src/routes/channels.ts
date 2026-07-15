@@ -7,15 +7,17 @@ import { ChannelConnection, ChannelType, DomainError, ValidationError } from '@b
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const connectSchema = z.object({
-  channel: z.nativeEnum(ChannelType),
-  providerId: z.string().min(1),
-  credentials: z.unknown(),
-  priority: z.number().int().positive().optional(),
+  channel: z.nativeEnum(ChannelType, { errorMap: () => ({ message: 'channel must be one of: WhatsApp, Email, SMS, Telegram' }) }),
+  providerId: z.string({ required_error: 'providerId is required' })
+    .min(1, 'providerId cannot be empty'),
+  credentials: z.unknown().refine(val => val !== undefined && val !== null, { message: 'credentials is required' }),
+  priority: z.number().int().positive('priority must be a positive integer').optional(),
 })
 
 function channelConnectionToJson(connection: ChannelConnection) {
@@ -37,20 +39,15 @@ export function createChannelsRouter(container: AwilixContainer<Cradle>, jwtSecr
 
   router.use('/workspaces/:id/channels', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/channels/connect', asyncHandler(async (req, res) => {
-    const parsed = connectSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/channels/connect', validateRequest(connectSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new ConnectProviderCommand(container.resolve('channelConnectionRepository'), container.resolve('providerRegistry'))
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      channel: parsed.data.channel,
-      providerId: parsed.data.providerId,
-      credentials: parsed.data.credentials,
-      priority: parsed.data.priority,
+      channel: data.channel,
+      providerId: data.providerId,
+      credentials: data.credentials,
+      priority: data.priority,
       userId: req.user!.sub,
     })
     if (result.isFail()) {

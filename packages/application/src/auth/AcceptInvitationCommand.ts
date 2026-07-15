@@ -17,6 +17,7 @@ import {
 } from '@bcp/contracts'
 
 import { hashPassword } from './security/passwordHasher'
+import { validatePasswordComplexity } from './security/passwordValidator'
 import { hashRefreshToken } from './security/refreshToken'
 import { issueTokenPair, TokenPair } from './security/issueTokenPair'
 
@@ -42,8 +43,10 @@ export class AcceptInvitationCommand {
     if (!input.name || input.name.trim().length === 0) {
       return Result.fail(new ValidationError('Name cannot be empty', 'name'))
     }
-    if (!input.password || input.password.length < 8) {
-      return Result.fail(new ValidationError('Password must be at least 8 characters', 'password'))
+
+    const passwordValidation = validatePasswordComplexity(input.password)
+    if (!passwordValidation.isValid) {
+      return Result.fail(new ValidationError(passwordValidation.errors.join('; '), 'password'))
     }
 
     const tokenHash = hashRefreshToken(input.token)

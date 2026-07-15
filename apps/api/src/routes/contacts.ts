@@ -18,26 +18,30 @@ import { Contact, ContactGroup, ChannelType, DomainError } from '@bcp/domain'
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
+import { validateRequest } from '../middleware/validateRequest'
 import { sendDomainError } from '../utils/httpError'
 import { asyncHandler } from '../utils/asyncHandler'
 import { Cradle } from '../container'
 
 const channelSchema = z.object({
-  type: z.nativeEnum(ChannelType),
-  value: z.string().min(1),
+  type: z.nativeEnum(ChannelType, { errorMap: () => ({ message: 'channel type must be one of: WhatsApp, Email, SMS, Telegram' }) }),
+  value: z.string({ required_error: 'channel value is required' })
+    .min(1, 'channel value cannot be empty'),
   verified: z.boolean().optional(),
   isPrimary: z.boolean().optional(),
 })
 
 const createContactSchema = z.object({
   identity: z.object({
-    firstName: z.string().min(1),
+    firstName: z.string({ required_error: 'identity.firstName is required' })
+      .min(1, 'identity.firstName cannot be empty'),
     lastName: z.string().optional(),
     company: z.string().optional(),
     externalId: z.string().optional(),
     notes: z.string().optional(),
-  }),
-  channels: z.array(channelSchema),
+  }, { required_error: 'identity object is required' }),
+  channels: z.array(channelSchema, { required_error: 'channels array is required' })
+    .min(1, 'at least one channel is required'),
   tags: z.array(z.string()).optional(),
   groupIds: z.array(z.string()).optional(),
 })
@@ -51,13 +55,16 @@ const updateContactSchema = z.object({
 })
 
 const createGroupSchema = z.object({
-  name: z.string().min(1),
+  name: z.string({ required_error: 'name is required' })
+    .min(1, 'name cannot be empty'),
   description: z.string().optional(),
 })
 
 const importContactsSchema = z.object({
-  fileKey: z.string().min(1),
-  columnMapping: z.record(z.string()),
+  fileKey: z.string({ required_error: 'fileKey is required' })
+    .min(1, 'fileKey cannot be empty'),
+  columnMapping: z.record(z.string(), { required_error: 'columnMapping is required' })
+    .refine(obj => Object.keys(obj).length > 0, 'columnMapping cannot be empty'),
   options: z.object({ hasHeader: z.boolean().optional() }).optional(),
 })
 
@@ -101,23 +108,18 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
   // once for everything nested under :id, instead of per-handler.
   router.use('/workspaces/:id', authenticate(jwtSecret), requireOwnWorkspace)
 
-  router.post('/workspaces/:id/contacts', asyncHandler(async (req, res) => {
-    const parsed = createContactSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/contacts', validateRequest(createContactSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new CreateContactCommand(
       container.resolve('contactRepository'),
       container.resolve('eventBus'),
     )
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      identity: parsed.data.identity,
-      channels: parsed.data.channels,
-      tags: parsed.data.tags,
-      groupIds: parsed.data.groupIds,
+      identity: data.identity,
+      channels: data.channels,
+      tags: data.tags,
+      groupIds: data.groupIds,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)
@@ -172,13 +174,8 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
     res.status(200).json({ success: true, data: contactToJson(result.getValue()) })
   }))
 
-  router.patch('/workspaces/:id/contacts/:contactId', asyncHandler(async (req, res) => {
-    const parsed = updateContactSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.patch('/workspaces/:id/contacts/:contactId', validateRequest(updateContactSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new UpdateContactCommand(
       container.resolve('contactRepository'),
       container.resolve('eventBus'),
@@ -186,9 +183,9 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
     const result = await command.execute({
       contactId: String(req.params.contactId),
       workspaceId: String(req.params.id),
-      identity: parsed.data.identity,
-      channels: parsed.data.channels,
-      tags: parsed.data.tags,
+      identity: data.identity,
+      channels: data.channels,
+      tags: data.tags,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError() as DomainError)
@@ -229,19 +226,14 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
     res.status(200).json({ success: true })
   }))
 
-  router.post('/workspaces/:id/contacts/import', asyncHandler(async (req, res) => {
-    const parsed = importContactsSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/contacts/import', validateRequest(importContactsSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new ImportContactsCommand(container.resolve('queue'))
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      fileKey: parsed.data.fileKey,
-      columnMapping: parsed.data.columnMapping,
-      options: parsed.data.options,
+      fileKey: data.fileKey,
+      columnMapping: data.columnMapping,
+      options: data.options,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError())
@@ -250,18 +242,13 @@ export function createContactsRouter(container: AwilixContainer<Cradle>, jwtSecr
     res.status(202).json({ success: true, data: result.getValue() })
   }))
 
-  router.post('/workspaces/:id/groups', asyncHandler(async (req, res) => {
-    const parsed = createGroupSchema.safeParse(req.body)
-    if (!parsed.success) {
-      res.status(400).json({ success: false, error: parsed.error.issues[0]?.message ?? 'Invalid request' })
-      return
-    }
-
+  router.post('/workspaces/:id/groups', validateRequest(createGroupSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
     const command = new CreateGroupCommand(container.resolve('groupRepository'))
     const result = await command.execute({
       workspaceId: String(req.params.id),
-      name: parsed.data.name,
-      description: parsed.data.description,
+      name: data.name,
+      description: data.description,
     })
     if (result.isFail()) {
       sendDomainError(res, result.getError())

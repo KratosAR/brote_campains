@@ -18,6 +18,7 @@ import {
 } from '@bcp/contracts'
 
 import { hashPassword } from './security/passwordHasher'
+import { validatePasswordComplexity } from './security/passwordValidator'
 import { issueTokenPair, TokenPair } from './security/issueTokenPair'
 
 export interface RegisterWorkspaceInput {
@@ -25,7 +26,7 @@ export interface RegisterWorkspaceInput {
   ownerEmail: string
   ownerPassword: string
   workspaceName: string
-  timezone: string
+  timezone?: string
 }
 
 export interface RegisterWorkspaceOutput extends TokenPair {
@@ -63,14 +64,16 @@ export class RegisterWorkspaceCommand {
     if (!input.ownerName || input.ownerName.trim().length === 0) {
       return Result.fail(new ValidationError('Owner name cannot be empty', 'ownerName'))
     }
-    if (!input.ownerPassword || input.ownerPassword.length < 8) {
+
+    const passwordValidation = validatePasswordComplexity(input.ownerPassword)
+    if (!passwordValidation.isValid) {
       return Result.fail(
-        new ValidationError('Password must be at least 8 characters', 'ownerPassword'),
+        new ValidationError(passwordValidation.errors.join('; '), 'ownerPassword'),
       )
     }
 
     const settingsResult = WorkspaceSettings.create({
-      timezone: input.timezone,
+      timezone: input.timezone ?? 'UTC',
       locale: DEFAULT_LOCALE,
       maxContacts: DEFAULT_MAX_CONTACTS,
       maxCampaigns: DEFAULT_MAX_CAMPAIGNS,
