@@ -34,3 +34,22 @@ export {
   type ConnectChannelInput,
   type HealthCheckResult
 } from './channels'
+export {
+  listContacts,
+  searchContacts,
+  getContact,
+  createContact,
+  updateContact,
+  deleteContact,
+  optOutContact,
+  importContacts,
+  getImportJobStatus,
+  listGroups,
+  createGroup,
+  type Contact,
+  type CreateContactInput,
+  type UpdateContactInput,
+  type ContactGroup,
+  type CreateGroupInput,
+  type ImportJobStatus
+} from './contacts'
