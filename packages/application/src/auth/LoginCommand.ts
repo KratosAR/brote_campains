@@ -45,14 +45,15 @@ export class LoginCommand {
     }
     const membership = membershipResult.getValue()
 
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: user.id,
       workspaceId: membership.workspaceId.toString(),
       role: membership.role,
       jwtSecret: this.jwtSecret,
       refreshTokenRepository: this.refreshTokenRepository,
     })
+    if (tokensResult.isFail()) return Result.fail(tokensResult.getError())
 
-    return Result.ok(tokens)
+    return Result.ok(tokensResult.getValue())
   }
 }

@@ -9,13 +9,14 @@ describe('RevokeSessionCommand', () => {
   it('revokes the matching refresh token for the user', async () => {
     const refreshTokenRepository = new InMemoryRefreshTokenRepository()
     const userId = UserId.generate()
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: userId.toString(),
       workspaceId: WorkspaceId.generate().toString(),
       role: UserRole.Operator,
       jwtSecret: SECRET,
       refreshTokenRepository,
     })
+    const tokens = tokensResult.getValue()
 
     const command = new RevokeSessionCommand(refreshTokenRepository)
     const result = await command.execute({ userId: userId.toString(), refreshToken: tokens.refreshToken })
@@ -27,13 +28,14 @@ describe('RevokeSessionCommand', () => {
 
   it('rejects revoking a token owned by another user', async () => {
     const refreshTokenRepository = new InMemoryRefreshTokenRepository()
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: UserId.generate().toString(),
       workspaceId: WorkspaceId.generate().toString(),
       role: UserRole.Operator,
       jwtSecret: SECRET,
       refreshTokenRepository,
     })
+    const tokens = tokensResult.getValue()
 
     const command = new RevokeSessionCommand(refreshTokenRepository)
     const result = await command.execute({
