@@ -95,3 +95,19 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Report coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          flags: coverage
