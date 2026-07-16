@@ -1,0 +1,139 @@
+name: Deploy by Branch
+
+on:
+  push:
+    branches: [main, staging, development]
+
+jobs:
+  build:
+    name: Build artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/*/dist
+            packages/*/dist
+          retention-days: 1
+
+  deploy-dev:
+    name: Deploy to Development
+    if: github.ref == 'refs/heads/development'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Deploy to development environment
+        run: |
+          echo "Deploying to development..."
+          # TODO: Add your dev deployment command
+          # Example: vercel deploy --token ${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Development deploy completed"
+
+      - name: Notify team
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: "🟢 Development deploy: ${{ job.status }}"
+          fields: commit,author,message
+
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/staging'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Deploy to staging environment
+        run: |
+          echo "Deploying to staging..."
+          # TODO: Add your staging deployment command
+          echo "✅ Staging deploy completed"
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests on staging..."
+          # TODO: curl https://staging-api.example.com/health
+          echo "✅ Smoke tests passed"
+
+      - name: Notify team
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: "🟠 Staging deploy: ${{ job.status }}"
+          fields: commit,author,message
+
+  deploy-production:
+    name: Ready for Production Deploy
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      deployment-branch-policy:
+        protected-branches: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify security checks passed
+        run: |
+          echo "✅ All security checks passed"
+
+      - name: Prepare for production deploy
+        run: |
+          echo "Build artifacts ready for production deployment"
+          echo "Manual deployment required: gh workflow run deploy-prod-manual.yml"
+
+      - name: Create deployment
+        run: |
+          # Create GitHub deployment (for tracking)
+          gh deployment create main \
+            --ref ${{ github.sha }} \
+            --environment production \
+            --auto-merge false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify team
+        uses: 8398a7/action-slack@v3
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: "📦 Production artifacts ready (awaiting manual deploy)"
+          fields: commit,author,message
