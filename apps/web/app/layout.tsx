@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/lib/toast";
 import { AuthProvider } from "@/lib/AuthProvider";
+import { WorkspaceProvider } from "@/lib/WorkspaceContext";
 import { QueryProvider } from "@/lib/QueryProvider";
 import "./globals.css";
 
@@ -37,7 +38,9 @@ export default function RootLayout({
         <QueryProvider>
           <ToastProvider>
             <AuthProvider>
-              {children}
+              <WorkspaceProvider>
+                {children}
+              </WorkspaceProvider>
             </AuthProvider>
           </ToastProvider>
         </QueryProvider>

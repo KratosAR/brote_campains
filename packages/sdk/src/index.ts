@@ -11,3 +11,13 @@ export {
   type LoginOutput,
   type User
 } from './auth'
+export {
+  getWorkspace,
+  updateWorkspace,
+  inviteUser,
+  type Workspace,
+  type WorkspaceSettings,
+  type WorkspaceUser,
+  type InviteUserInput,
+  type InviteUserOutput
+} from './workspaces'

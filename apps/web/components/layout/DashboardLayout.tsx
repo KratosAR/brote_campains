@@ -54,7 +54,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <NavLink href="/campaigns" label="Campaigns" />
           <NavLink href="/channels" label="Channels" />
           <NavLink href="/analytics" label="Analytics" />
-          <NavLink href="/settings" label="Settings" />
+          <div className="pt-2 border-t border-slate-200 mt-2">
+            <NavLink href="/settings" label="Settings" />
+            <NavLink href="/settings/users" label="Users" />
+          </div>
         </nav>
 
         <div className="p-4 border-t border-slate-200 bg-white">
