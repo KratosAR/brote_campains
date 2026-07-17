@@ -9,6 +9,7 @@ const\s+token\s*=
 match\[1\]
 query\['hub\.verify_token'\]
 apikey.*other-key
+config\.apiKey
 expect\.objectContaining.*apikey
 
 # Inline test/example credentials in code
