@@ -59,15 +59,6 @@ jobs:
           # Example: vercel deploy --token ${{ secrets.VERCEL_TOKEN }}
           echo "✅ Development deploy completed"
 
-      - name: Notify team
-        uses: 8398a7/action-slack@v3
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
-        with:
-          status: ${{ job.status }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: "🟢 Development deploy: ${{ job.status }}"
-          fields: commit,author,message
-
   deploy-staging:
     name: Deploy to Staging
     if: github.ref == 'refs/heads/staging'
@@ -94,8 +85,7 @@ jobs:
       # is set as a repository/environment variable, since no actual deploy
       # target is wired up above yet. Once it is, this activates automatically:
       # retries with backoff, verifies /health returns 200 + expected shape,
-      # fails the job (blocking the "Notify team" step from reporting success)
-      # if the newly-deployed instance isn't actually healthy.
+      # fails the job if the newly-deployed instance isn't actually healthy.
       - name: Smoke test - verify deployment is healthy
         if: vars.STAGING_API_URL != ''
         env:
@@ -119,15 +109,6 @@ jobs:
       - name: Smoke test skipped (no STAGING_API_URL configured yet)
         if: vars.STAGING_API_URL == ''
         run: echo "::warning::Skipping smoke test - set the STAGING_API_URL repository/environment variable once staging has a real deploy target."
-
-      - name: Notify team
-        uses: 8398a7/action-slack@v3
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
-        with:
-          status: ${{ job.status }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: "🟠 Staging deploy: ${{ job.status }}"
-          fields: commit,author,message
 
   deploy-production:
     name: Ready for Production Deploy
@@ -161,12 +142,3 @@ jobs:
             --auto-merge false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Notify team
-        uses: 8398a7/action-slack@v3
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
-        with:
-          status: ${{ job.status }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: "📦 Production artifacts ready (awaiting manual deploy)"
-          fields: commit,author,message

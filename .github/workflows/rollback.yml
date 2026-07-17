@@ -93,12 +93,3 @@ jobs:
           done
           echo "##[error]Rollback deploy is not healthy either - this needs a human, now."
           exit 1
-
-      - name: Notify team
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          text: "🔙 Rollback of ${{ inputs.environment }} to ${{ inputs.ref }}: ${{ job.status }}. Reason: ${{ inputs.reason }}"
-          fields: commit,author
