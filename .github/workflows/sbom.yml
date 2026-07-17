@@ -39,7 +39,11 @@ jobs:
 
       - name: Generate SBOM (SPDX format)
         run: |
-          npm list --all --json > npm-list.json
+          # npm list exits non-zero on pnpm's node_modules layout (unmet
+          # peer/dev deps it can't resolve the pnpm-specific way) even with
+          # --json, which still writes a (partial) tree despite the exit
+          # code. Tolerate it here, same as the npm audit step below.
+          npm list --all --json > npm-list.json || true
           echo "npm list exported to npm-list.json"
 
       - name: Upload SBOM as artifact
