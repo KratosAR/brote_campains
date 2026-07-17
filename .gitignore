@@ -159,3 +159,7 @@ apps/**/*.js.map
 # Exceptions: keep root-level config files
 !commitlint.config.js
 !eslint.config.js
+
+# Exceptions: keep per-package test/build config (not compiled output)
+!packages/**/jest.config.js
+!apps/**/jest.config.js
