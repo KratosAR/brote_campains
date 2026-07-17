@@ -103,25 +103,25 @@ jobs:
           # X-Content-Type-Options
           if echo "$HEADERS" | grep -qi "X-Content-Type-Options: nosniff"; then
             echo "✅ X-Content-Type-Options: nosniff"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "⚠️  Missing X-Content-Type-Options: nosniff"
-            ((FAIL++))
+            FAIL=$((FAIL+1))
           fi
 
           # X-Frame-Options
           if echo "$HEADERS" | grep -qi "X-Frame-Options"; then
             echo "✅ X-Frame-Options present"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "⚠️  Missing X-Frame-Options"
-            ((FAIL++))
+            FAIL=$((FAIL+1))
           fi
 
           # Strict-Transport-Security (may not be on localhost, warning only)
           if echo "$HEADERS" | grep -qi "Strict-Transport-Security"; then
             echo "✅ Strict-Transport-Security present"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "ℹ️  Strict-Transport-Security missing (expected on localhost)"
           fi
@@ -129,16 +129,16 @@ jobs:
           # Content-Security-Policy
           if echo "$HEADERS" | grep -qi "Content-Security-Policy"; then
             echo "✅ Content-Security-Policy present"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "⚠️  Missing Content-Security-Policy"
-            ((FAIL++))
+            FAIL=$((FAIL+1))
           fi
 
           # X-XSS-Protection (deprecated but still good to have)
           if echo "$HEADERS" | grep -qi "X-XSS-Protection"; then
             echo "✅ X-XSS-Protection present"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "ℹ️  X-XSS-Protection missing"
           fi
@@ -146,7 +146,7 @@ jobs:
           # Referrer-Policy
           if echo "$HEADERS" | grep -qi "Referrer-Policy"; then
             echo "✅ Referrer-Policy present"
-            ((PASS++))
+            PASS=$((PASS+1))
           else
             echo "ℹ️  Referrer-Policy missing"
           fi

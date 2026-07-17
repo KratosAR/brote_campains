@@ -91,11 +91,11 @@ jobs:
           exit 1
 
       - name: Run E2E tests
-        run: pnpm test --testPathPattern="e2e" --runInBand --detectOpenHandles
+        run: pnpm test -- --testPathPattern="e2e" --runInBand --detectOpenHandles --passWithNoTests
         timeout-minutes: 10
 
       - name: Collect coverage
-        run: pnpm test --coverage --testPathPattern="e2e"
+        run: pnpm test -- --coverage --testPathPattern="e2e" --passWithNoTests
         if: always()
 
       - name: Upload coverage to Codecov

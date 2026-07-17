@@ -63,6 +63,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         if: always()
         with:
+          status: ${{ job.status }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           text: "🟢 Development deploy: ${{ job.status }}"
           fields: commit,author,message
@@ -123,6 +124,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         if: always()
         with:
+          status: ${{ job.status }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           text: "🟠 Staging deploy: ${{ job.status }}"
           fields: commit,author,message
@@ -162,7 +164,9 @@ jobs:
 
       - name: Notify team
         uses: 8398a7/action-slack@v3
+        if: always()
         with:
+          status: ${{ job.status }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           text: "📦 Production artifacts ready (awaiting manual deploy)"
           fields: commit,author,message
