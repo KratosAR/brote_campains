@@ -29,32 +29,206 @@ Se identificaron y resolvieron **5 problemas críticos de estabilidad del servid
 - pnpm 9+
 - Docker y Docker Compose
 
-## Levantar el proyecto
+## Instalación Inicial
 
 ```bash
-# Instalar dependencias
+# 1. Instalar dependencias (una sola vez)
 pnpm install
+```
 
-# Levantar infraestructura (PostgreSQL, Redis, Prometheus, Grafana)
-docker compose up -d
+## Levantar la Infraestructura (Docker)
 
-# Correr migraciones
+La infraestructura (PostgreSQL, Redis, Prometheus, Grafana) corre en Docker.
+
+```bash
+# Desde la raíz del proyecto
+docker compose -f docker/docker-compose.yml up -d
+
+# O si estás en el directorio docker/
+cd docker && docker compose up -d
+```
+
+**Servicios disponibles:**
+- **PostgreSQL:** localhost:5433 (usuario: `bcp`, contraseña: `bcp_dev_password`)
+- **Redis:** localhost:6379
+- **Prometheus:** http://localhost:9090
+- **Grafana:** http://localhost:3001 (admin/admin)
+
+Para detener los servicios:
+```bash
+docker compose -f docker/docker-compose.yml down
+```
+
+## Ejecutar Migraciones de Base de Datos
+
+Necesario hacer UNA SOLA VEZ antes de levantar el backend:
+
+```bash
 pnpm db:migrate
+```
 
-# Levantar API en desarrollo
+## Iniciar el Backend
+
+El backend es una API Express.js que corre en puerto **3000**.
+
+```bash
+# Desarrollo con hot-reload
+pnpm dev
+
+# O si quieres levantar solo el API (sin otros apps)
+cd apps/api
 pnpm dev
 ```
 
-## Scripts disponibles
+**Verificar que funciona:**
+- API: http://localhost:3000
+- Swagger API Docs: http://localhost:3000/api-docs
+
+## Iniciar el Frontend
+
+El frontend es una aplicación Next.js que corre en puerto **3002**.
 
 ```bash
-pnpm build          # Compilar todo el monorepo
-pnpm dev            # Levantar API con hot-reload
-pnpm test           # Correr todos los tests
-pnpm lint           # Lint de todo el monorepo
-pnpm typecheck      # TypeScript check sin emitir archivos
-pnpm db:migrate     # Correr migraciones de Prisma
-pnpm db:generate    # Generar cliente de Prisma
+# Desarrollo con hot-reload
+cd apps/web
+pnpm dev
+```
+
+**Verificar que funciona:**
+- Frontend: http://localhost:3002
+
+## Levantar Todo Junto (Recomendado para desarrollo)
+
+### Opción 1: Usar Scripts (MÁS FÁCIL) ⭐
+
+Desde la raíz del proyecto:
+
+```bash
+# Terminal 1: Docker + Migraciones + API (una sola vez)
+pnpm dev:docker-api
+
+# Terminal 2: Frontend (en otra terminal)
+pnpm dev:web
+```
+
+O todo en una sola terminal (Docker y API en foreground):
+```bash
+pnpm dev:docker-api:watch
+```
+
+### Opción 2: Terminales Separadas (Manual)
+
+Si prefieres control total:
+
+```bash
+# Terminal 1: Infraestructura (una sola vez)
+pnpm dev:infra
+
+# Terminal 2: Migraciones (una sola vez)
+pnpm db:migrate
+
+# Terminal 3: Backend
+pnpm dev:api
+
+# Terminal 4: Frontend
+pnpm dev:web
+```
+
+### Opción 3: Todo en Paralelo
+
+```bash
+pnpm dev:all     # Backend + Frontend en paralelo (requiere Docker ya levantado)
+```
+
+## Scripts Disponibles en la Raíz
+
+```bash
+# Compilación
+pnpm build              # Compilar todo el monorepo (backend + frontend)
+
+# Desarrollo - Quick Start ⭐
+pnpm dev:docker-api     # Levanta Docker + migraciones + API (recomendado)
+pnpm dev:docker-api:watch # Docker + API en foreground (ver logs en tiempo real)
+pnpm dev:infra          # Solo levanta Docker (PostgreSQL + Redis + Prometheus + Grafana)
+pnpm dev:infra:down     # Detiene todos los contenedores Docker
+
+# Desarrollo - Individual
+pnpm dev                # Levantar solo el backend con hot-reload
+pnpm dev:api            # Alias para dev (solo API)
+pnpm dev:web            # Levantar solo el frontend
+pnpm dev:all            # Levantar backend + frontend en paralelo (requiere Docker activo)
+
+# Testing
+pnpm test               # Correr todos los tests
+pnpm test:watch        # Modo watch en tests
+
+# Calidad de código
+pnpm lint               # Lint de todo el monorepo
+pnpm typecheck          # TypeScript check sin emitir archivos
+pnpm format             # Formatear con Prettier
+
+# Base de datos
+pnpm db:migrate         # Correr migraciones de Prisma
+pnpm db:generate        # Regenerar cliente de Prisma
+pnpm db:studio          # Abrir Prisma Studio (UI para BD)
+```
+
+## Scripts en apps/api (Backend)
+
+```bash
+cd apps/api
+
+pnpm dev                # Levantar API con hot-reload (ts-node-dev)
+pnpm build              # Compilar a JavaScript
+pnpm start              # Correr API compilada
+pnpm test               # Correr tests
+pnpm lint               # Lint del backend
+pnpm typecheck          # TypeScript check
+```
+
+## Scripts en apps/web (Frontend)
+
+```bash
+cd apps/web
+
+pnpm dev                # Levantar Next.js en puerto 3002
+pnpm build              # Compilar para producción
+pnpm start              # Correr compilada (requiere `pnpm build` primero)
+pnpm lint               # Lint del frontend
+pnpm typecheck          # TypeScript check
+```
+
+## Flujo de Desarrollo Recomendado
+
+1. **Setup inicial (una sola vez):**
+   ```bash
+   pnpm install
+   docker compose -f docker/docker-compose.yml up -d
+   pnpm db:migrate
+   ```
+
+2. **Desarrollo diario:**
+   - Terminal 1: `pnpm dev` (Backend)
+   - Terminal 2: `cd apps/web && pnpm dev` (Frontend)
+   - Abre http://localhost:3002
+
+3. **Ver cambios en tiempo real:**
+   - Backend: hot-reload automático con ts-node-dev
+   - Frontend: hot-reload automático con Next.js
+
+## Variables de Entorno
+
+### Backend (apps/api/.env)
+```
+DATABASE_URL=postgresql://bcp:bcp_dev_password@localhost:5433/bcp
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=your-secret-key-here
+NODE_ENV=development
+```
+
+### Frontend (apps/web/.env.local)
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
 ## Estado del proyecto

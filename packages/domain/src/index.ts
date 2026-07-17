@@ -1,11 +1,13 @@
 export { UniqueId } from './shared/UniqueId'
-export { IClock, SystemClock, FixedClock } from './shared/Clock'
+export type { IClock } from './shared/Clock'
+export { SystemClock, FixedClock } from './shared/Clock'
 export { Result } from './shared/Result'
 export { ValueObject } from './shared/ValueObject'
 export { Entity } from './shared/Entity'
 export { AggregateRoot } from './shared/AggregateRoot'
 export { DomainEvent } from './shared/DomainEvent'
-export { Specification, AndSpecification, OrSpecification, NotSpecification } from './shared/Specification'
+export type { Specification } from './shared/Specification'
+export { AndSpecification, OrSpecification, NotSpecification } from './shared/Specification'
 export {
   DomainError,
   ValidationError,

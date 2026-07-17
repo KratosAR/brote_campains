@@ -1,0 +1,88 @@
+name: SBOM Generation
+
+on:
+  push:
+    branches: [main, "sprint/*"]
+  pull_request:
+    branches: [main, "sprint/*"]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  sbom:
+    name: Generate Software Bill of Materials
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install CycloneDX
+        run: npm install -g @cyclonedx/bom
+
+      - name: Generate SBOM (CycloneDX format)
+        run: |
+          cyclonedx-npm --output-file sbom.xml --output-format xml
+          echo "SBOM generated: sbom.xml"
+          ls -lh sbom.xml
+
+      - name: Generate SBOM (SPDX format)
+        run: |
+          npm list --all --json > npm-list.json
+          echo "npm list exported to npm-list.json"
+
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: |
+            sbom.xml
+            npm-list.json
+          retention-days: 90
+
+      - name: Comment SBOM stats on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const sbom = fs.readFileSync('sbom.xml', 'utf8');
+
+            // Count components
+            const componentMatch = sbom.match(/<components>([\s\S]*?)<\/components>/);
+            const componentCount = (componentMatch?.[1] || '').match(/<component/g)?.length || 0;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📋 **SBOM Generated**\n\n- Total dependencies: ${componentCount}\n- Format: CycloneDX (XML)\n- Artifact: [sbom.xml](artifacts)\n\n**Note:** SBOM can be consumed by:\n- Dependency scanners (Snyk, Trivy)\n- License compliance tools\n- Supply chain security audits`
+            });
+
+      - name: Check for unmaintained dependencies
+        run: |
+          echo "Scanning for deprecated packages..."
+          npm audit --json > audit-report.json || true
+
+          # Parse audit report (non-blocking)
+          VULNERABILITIES=$(jq '.metadata.vulnerabilities.total // 0' audit-report.json)
+          echo "Found $VULNERABILITIES vulnerabilities (see Snyk for details)"
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-report
+          path: audit-report.json
+          retention-days: 30

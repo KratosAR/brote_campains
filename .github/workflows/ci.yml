@@ -57,6 +57,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Scan for hardcoded secrets
+        run: |
+          # Detect common secrets patterns in source code
+          echo "Scanning for hardcoded secrets..."
+          ! grep -r --include="*.ts" --include="*.tsx" --include="*.js" \
+            -E '(api[_-]?key|password|secret|token|credential)\s*[=:]\s*["\x27]' \
+            apps packages providers src | grep -v node_modules | grep -v "\.example\." && \
+          echo "✓ No obvious hardcoded secrets found" || echo "⚠ Check above matches manually"
+
+          # Detect .env files in commit (should never happen)
+          ! git ls-files | grep -E '^\.env[^.]' && \
+          echo "✓ No .env files in git" || exit 1
+
       - name: Dependency vulnerability scan (Snyk)
         run: pnpm add -g snyk && snyk test --severity-threshold=high
         continue-on-error: true
@@ -82,3 +95,19 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Report coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          flags: coverage

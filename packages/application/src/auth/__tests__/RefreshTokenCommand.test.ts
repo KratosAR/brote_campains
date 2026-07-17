@@ -20,13 +20,14 @@ describe('RefreshTokenCommand', () => {
       }),
     )
     const membership = workspaceUserRepository.memberships[0]!
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: userId.toString(),
       workspaceId: membership.workspaceId.toString(),
       role: membership.role,
       jwtSecret: SECRET,
       refreshTokenRepository,
     })
+    const tokens = tokensResult.getValue()
     return { workspaceUserRepository, refreshTokenRepository, tokens }
   }
 

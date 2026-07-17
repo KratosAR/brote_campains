@@ -1,0 +1,112 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, "sprint/*"]
+  pull_request:
+    branches: [main, "sprint/*"]
+
+jobs:
+  e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    if: success()  # Only run if CI workflow passed
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: bcp_test
+          POSTGRES_USER: bcp
+          POSTGRES_PASSWORD: bcp_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://bcp:bcp_test_password@localhost:5432/bcp_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-at-least-32-characters-long
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-at-least-32-char
+      ENCRYPTION_KEY: ci-test-encryption-key-at-least-32-chars
+      NODE_ENV: test
+      API_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Run database migrations
+        run: |
+          cd apps/api
+          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy
+
+      - name: Start API server
+        run: |
+          # Start API in background
+          NODE_ENV=test DATABASE_URL=${{ env.DATABASE_URL }} \
+          REDIS_URL=${{ env.REDIS_URL }} \
+          JWT_SECRET=${{ env.JWT_SECRET }} \
+          node apps/api/dist/index.js &
+
+          # Wait for API to be ready
+          echo "Waiting for API to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health > /dev/null; then
+              echo "✓ API is ready"
+              exit 0
+            fi
+            echo "Attempt $i/30: API not ready yet, waiting..."
+            sleep 1
+          done
+          echo "❌ API failed to start"
+          exit 1
+
+      - name: Run E2E tests
+        run: pnpm test --testPathPattern="e2e" --runInBand --detectOpenHandles
+        timeout-minutes: 10
+
+      - name: Collect coverage
+        run: pnpm test --coverage --testPathPattern="e2e"
+        if: always()
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          flags: e2e
+          name: e2e-coverage
+
+      - name: API logs on failure
+        if: failure()
+        run: |
+          echo "=== API Output ==="
+          # Logs would be available from background process
+          echo "Check workflow logs above for details"

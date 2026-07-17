@@ -1,1 +1,37 @@
-pnpm lint && pnpm typecheck
+#!/bin/sh
+
+set -e
+
+echo "🔍 Pre-commit checks starting..."
+
+# 1. Lint & TypeCheck (existing)
+echo "  → Running lint and typecheck..."
+pnpm lint && pnpm typecheck || { echo "❌ Lint/typecheck failed"; exit 1; }
+
+# 2. Test critical paths if modified
+echo "  → Checking modified files for test coverage..."
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if auth, security, or validation files changed
+if echo "$STAGED_FILES" | grep -qE '(auth|security|validation|middleware|command)'; then
+  echo "  ⚠️  Critical files modified - running tests for auth/security packages"
+  pnpm test --testPathPattern="(auth|security|validation)" --bail || { echo "❌ Tests failed for critical paths"; exit 1; }
+fi
+
+# 3. Detect secrets (fail-fast)
+echo "  → Scanning for hardcoded secrets..."
+if git diff --cached | grep -iE '(api.?key|password|secret|token|credential)\s*[=:]\s*["\047]' | grep -v node_modules; then
+  echo "❌ Hardcoded secret detected!"
+  echo "Remove the secret and try again."
+  exit 1
+fi
+
+# 4. Check for console.log in staged code
+if git diff --cached | grep -E '^\+.*console\.(log|error|warn|debug)' | grep -v '.test.' | grep -v node_modules; then
+  echo "⚠️  console.log found in staged code - consider removing before commit"
+  # Non-blocking warning
+fi
+
+echo "✅ Pre-commit checks passed!"

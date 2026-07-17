@@ -1,0 +1,160 @@
+name: Security Headers Validation
+
+on:
+  push:
+    branches: [main, "sprint/*"]
+  pull_request:
+    branches: [main, "sprint/*"]
+
+jobs:
+  security-headers:
+    name: Check API Security Headers
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: bcp_test
+          POSTGRES_USER: bcp
+          POSTGRES_PASSWORD: bcp_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://bcp:bcp_test_password@localhost:5432/bcp_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-at-least-32-characters-long
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-at-least-32-char
+      ENCRYPTION_KEY: ci-test-encryption-key-at-least-32-chars
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run database migrations
+        run: |
+          cd apps/api
+          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy
+
+      - name: Start API server
+        run: |
+          NODE_ENV=test DATABASE_URL=${{ env.DATABASE_URL }} \
+          REDIS_URL=${{ env.REDIS_URL }} \
+          JWT_SECRET=${{ env.JWT_SECRET }} \
+          node apps/api/dist/index.js > /tmp/api.log 2>&1 &
+
+          echo "Waiting for API..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✓ API ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "❌ API failed to start"
+          cat /tmp/api.log
+          exit 1
+
+      - name: Check Security Headers
+        run: |
+          echo "🔍 Checking API security headers..."
+
+          HEADERS=$(curl -I -s http://localhost:3000/health)
+
+          # Check for required headers
+          echo "Response headers:"
+          echo "$HEADERS"
+          echo ""
+
+          PASS=0
+          FAIL=0
+
+          # X-Content-Type-Options
+          if echo "$HEADERS" | grep -qi "X-Content-Type-Options: nosniff"; then
+            echo "✅ X-Content-Type-Options: nosniff"
+            ((PASS++))
+          else
+            echo "⚠️  Missing X-Content-Type-Options: nosniff"
+            ((FAIL++))
+          fi
+
+          # X-Frame-Options
+          if echo "$HEADERS" | grep -qi "X-Frame-Options"; then
+            echo "✅ X-Frame-Options present"
+            ((PASS++))
+          else
+            echo "⚠️  Missing X-Frame-Options"
+            ((FAIL++))
+          fi
+
+          # Strict-Transport-Security (may not be on localhost, warning only)
+          if echo "$HEADERS" | grep -qi "Strict-Transport-Security"; then
+            echo "✅ Strict-Transport-Security present"
+            ((PASS++))
+          else
+            echo "ℹ️  Strict-Transport-Security missing (expected on localhost)"
+          fi
+
+          # Content-Security-Policy
+          if echo "$HEADERS" | grep -qi "Content-Security-Policy"; then
+            echo "✅ Content-Security-Policy present"
+            ((PASS++))
+          else
+            echo "⚠️  Missing Content-Security-Policy"
+            ((FAIL++))
+          fi
+
+          # X-XSS-Protection (deprecated but still good to have)
+          if echo "$HEADERS" | grep -qi "X-XSS-Protection"; then
+            echo "✅ X-XSS-Protection present"
+            ((PASS++))
+          else
+            echo "ℹ️  X-XSS-Protection missing"
+          fi
+
+          # Referrer-Policy
+          if echo "$HEADERS" | grep -qi "Referrer-Policy"; then
+            echo "✅ Referrer-Policy present"
+            ((PASS++))
+          else
+            echo "ℹ️  Referrer-Policy missing"
+          fi
+
+          echo ""
+          echo "Summary: $PASS passed, $FAIL issues"
+
+          if [ $FAIL -gt 0 ]; then
+            echo "❌ Security headers validation failed"
+            exit 1
+          fi
+
+          echo "✅ Security headers validated"

@@ -118,4 +118,31 @@ export class Workspace extends AggregateRoot<WorkspaceProps> {
     this.addDomainEvent(new WorkspaceArchived(this.id.toString(), this.id.toString()))
     return Result.ok(undefined)
   }
+
+  updateDetails(
+    updates: Partial<{ name: string; slug: string; settings: WorkspaceSettings }>,
+  ): Result<void, ValidationError> {
+    const updates_to_apply: Partial<WorkspaceProps> = {}
+
+    if (updates.name !== undefined) {
+      if (!updates.name || updates.name.trim().length === 0) {
+        return Result.fail(new ValidationError('Workspace name cannot be empty', 'name'))
+      }
+      updates_to_apply.name = updates.name.trim()
+    }
+
+    if (updates.slug !== undefined) {
+      if (!updates.slug || updates.slug.trim().length === 0) {
+        return Result.fail(new ValidationError('Workspace slug cannot be empty', 'slug'))
+      }
+      updates_to_apply.slug = updates.slug.trim()
+    }
+
+    if (updates.settings !== undefined) {
+      updates_to_apply.settings = updates.settings
+    }
+
+    this.props = { ...this.props, ...updates_to_apply }
+    return Result.ok(undefined)
+  }
 }

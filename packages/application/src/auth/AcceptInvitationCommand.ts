@@ -92,14 +92,15 @@ export class AcceptInvitationCommand {
 
     await this.eventBus.publish([new UserJoined(invitation.workspaceId, invitation.workspaceId, userId.toString())])
 
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: userId.toString(),
       workspaceId: invitation.workspaceId,
       role: invitation.role,
       jwtSecret: this.jwtSecret,
       refreshTokenRepository: this.refreshTokenRepository,
     })
+    if (tokensResult.isFail()) return Result.fail(tokensResult.getError())
 
-    return Result.ok(tokens)
+    return Result.ok(tokensResult.getValue())
   }
 }

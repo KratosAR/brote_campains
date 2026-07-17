@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { UserRole, RolePermissions } from '@bcp/domain'
+import { UserRole, RolePermissions, Result, DomainError } from '@bcp/domain'
 import { IRefreshTokenRepository } from '@bcp/contracts'
 
 import { signAccessToken, ACCESS_TOKEN_TTL_SECONDS } from './accessToken'
@@ -17,7 +17,7 @@ export async function issueTokenPair(params: {
   role: UserRole
   jwtSecret: string
   refreshTokenRepository: IRefreshTokenRepository
-}): Promise<TokenPair> {
+}): Promise<Result<TokenPair, DomainError>> {
   const accessToken = signAccessToken(
     {
       sub: params.userId,
@@ -41,8 +41,8 @@ export async function issueTokenPair(params: {
   })
 
   if (result.isFail()) {
-    throw result.getError()
+    return Result.fail(result.getError())
   }
 
-  return { accessToken, refreshToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS }
+  return Result.ok({ accessToken, refreshToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS })
 }

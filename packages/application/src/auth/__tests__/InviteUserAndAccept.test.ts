@@ -62,7 +62,7 @@ describe('InviteUserCommand + AcceptInvitationCommand', () => {
     const acceptResult = await accept.execute({
       token: inviteResult.getValue().invitationToken,
       name: 'Newbie',
-      password: 'super-secret-1',
+      password: 'Super@Secret1',
     })
 
     expect(acceptResult.isOk()).toBe(true)
@@ -132,8 +132,8 @@ describe('InviteUserCommand + AcceptInvitationCommand', () => {
       SECRET,
     )
     const token = inviteResult.getValue().invitationToken
-    const first = await accept.execute({ token, name: 'Newbie', password: 'super-secret-1' })
-    const second = await accept.execute({ token, name: 'Newbie', password: 'super-secret-1' })
+    const first = await accept.execute({ token, name: 'Newbie', password: 'Super@Secret1' })
+    const second = await accept.execute({ token, name: 'Newbie', password: 'Super@Secret1' })
 
     expect(first.isOk()).toBe(true)
     expect(second.isFail()).toBe(true)
