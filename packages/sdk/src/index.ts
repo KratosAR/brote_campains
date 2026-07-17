@@ -53,3 +53,18 @@ export {
   type CreateGroupInput,
   type ImportJobStatus
 } from './contacts'
+export {
+  listTemplates,
+  getTemplate,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  getTemplateVersions,
+  previewTemplate,
+  extractVariables,
+  type Template,
+  type TemplateVersion,
+  type CreateTemplateInput,
+  type UpdateTemplateInput,
+  type PreviewResult
+} from './templates'

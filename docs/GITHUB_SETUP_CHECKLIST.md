@@ -135,6 +135,9 @@ Codecov configuration is NOT done in dashboard toggles — it's configured via a
 - Reads PR context from GitHub automatically
 - No manual token configuration required
 
+**Free Plan Limitations:**
+See [CODECOV_LIMITATIONS.md](./CODECOV_LIMITATIONS.md) for full capabilities breakdown
+
 ### 4.3: Verify Integration
 1. Create a test PR
 2. CI generates coverage report

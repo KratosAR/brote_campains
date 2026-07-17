@@ -27,7 +27,7 @@ export interface CreateContactInput {
   telegramId?: string
 }
 
-export interface UpdateContactInput extends Partial<CreateContactInput> {}
+export type UpdateContactInput = Partial<CreateContactInput>
 
 export interface ContactGroup {
   id: string
