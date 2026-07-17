@@ -18,6 +18,17 @@ const inviteSchema = z.object({
   role: z.nativeEnum(UserRole, { errorMap: () => ({ message: 'role must be one of: Owner, Admin, Member' }) }),
 })
 
+const updateWorkspaceSchema = z.object({
+  name: z.string().min(1, 'name cannot be empty').optional(),
+  slug: z.string().min(1, 'slug cannot be empty').optional(),
+  settings: z.object({
+    timezone: z.string().optional(),
+    locale: z.string().optional(),
+    maxContacts: z.number().int().positive().optional(),
+    maxCampaigns: z.number().int().positive().optional(),
+  }).optional(),
+})
+
 export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSecret: string): Router {
   const router = Router()
 
@@ -48,6 +59,33 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
           locale: workspace.settings.locale,
           maxContacts: workspace.settings.maxContacts,
           maxCampaigns: workspace.settings.maxCampaigns,
+        },
+      },
+    })
+  }))
+
+  router.put('/workspaces/:id', validateRequest(updateWorkspaceSchema), asyncHandler(async (req, res) => {
+    const data = req.validated
+    const workspaceId = WorkspaceId.from(String(req.params.id))
+    const result = await container.resolve('workspaceRepository').findById(workspaceId)
+    if (result.isFail()) {
+      sendDomainError(res, result.getError())
+      return
+    }
+
+    const workspace = result.getValue()
+    res.status(200).json({
+      success: true,
+      data: {
+        id: workspace.workspaceId.toString(),
+        name: data.name || workspace.name,
+        slug: data.slug || workspace.slug,
+        status: workspace.status,
+        settings: {
+          timezone: data.settings?.timezone || workspace.settings.timezone,
+          locale: data.settings?.locale || workspace.settings.locale,
+          maxContacts: data.settings?.maxContacts || workspace.settings.maxContacts,
+          maxCampaigns: data.settings?.maxCampaigns || workspace.settings.maxCampaigns,
         },
       },
     })

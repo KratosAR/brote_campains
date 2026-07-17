@@ -1,4 +1,5 @@
 import { ApiClient } from './client'
+import type { ChannelType } from '@bcp/domain'
 
 export interface Template {
   id: string
@@ -22,6 +23,7 @@ export interface TemplateVersion {
 export interface CreateTemplateInput {
   name: string
   body: string
+  channel: ChannelType
 }
 
 export interface UpdateTemplateInput {
@@ -79,7 +81,9 @@ export async function createTemplate(
   const client = getApiClient()
   const variables = extractVariables(input.body)
   return client.post(`/workspaces/${workspaceId}/templates`, {
-    ...input,
+    name: input.name,
+    body: input.body,
+    channel: input.channel,
     variables
   })
 }

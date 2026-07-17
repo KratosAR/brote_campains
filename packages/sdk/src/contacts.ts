@@ -29,6 +29,22 @@ export interface CreateContactInput {
 
 export type UpdateContactInput = Partial<CreateContactInput>
 
+interface Channel {
+  type: 'WhatsApp' | 'Email' | 'SMS' | 'Telegram'
+  value: string
+  verified?: boolean
+  isPrimary?: boolean
+}
+
+function buildChannels(input: CreateContactInput): Channel[] {
+  const channels: Channel[] = []
+  if (input.whatsappPhone) channels.push({ type: 'WhatsApp', value: input.whatsappPhone })
+  if (input.emailAddress) channels.push({ type: 'Email', value: input.emailAddress })
+  if (input.smsPhone) channels.push({ type: 'SMS', value: input.smsPhone })
+  if (input.telegramId) channels.push({ type: 'Telegram', value: input.telegramId })
+  return channels
+}
+
 export interface ContactGroup {
   id: string
   name: string
@@ -89,7 +105,14 @@ export async function createContact(
   input: CreateContactInput
 ): Promise<Contact> {
   const client = getApiClient()
-  return client.post(`/workspaces/${workspaceId}/contacts`, input)
+  const channels = buildChannels(input)
+  if (channels.length === 0) {
+    throw new Error('At least one contact channel is required')
+  }
+  return client.post(`/workspaces/${workspaceId}/contacts`, {
+    identity: input.identity,
+    channels
+  })
 }
 
 export async function updateContact(

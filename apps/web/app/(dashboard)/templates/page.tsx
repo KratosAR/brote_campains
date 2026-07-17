@@ -17,7 +17,8 @@ export default function TemplatesPage() {
   const [previewTemplateId, setPreviewTemplateId] = React.useState<string | null>(null)
   const [formData, setFormData] = React.useState<CreateTemplateInput>({
     name: '',
-    body: ''
+    body: '',
+    channel: 'WhatsApp' as any
   })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null)
@@ -38,7 +39,7 @@ export default function TemplatesPage() {
     onSuccess: () => {
       addToast('Template created', 'success')
       setView('list')
-      setFormData({ name: '', body: '' })
+      setFormData({ name: '', body: '', channel: 'WhatsApp' as any })
       queryClient.invalidateQueries({ queryKey: ['templates', workspaceId] })
     },
     onError: () => {
@@ -223,6 +224,19 @@ export default function TemplatesPage() {
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-slate-700">Channel</label>
+              <select
+                value={formData.channel}
+                onChange={(e) => setFormData({ ...formData, channel: e.target.value as any })}
+                className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
+              >
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Email">Email</option>
+                <option value="SMS">SMS</option>
+              </select>
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-slate-700">
                 Template Body (use {'{{variable}}'} for placeholders)
               </label>
@@ -255,7 +269,7 @@ export default function TemplatesPage() {
             <button
               onClick={() => {
                 setView('list')
-                setFormData({ name: '', body: '' })
+                setFormData({ name: '', body: '', channel: 'WhatsApp' as any })
                 setErrors({})
               }}
               className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg"

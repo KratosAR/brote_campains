@@ -48,6 +48,11 @@ export default function LoginPage() {
         return
       }
 
+      const data = await response.json()
+      if (data.workspaceId) {
+        sessionStorage.setItem('workspaceId', data.workspaceId)
+      }
+
       addToast('Successfully signed in', 'success')
       router.push('/')
     } catch (err) {

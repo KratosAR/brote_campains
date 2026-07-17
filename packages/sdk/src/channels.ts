@@ -64,10 +64,10 @@ export async function connectChannel(
 
 export async function disconnectChannel(
   workspaceId: string,
-  channel: ChannelType
+  connectionId: string
 ): Promise<void> {
   const client = getApiClient()
-  await client.delete(`/workspaces/${workspaceId}/channels/${channel}`)
+  await client.post(`/workspaces/${workspaceId}/channels/${connectionId}/disconnect`, {})
 }
 
 export async function healthCheckChannel(
