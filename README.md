@@ -2,10 +2,13 @@
 
 Plataforma de comunicación empresarial omnicanal. Campañas masivas, contactos, templates y analíticas — con arquitectura desacoplada que permite cambiar de proveedor (Meta, Evolution, SMTP, Telegram) sin tocar el dominio.
 
+**Visión de producto (2026-07-17):** evolucionar de motor de campañas broadcast (WhatsApp) a una alternativa completa a ManyChat — multicanal, inbox conversacional, flow builder visual y secuencias — diferenciándose por ser **self-hosted / open-core** (WhatsApp vía Evolution API self-hosted además de Meta Cloud API oficial, sin vendor lock-in) y por un modelo de **compliance/consentimiento** más robusto que el estándar del mercado. Ver [`[IN_DEV].ROADMAP.md`](./[IN_DEV].ROADMAP.md).
+
 ## Documentación
 
-- [`BCP-SPECIFICATION.md`](./BCP-SPECIFICATION.md) — especificación completa del producto: arquitectura, dominio, decisiones y SRS
-- [`BCP-SPRINTS.md`](./BCP-SPRINTS.md) — plan de sprints con tareas y criterios de aceptación
+- [`[IN_DEV].ROADMAP.md`](./[IN_DEV].ROADMAP.md) — roadmap de producto hacia paridad y diferenciación frente a ManyChat: fases, sprints backend/frontend, estimaciones
+- [`[COMPLETE].BCP-SPECIFICATION.md`](./[COMPLETE].BCP-SPECIFICATION.md) — especificación completa del producto: arquitectura, dominio, decisiones y SRS
+- [`[COMPLETE].BCP-SPRINTS.md`](./[COMPLETE].BCP-SPRINTS.md) — plan de sprints ejecutados (Sprint 0–9.4, ✅ completo) con tareas y criterios de aceptación
 
 ## Status de Estabilidad
 
@@ -21,7 +24,7 @@ Se identificaron y resolvieron **5 problemas críticos de estabilidad del servid
 | **Slug duplicado sin validación** | Crash silencioso (unhandled rejection) | Validar slug antes de guardar | Error validación claro |
 | **Rate limiters conflictivos** | 429 inconsistentes, dos configuraciones | Consolidar en un solo archivo, 3 limiters claros | Rate limiting predecible |
 
-**Detalles:** Ver [`BCP-SPRINTS.md#post-sprint-9`](./BCP-SPRINTS.md#post-sprint-9--stabilization--bug-fixes-investigación-de-2026-07-13)
+**Detalles:** Ver [`[COMPLETE].BCP-SPRINTS.md#post-sprint-9`](./[COMPLETE].BCP-SPRINTS.md#post-sprint-9--stabilization--bug-fixes-investigación-de-2026-07-13)
 
 ## Requisitos
 
