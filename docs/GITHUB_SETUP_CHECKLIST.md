@@ -119,20 +119,35 @@ In Snyk dashboard (https://app.snyk.io):
 3. Authorize Codecov
 4. Select `brote_campains` repository (auto-detected)
 
-### 4.2: Configure Repository
-In Codecov dashboard:
-1. Go to your repo settings
-2. **Coverage tolerance:** 80% (match our threshold)
-3. **Fail CI if coverage drops:** YES
-4. **Patch coverage requirement:** 80%
-5. **Flag:** Create flag "backend" + "frontend" if multi-project
+### 4.2: Configure Codecov via codecov.yml
+Codecov configuration is NOT done in dashboard toggles — it's configured via a `codecov.yml` file in the repo root.
 
-### 4.3: No token needed
-Codecov auto-detects GitHub Actions, no explicit token required
+**File:** `codecov.yml` (already created in repo)
 
-### 4.4: Verify Integration
-- PR should show coverage report (wait for first coverage upload)
-- Codecov badge in README can be added
+**What it configures:**
+- ✅ Coverage target: 80% (project-wide)
+- ✅ Patch coverage: 80% (new code only)
+- ✅ Fail CI if coverage drops: YES
+- ❌ Flags (backend/frontend): Requires Pro Plan (not using Free plan)
+
+**No GitHub Secret needed:**
+- Codecov auto-detects GitHub Actions
+- Reads PR context from GitHub automatically
+- No manual token configuration required
+
+### 4.3: Verify Integration
+1. Create a test PR
+2. CI generates coverage report
+3. Wait 2-3 minutes
+4. Codecov comments on PR with coverage analysis
+5. If coverage < 80%: PR shows ❌ (CI required check fails)
+6. If coverage ≥ 80%: PR shows ✅ (CI passes)
+
+### 4.4: Add Codecov Badge (Optional)
+Add to README.md:
+```markdown
+[![codecov](https://codecov.io/gh/KratosAR/brote_campains/branch/main/graph/badge.svg)](https://codecov.io/gh/KratosAR/brote_campains)
+```
 
 ---
 
