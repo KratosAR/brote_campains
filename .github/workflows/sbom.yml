@@ -2,9 +2,9 @@ name: SBOM Generation
 
 on:
   push:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
   pull_request:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
 
 permissions:
   contents: read

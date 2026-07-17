@@ -1,0 +1,66 @@
+name: Auto-Promote Branches
+
+# Opens (or refreshes) a promotion PR the moment CI goes green on a source
+# branch. It never merges automatically - staging->main always needs a human
+# approval, and development->staging needs CI green at minimum. This keeps
+# the dev -> staging -> main pipeline moving without silently pushing
+# unreviewed code toward production.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [development, staging]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  promote:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine promotion direction
+        id: direction
+        run: |
+          case "${{ github.event.workflow_run.head_branch }}" in
+            development)
+              echo "base=staging" >> "$GITHUB_OUTPUT"
+              echo "head=development" >> "$GITHUB_OUTPUT"
+              echo "label=promote-to-staging" >> "$GITHUB_OUTPUT"
+              ;;
+            staging)
+              echo "base=main" >> "$GITHUB_OUTPUT"
+              echo "head=staging" >> "$GITHUB_OUTPUT"
+              echo "label=promote-to-main" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unexpected branch, skipping"
+              exit 0
+              ;;
+          esac
+
+      - name: Open or update promotion PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE: ${{ steps.direction.outputs.base }}
+          HEAD: ${{ steps.direction.outputs.head }}
+          LABEL: ${{ steps.direction.outputs.label }}
+        run: |
+          EXISTING=$(gh pr list --repo "${{ github.repository }}" \
+            --base "$BASE" --head "$HEAD" --state open --json number -q '.[0].number')
+
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already open ($HEAD -> $BASE), CI just refreshed it green."
+            exit 0
+          fi
+
+          BODY="Auto-opened because CI passed on \`$HEAD\` (run: ${{ github.event.workflow_run.html_url }})."
+          BODY="$BODY"$'\n\n'"Review the diff, confirm no regressions, then merge. This PR does not auto-merge - $BASE requires a human approval."
+
+          gh pr create --repo "${{ github.repository }}" \
+            --base "$BASE" --head "$HEAD" \
+            --title "[INFRA] chore: promote $HEAD -> $BASE (CI green)" \
+            --body "$BODY" \
+            --label "$LABEL" 2>&1 || echo "PR creation skipped (label may not exist yet or PR already covered by branch state)"
