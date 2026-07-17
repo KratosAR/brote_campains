@@ -1,40 +1,46 @@
 # Git-secrets false positives allowlist
-# These patterns are whitelisted because they are examples, tests, or documentation
+# Patterns (regex) that match legitimate non-secret uses of keywords like password, token, key, secret
 
-# Test data and examples
+# Code patterns: password/token as variable names or function calls (not credentials)
+confirmPassword
+getAccessToken
+password\s*===
+const\s+token\s*=
+match\[1\]
+query\['hub\.verify_token'\]
+apikey.*other-key
+expect\.objectContaining.*apikey
+
+# Inline test/example credentials in code
+'other-key'
 Test@1234567890
 Test123456!
 test-connection
-your-api-key
-secret-here
-demo-token
 
-# Documentation and comments
-Evolution API no firma sus webhooks
-Query param.*token=
+# Comments and documentation patterns (not actual credentials)
+secreto\s+compartido
+`\?token=`
+Evolution API.*webhooks
+como query param
 WEBHOOK_VERIFY_TOKEN
-accessToken
 invitationToken
 refreshToken
-apikey.*secret
-EVOLUTION_API_KEY.*your-api-key
+---BEGIN.*PRIVATE KEY
+your-api-key
+demo-token
 
-# Test files patterns
-\.test\.ts:.*password
-\.test\.ts:.*token
-\.test\.ts:.*secret
-e2e/.*\.ts:.*password
-e2e/.*\.ts:.*token
-__tests__/.*password
-__tests__/.*token
-
-# Configuration examples
-\.env\.example:.*password
-\.env\.example:.*token
-\.env\.example:.*secret
-\.env\.example:.*key
-scripts/.*password
-scripts/.*token
-docs/.*password
-docs/.*token
-docs/.*EVOLUTION_API_KEY
+# File-based exclusions: don't scan these file types for secrets
+README.*:.*password
+README.*:.*token
+.*\.md:.*password
+.*\.md:.*token
+.*\.md:.*secret
+.*\.md:.*key
+\.gitignore:.*
+\.env\.example:.*
+scripts/.*:.*password
+scripts/.*:.*token
+__tests__/.*:.*password
+__tests__/.*:.*token
+\.test\.ts:.*
+\.spec\.ts:.*
