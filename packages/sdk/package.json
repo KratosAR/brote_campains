@@ -10,6 +10,9 @@
     "lint": "eslint src --ext .ts --no-error-on-unmatched-pattern",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@bcp/domain": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^22.15.3",
     "typescript": "^5.8.3",

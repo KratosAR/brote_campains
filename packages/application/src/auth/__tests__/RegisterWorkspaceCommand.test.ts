@@ -34,11 +34,10 @@ describe('RegisterWorkspaceCommand', () => {
     const result = await command.execute({
       ownerName: 'Ada Lovelace',
       ownerEmail: 'ada@example.com',
-      ownerPassword: 'Super-secret-1',
+      ownerPassword: 'Super@Secret1',
       workspaceName: 'Ada Inc',
       timezone: 'America/Argentina/Buenos_Aires',
     })
-
     expect(result.isOk()).toBe(true)
     const output = result.getValue()
     expect(output.accessToken).toEqual(expect.any(String))
@@ -54,7 +53,7 @@ describe('RegisterWorkspaceCommand', () => {
     const input = {
       ownerName: 'Ada',
       ownerEmail: 'dup@example.com',
-      ownerPassword: 'Super-secret-1',
+      ownerPassword: 'Super@Secret1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     }
@@ -70,7 +69,7 @@ describe('RegisterWorkspaceCommand', () => {
     const result = await command.execute({
       ownerName: 'Ada',
       ownerEmail: 'not-an-email',
-      ownerPassword: 'Super-secret-1',
+      ownerPassword: 'Super@Secret1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })

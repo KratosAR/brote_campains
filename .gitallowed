@@ -1,0 +1,50 @@
+# Git-secrets false positives allowlist
+# Patterns (regex) that match legitimate non-secret uses of keywords like password, token, key, secret
+
+# Code patterns: password/token as variable names or function calls (not credentials)
+confirmPassword
+getAccessToken
+password\s*===
+const\s+token\s*=
+match\[1\]
+query\['hub\.verify_token'\]
+apikey.*other-key
+config\.apiKey
+expect\.objectContaining.*apikey
+
+# Inline test/example credentials in code
+'other-key'
+Test@1234567890
+Test123456!
+test-connection
+
+# Comments and documentation patterns (not actual credentials)
+secreto\s+compartido
+`\?token=`
+Evolution API.*webhooks
+como query param
+WEBHOOK_VERIFY_TOKEN
+invitationToken
+refreshToken
+---BEGIN.*PRIVATE KEY
+your-api-key
+demo-token
+
+# File-based exclusions: don't scan these file types for secrets
+README.*:.*password
+README.*:.*token
+.*\.md:.*password
+.*\.md:.*token
+.*\.md:.*secret
+.*\.md:.*key
+\.gitignore:.*
+\.env\.example:.*
+scripts/.*:.*password
+scripts/.*:.*token
+__tests__/.*:.*password
+__tests__/.*:.*token
+\.test\.ts:.*
+\.spec\.ts:.*
+
+# Exclude .gitallowed itself (contains example patterns, not real secrets)
+\.gitallowed:.*

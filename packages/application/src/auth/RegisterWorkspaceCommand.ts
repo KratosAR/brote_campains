@@ -123,18 +123,19 @@ export class RegisterWorkspaceCommand {
 
     await this.eventBus.publish(workspace.clearDomainEvents())
 
-    const tokens = await issueTokenPair({
+    const tokensResult = await issueTokenPair({
       userId: userId.toString(),
       workspaceId: workspace.workspaceId.toString(),
       role: UserRole.Owner,
       jwtSecret: this.jwtSecret,
       refreshTokenRepository: this.refreshTokenRepository,
     })
+    if (tokensResult.isFail()) return Result.fail(tokensResult.getError())
 
     return Result.ok({
       workspaceId: workspace.workspaceId.toString(),
       userId: userId.toString(),
-      ...tokens,
+      ...tokensResult.getValue(),
     })
   }
 }

@@ -28,7 +28,7 @@ describe('LoginCommand', () => {
     const userRepository = new InMemoryUserRepository()
     const workspaceUserRepository = new InMemoryWorkspaceUserRepository()
     const refreshTokenRepository = new InMemoryRefreshTokenRepository()
-    const userId = await seedUser(userRepository, 'correct-password')
+    const userId = await seedUser(userRepository, 'Correct@Pass1')
     workspaceUserRepository.memberships.push(
       WorkspaceUser.create({
         userId,
@@ -40,7 +40,7 @@ describe('LoginCommand', () => {
     )
 
     const command = new LoginCommand(userRepository, workspaceUserRepository, refreshTokenRepository, SECRET)
-    const result = await command.execute({ email: 'user@example.com', password: 'correct-password' })
+    const result = await command.execute({ email: 'user@example.com', password: 'Correct@Pass1' })
 
     expect(result.isOk()).toBe(true)
   })
@@ -49,7 +49,7 @@ describe('LoginCommand', () => {
     const userRepository = new InMemoryUserRepository()
     const workspaceUserRepository = new InMemoryWorkspaceUserRepository()
     const refreshTokenRepository = new InMemoryRefreshTokenRepository()
-    await seedUser(userRepository, 'correct-password')
+    await seedUser(userRepository, 'Correct@Pass1')
 
     const command = new LoginCommand(userRepository, workspaceUserRepository, refreshTokenRepository, SECRET)
 
