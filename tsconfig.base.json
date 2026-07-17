@@ -19,7 +19,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@bcp/*": ["packages/*/src", "providers/*/src"]
+      "@bcp/*": ["packages/*/src"],
+      "@bcp/provider-fake": ["providers/fake/src"],
+      "@bcp/provider-evolution": ["providers/evolution/src"],
+      "@bcp/provider-meta": ["providers/meta/src"]
     }
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
