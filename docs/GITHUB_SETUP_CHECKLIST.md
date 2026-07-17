@@ -86,10 +86,28 @@ Same as `main`, but:
 4. Save to GitHub Secrets (see Step 5)
 
 ### 3.3: Snyk Configuration
-In Snyk dashboard:
+In Snyk dashboard (https://app.snyk.io):
+
+**Vulnerability Scanning:**
 - [ ] Enable "Fail PR if vulnerabilities found" (HIGH+)
 - [ ] Set "Only fail on fixable issues": NO (we want to know about all)
 - [ ] Enable "Automatic fixes" for minor/patch (optional)
+
+**Automatic Dependency Upgrade PRs:**
+1. Go to Settings → Integrations → GitHub
+2. Under "Automatic pull requests for vulnerabilities":
+   - [ ] ✅ Create pull requests for vulnerability fixes
+   - [ ] Only security issues: YES (HIGH+ severity)
+   - [ ] Limit open PRs: 5 (prevents PR spam)
+   - [ ] Create PR as soon as fix is available: YES (responsive)
+   - [ ] Auto-merge security fixes: NO (require CI pass validation)
+
+**Result:**
+- Snyk will auto-create fix PRs for HIGH/CRITICAL vulnerabilities
+- Max 5 open Snyk PRs (+ 5 from Dependabot = 10 max total)
+- Each PR must pass CI before merge
+- Security fixes auto-merge if CI ✅
+- See: `docs/DEPENDENCY_UPDATE_STRATEGY.md` for coordination with Dependabot
 
 ---
 
