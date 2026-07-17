@@ -45,3 +45,6 @@ __tests__/.*:.*password
 __tests__/.*:.*token
 \.test\.ts:.*
 \.spec\.ts:.*
+
+# Exclude .gitallowed itself (contains example patterns, not real secrets)
+\.gitallowed:.*

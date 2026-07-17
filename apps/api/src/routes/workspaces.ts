@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { AwilixContainer } from 'awilix'
 
 import { InviteUserCommand } from '@bcp/application'
-import { WorkspaceId, UserRole, DomainError } from '@bcp/domain'
+import { WorkspaceId, UserRole, DomainError, WorkspaceSettings } from '@bcp/domain'
 
 import { authenticate } from '../middleware/authenticate'
 import { requireOwnWorkspace } from '../middleware/requireOwnWorkspace'
@@ -74,18 +74,53 @@ export function createWorkspacesRouter(container: AwilixContainer<Cradle>, jwtSe
     }
 
     const workspace = result.getValue()
+    let settingsUpdate: WorkspaceSettings | undefined
+
+    if (data.settings) {
+      const settingsResult = WorkspaceSettings.create({
+        timezone: data.settings.timezone || workspace.settings.timezone,
+        locale: data.settings.locale || workspace.settings.locale,
+        maxContacts: data.settings.maxContacts ?? workspace.settings.maxContacts,
+        maxCampaigns: data.settings.maxCampaigns ?? workspace.settings.maxCampaigns,
+      })
+
+      if (settingsResult.isFail()) {
+        sendDomainError(res, settingsResult.getError() as DomainError)
+        return
+      }
+
+      settingsUpdate = settingsResult.getValue()
+    }
+
+    const updateResult = workspace.updateDetails({
+      name: data.name,
+      slug: data.slug,
+      settings: settingsUpdate,
+    })
+
+    if (updateResult.isFail()) {
+      sendDomainError(res, updateResult.getError() as DomainError)
+      return
+    }
+
+    const saveResult = await container.resolve('workspaceRepository').save(workspace)
+    if (saveResult.isFail()) {
+      sendDomainError(res, saveResult.getError() as DomainError)
+      return
+    }
+
     res.status(200).json({
       success: true,
       data: {
         id: workspace.workspaceId.toString(),
-        name: data.name || workspace.name,
-        slug: data.slug || workspace.slug,
+        name: workspace.name,
+        slug: workspace.slug,
         status: workspace.status,
         settings: {
-          timezone: data.settings?.timezone || workspace.settings.timezone,
-          locale: data.settings?.locale || workspace.settings.locale,
-          maxContacts: data.settings?.maxContacts || workspace.settings.maxContacts,
-          maxCampaigns: data.settings?.maxCampaigns || workspace.settings.maxCampaigns,
+          timezone: workspace.settings.timezone,
+          locale: workspace.settings.locale,
+          maxContacts: workspace.settings.maxContacts,
+          maxCampaigns: workspace.settings.maxCampaigns,
         },
       },
     })

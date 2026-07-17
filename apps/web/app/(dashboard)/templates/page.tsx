@@ -3,6 +3,7 @@
 import React from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listTemplates, createTemplate, deleteTemplate, previewTemplate, extractVariables, type CreateTemplateInput } from '@bcp/sdk'
+import { ChannelType } from '@bcp/domain'
 import { useWorkspace } from '@/lib/WorkspaceContext'
 import { useToast } from '@/lib/toast'
 import { Card } from '@/components/ui/Card'
@@ -18,7 +19,7 @@ export default function TemplatesPage() {
   const [formData, setFormData] = React.useState<CreateTemplateInput>({
     name: '',
     body: '',
-    channel: 'WhatsApp' as any
+    channel: ChannelType.WhatsApp
   })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null)
@@ -39,7 +40,7 @@ export default function TemplatesPage() {
     onSuccess: () => {
       addToast('Template created', 'success')
       setView('list')
-      setFormData({ name: '', body: '', channel: 'WhatsApp' as any })
+      setFormData({ name: '', body: '', channel: ChannelType.WhatsApp })
       queryClient.invalidateQueries({ queryKey: ['templates', workspaceId] })
     },
     onError: () => {
@@ -227,12 +228,12 @@ export default function TemplatesPage() {
               <label className="block text-sm font-medium text-slate-700">Channel</label>
               <select
                 value={formData.channel}
-                onChange={(e) => setFormData({ ...formData, channel: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, channel: e.target.value as ChannelType })}
                 className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
               >
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Email">Email</option>
-                <option value="SMS">SMS</option>
+                <option value={ChannelType.WhatsApp}>WhatsApp</option>
+                <option value={ChannelType.Email}>Email</option>
+                <option value={ChannelType.SMS}>SMS</option>
               </select>
             </div>
 
@@ -269,7 +270,7 @@ export default function TemplatesPage() {
             <button
               onClick={() => {
                 setView('list')
-                setFormData({ name: '', body: '', channel: 'WhatsApp' as any })
+                setFormData({ name: '', body: '', channel: ChannelType.WhatsApp })
                 setErrors({})
               }}
               className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg"
