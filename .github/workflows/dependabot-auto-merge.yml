@@ -1,0 +1,87 @@
+name: Dependabot Auto-Merge
+
+# Auto-merges ONLY Dependabot PRs that are:
+#   1. Labeled `auto-merge-candidate` (dependabot.yml only applies this label
+#      to its daily security-only update job - regular weekly dependency
+#      bumps are NOT labeled this way and always need a human to merge)
+#   2. A patch or minor semver bump (never major - those can break APIs)
+#   3. Green on every required CI check
+#
+# This exists so low-risk security patches don't pile up unmerged just
+# because nobody got around to clicking merge - vulnerabilities accumulate
+# for free, fixing them should be free too. Anything riskier always waits
+# for a human.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [development]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find the PR for this CI run
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NUMBER=$(gh api "repos/${{ github.repository }}/commits/${{ github.event.workflow_run.head_sha }}/pulls" \
+            --jq '.[0].number')
+          if [ -z "$NUMBER" ] || [ "$NUMBER" == "null" ]; then
+            echo "No PR found for this commit, skipping."
+            echo "number=" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify eligibility (label + not a major bump)
+        if: steps.pr.outputs.number != ''
+        id: eligible
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ steps.pr.outputs.number }}
+        run: |
+          LABELS=$(gh pr view "$PR" --repo "${{ github.repository }}" --json labels -q '.labels[].name')
+          TITLE=$(gh pr view "$PR" --repo "${{ github.repository }}" --json title -q '.title')
+
+          HAS_LABEL=$(echo "$LABELS" | grep -c '^auto-merge-candidate$' || true)
+          echo "labels: $LABELS"
+
+          # dependabot/fetch-metadata needs the PR context directly, which we
+          # don't have on a workflow_run trigger - fall back to a title-based
+          # heuristic instead: dependabot's PR titles always start with "bump"
+          # and major bumps look like "bump X from 1.x.x to 2.x.x" - reject
+          # any bump that changes the major version segment.
+          IS_MAJOR=0
+          FROM_VER=$(echo "$TITLE" | grep -oP 'from \K[0-9]+' | head -1 || true)
+          TO_VER=$(echo "$TITLE" | grep -oP 'to \K[0-9]+' | head -1 || true)
+          if [ -n "$FROM_VER" ] && [ -n "$TO_VER" ] && [ "$FROM_VER" != "$TO_VER" ]; then
+            IS_MAJOR=1
+          fi
+
+          if [ "$HAS_LABEL" == "1" ] && [ "$IS_MAJOR" == "0" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "Not eligible - label=$HAS_LABEL major=$IS_MAJOR"
+          fi
+
+      - name: Approve and merge
+        if: steps.pr.outputs.number != '' && steps.eligible.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ steps.pr.outputs.number }}
+        run: |
+          gh pr review "$PR" --repo "${{ github.repository }}" --approve \
+            -b "Auto-approved: security-only patch/minor update, CI already green on this exact commit (run: ${{ github.event.workflow_run.html_url }})."
+          gh pr merge "$PR" --repo "${{ github.repository }}" --squash --delete-branch

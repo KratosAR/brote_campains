@@ -4,6 +4,7 @@ updates:
   # npm/pnpm dependencies
   - package-ecosystem: npm
     directory: "/"
+    target-branch: development
     schedule:
       interval: weekly
       day: monday
@@ -19,8 +20,8 @@ updates:
       - "dependencies"
       - "npm"
     commit-message:
-      prefix: "chore(deps)"
-      prefix-development: "chore(deps-dev)"
+      prefix: "[INFRA] chore(deps)"
+      prefix-development: "[INFRA] chore(deps-dev)"
       include: "scope"
     allow:
       - dependency-type: all
@@ -34,6 +35,7 @@ updates:
   # GitHub Actions
   - package-ecosystem: github-actions
     directory: "/"
+    target-branch: development
     schedule:
       interval: weekly
       day: monday
@@ -45,12 +47,13 @@ updates:
       - "dependencies"
       - "github-actions"
     commit-message:
-      prefix: "ci(actions)"
+      prefix: "[INFRA] ci(actions)"
       include: "scope"
 
 # Security Updates (run daily, separate from regular updates)
   - package-ecosystem: npm
     directory: "/"
+    target-branch: development
     schedule:
       interval: daily
     security-updates-only: true
@@ -61,7 +64,8 @@ updates:
     labels:
       - "security"
       - "dependencies"
+      - "auto-merge-candidate"
     commit-message:
-      prefix: "fix(security)"
+      prefix: "[INFRA] fix(security)"
       include: "scope"
     rebase-strategy: auto

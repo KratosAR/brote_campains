@@ -65,8 +65,7 @@ jobs:
 
       - name: Run database migrations
         run: |
-          cd apps/api
-          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy
+          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma
 
       - name: Start API server
         run: |
