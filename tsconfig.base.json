@@ -17,10 +17,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "paths": {
-      "@bcp/*": ["packages/*/src", "providers/*/src"]
-    }
+    "emitDecoratorMetadata": true
   },
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

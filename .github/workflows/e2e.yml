@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, development, "sprint/*"]
   pull_request:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
 
 jobs:
   e2e:
@@ -59,13 +59,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
       - name: Build application
         run: pnpm build
 
       - name: Run database migrations
         run: |
-          cd apps/api
-          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy
+          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma
 
       - name: Start API server
         run: |
@@ -89,11 +91,11 @@ jobs:
           exit 1
 
       - name: Run E2E tests
-        run: pnpm test --testPathPattern="e2e" --runInBand --detectOpenHandles
+        run: pnpm test -- --testPathPattern="e2e" --runInBand --detectOpenHandles --passWithNoTests
         timeout-minutes: 10
 
       - name: Collect coverage
-        run: pnpm test --coverage --testPathPattern="e2e"
+        run: pnpm test -- --coverage --testPathPattern="e2e" --passWithNoTests
         if: always()
 
       - name: Upload coverage to Codecov

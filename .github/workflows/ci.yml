@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, "sprint/*"]
+    branches: [main, "sprint/*", "feature/*", development, staging]
   pull_request:
-    branches: [main, "sprint/*"]
+    branches: [main, "sprint/*", "feature/*"]
 
 jobs:
   ci:
@@ -56,6 +56,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
 
       - name: Scan for hardcoded secrets
         run: |

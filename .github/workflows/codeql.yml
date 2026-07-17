@@ -2,9 +2,9 @@ name: CodeQL Security Analysis
 
 on:
   push:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, development, "sprint/*", "feature/*"]
   pull_request:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
   schedule:
     - cron: '0 0 * * 0' # Weekly on Sunday
 
@@ -12,6 +12,9 @@ jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -38,6 +41,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
 
       - name: Build
         run: pnpm build

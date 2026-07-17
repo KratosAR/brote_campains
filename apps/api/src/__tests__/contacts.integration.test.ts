@@ -14,7 +14,7 @@ describe('Contacts HTTP flow', () => {
     const res = await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: email,
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })

@@ -2,13 +2,14 @@ name: SBOM Generation
 
 on:
   push:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
   pull_request:
-    branches: [main, "sprint/*"]
+    branches: [main, staging, "sprint/*"]
 
 permissions:
   contents: read
   packages: write
+  pull-requests: write
 
 jobs:
   sbom:
@@ -29,17 +30,21 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install CycloneDX
-        run: npm install -g @cyclonedx/bom
+        run: npm install -g @cyclonedx/cyclonedx-npm
 
       - name: Generate SBOM (CycloneDX format)
         run: |
-          cyclonedx-npm --output-file sbom.xml --output-format xml
+          cyclonedx-npm --ignore-npm-errors --output-file sbom.xml --output-format xml
           echo "SBOM generated: sbom.xml"
           ls -lh sbom.xml
 
       - name: Generate SBOM (SPDX format)
         run: |
-          npm list --all --json > npm-list.json
+          # npm list exits non-zero on pnpm's node_modules layout (unmet
+          # peer/dev deps it can't resolve the pnpm-specific way) even with
+          # --json, which still writes a (partial) tree despite the exit
+          # code. Tolerate it here, same as the npm audit step below.
+          npm list --all --json > npm-list.json || true
           echo "npm list exported to npm-list.json"
 
       - name: Upload SBOM as artifact

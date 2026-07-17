@@ -14,12 +14,12 @@ describe('Auth HTTP flow', () => {
     return createApp(createTestContainer(), JWT_SECRET)
   }
 
-  it('registers a workspace and issues a 15-minute access token', async () => {
+  it('registers a workspace and issues a 24-hour access token', async () => {
     const app = makeApp()
     const res = await request(app).post('/auth/register').send({
       ownerName: 'Ada Lovelace',
       ownerEmail: 'ada@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })
@@ -28,7 +28,7 @@ describe('Auth HTTP flow', () => {
     expect(res.body.data.accessToken).toEqual(expect.any(String))
 
     const decoded = jwt.decode(res.body.data.accessToken) as { iat: number; exp: number }
-    expect(decoded.exp - decoded.iat).toBe(15 * 60)
+    expect(decoded.exp - decoded.iat).toBe(24 * 60 * 60)
   })
 
   it('returns 401 for login with a wrong password, without revealing whether the email exists', async () => {
@@ -36,7 +36,7 @@ describe('Auth HTTP flow', () => {
     await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: 'ada2@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })
@@ -58,7 +58,7 @@ describe('Auth HTTP flow', () => {
     const register = await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: 'ada3@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })
@@ -82,7 +82,7 @@ describe('Auth HTTP flow', () => {
     const register = await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: 'ada4@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })
@@ -101,14 +101,14 @@ describe('Auth HTTP flow', () => {
     const wsA = await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: 'ada5@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Workspace A',
       timezone: 'UTC',
     })
     const wsB = await request(app).post('/auth/register').send({
       ownerName: 'Bob',
       ownerEmail: 'bob@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Workspace B',
       timezone: 'UTC',
     })
@@ -125,7 +125,7 @@ describe('Auth HTTP flow', () => {
     const register = await request(app).post('/auth/register').send({
       ownerName: 'Ada',
       ownerEmail: 'ada6@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })

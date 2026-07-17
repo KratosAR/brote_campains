@@ -499,6 +499,9 @@ importers:
 
   packages/common:
     devDependencies:
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
       '@types/node':
         specifier: ^22.15.3
         version: 22.20.0
@@ -651,6 +654,10 @@ importers:
         version: 5.9.3
 
   packages/sdk:
+    dependencies:
+      '@bcp/domain':
+        specifier: workspace:*
+        version: link:../domain
     devDependencies:
       '@types/node':
         specifier: ^22.15.3
