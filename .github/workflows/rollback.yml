@@ -1,0 +1,103 @@
+name: Rollback Deployment
+
+# Manually triggered. Redeploys a known-good commit/tag to a target
+# environment by re-running the same build + deploy path deploy.yml uses,
+# pinned to whatever ref you give it - instead of whatever HEAD happens to
+# be on the branch right now. This is the "undo" button: it does not revert
+# git history, it just deploys something that already worked before.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to roll back"
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      ref:
+        description: "Git ref to redeploy (tag, commit SHA, or branch name of a previously known-good build)"
+        required: true
+        type: string
+      reason:
+        description: "Why are we rolling back? (goes in the deployment record and Slack notification)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  rollback:
+    name: Rollback ${{ inputs.environment }} to ${{ inputs.ref }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Build
+        run: pnpm build
+
+      - name: Record rollback deployment
+        id: deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/deployments \
+            -f ref="${{ inputs.ref }}" \
+            -f environment="${{ inputs.environment }}" \
+            -f description="Rollback: ${{ inputs.reason }}" \
+            -F auto_merge=false \
+            -f required_contexts[]
+
+      # Same placeholder as deploy.yml - fill in with the real deploy command
+      # once a hosting target exists. Kept identical on purpose: rollback
+      # must use the exact same deploy path as forward deploys, never a
+      # separate "just this once" script.
+      - name: Deploy ${{ inputs.ref }} to ${{ inputs.environment }}
+        run: |
+          echo "Rolling back ${{ inputs.environment }} to ${{ inputs.ref }}"
+          echo "Reason: ${{ inputs.reason }}"
+          # TODO: same deployment command as deploy.yml's deploy-<env> job
+          echo "✅ Rollback deploy completed"
+
+      - name: Smoke test the rolled-back deployment
+        if: inputs.environment == 'staging' && vars.STAGING_API_URL != ''
+        env:
+          HEALTH_URL: ${{ vars.STAGING_API_URL }}/health
+        run: |
+          for i in $(seq 1 10); do
+            STATUS=$(curl -s -o /tmp/health.json -w "%{http_code}" "$HEALTH_URL" || echo "000")
+            [ "$STATUS" = "200" ] && { echo "✅ Healthy after rollback"; cat /tmp/health.json; exit 0; }
+            echo "Attempt $i: HTTP $STATUS, retrying..."
+            sleep 5
+          done
+          echo "##[error]Rollback deploy is not healthy either - this needs a human, now."
+          exit 1
+
+      - name: Notify team
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          text: "🔙 Rollback of ${{ inputs.environment }} to ${{ inputs.ref }}: ${{ job.status }}. Reason: ${{ inputs.reason }}"
+          fields: commit,author

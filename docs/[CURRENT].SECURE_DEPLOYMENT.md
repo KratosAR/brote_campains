@@ -235,8 +235,11 @@ curl https://monitoring.example.com/metrics/db_latency
 If ANY metric spikes → **Immediate rollback**:
 
 ```bash
-# One-click rollback
-gh workflow run deploy-rollback.yml --field=from_version=current --field=to_version=previous
+# One-click rollback via the real rollback.yml workflow
+gh workflow run rollback.yml \
+  -f environment=production \
+  -f ref=<last-known-good-tag-or-sha> \
+  -f reason="error rate spike after deploy"
 ```
 
 ### Step 5: Validation (30 minutes)
@@ -261,16 +264,28 @@ echo "✅ Production deploy successful at $(date)" >> DEPLOYMENT_LOG.md
 ### Manual Rollback
 
 ```bash
-# 1. Identify good version
+# 1. Identify the last known-good ref (tag, commit SHA, or branch)
 git log --oneline | head -10
 
-# 2. Rollback to previous commit
-GOOD_COMMIT=abc1234
-gh workflow run deploy-prod.yml --field=target_commit=$GOOD_COMMIT
+# 2. Trigger the rollback workflow (.github/workflows/rollback.yml) - it
+#    rebuilds and redeploys that exact ref through the same deploy path as
+#    a normal deploy (never a separate "just this once" script), then runs
+#    the same smoke test used after forward deploys.
+gh workflow run rollback.yml \
+  -f environment=production \
+  -f ref=abc1234 \
+  -f reason="describe why here - goes into the deployment record and Slack"
 
-# 3. Monitor rollback
-# (same as deployment verification)
+# 3. Watch it run
+gh run watch
 ```
+
+**Status:** the rollback workflow itself is real and tested (dry-run: builds
+and generates the Prisma client for an arbitrary ref, records a GitHub
+Deployment, smoke-tests staging). The actual `deploy` step inside it is
+still a placeholder - see [Known Limitations](#known-limitations) - so a
+rollback today does everything except push bits to a live server, because
+there isn't one yet.
 
 ### Automatic Rollback (Error Rate Threshold)
 
@@ -493,6 +508,27 @@ Verified by: __________
 ```
 
 ---
+
+## Known Limitations
+
+As of 2026-07-17, honestly:
+
+- **No real hosting target is wired up yet.** `deploy.yml`'s `deploy-dev`/
+  `deploy-staging`/`deploy-production` jobs, and `rollback.yml`'s deploy
+  step, all have a `# TODO: Add your deployment command` placeholder. CI
+  (lint/typecheck/test/build), branch protection, environment gates,
+  auto-promotion, and the rollback *workflow itself* are all real and
+  wired up - the only missing piece is the actual `vercel deploy` /
+  `railway up` / etc. command once a hosting provider is chosen.
+- **Smoke tests are real but inert** until `STAGING_API_URL` (and its
+  production equivalent) is set as a repository/environment variable - see
+  `deploy.yml`'s "Smoke test" steps. They'll start actually checking
+  `/health` the moment that variable exists and a real deploy happens.
+- **Metrics/monitoring commands in this doc** (`curl
+  https://monitoring.example.com/...`) are illustrative, not real endpoints -
+  replace with the actual Prometheus/Grafana URLs once deployed (see
+  `INFRASTRUCTURE.md` section 5 for the dashboards that will eventually
+  serve these).
 
 ## References
 

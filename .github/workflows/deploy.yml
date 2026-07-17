@@ -86,13 +86,38 @@ jobs:
         run: |
           echo "Deploying to staging..."
           # TODO: Add your staging deployment command
+          # Example: vercel deploy --token ${{ secrets.VERCEL_TOKEN }} --env=staging
           echo "✅ Staging deploy completed"
 
-      - name: Run smoke tests
+      # Real, working smoke test - stays inert (no-op) until STAGING_API_URL
+      # is set as a repository/environment variable, since no actual deploy
+      # target is wired up above yet. Once it is, this activates automatically:
+      # retries with backoff, verifies /health returns 200 + expected shape,
+      # fails the job (blocking the "Notify team" step from reporting success)
+      # if the newly-deployed instance isn't actually healthy.
+      - name: Smoke test - verify deployment is healthy
+        if: vars.STAGING_API_URL != ''
+        env:
+          HEALTH_URL: ${{ vars.STAGING_API_URL }}/health
         run: |
-          echo "Running smoke tests on staging..."
-          # TODO: curl https://staging-api.example.com/health
-          echo "✅ Smoke tests passed"
+          echo "Checking $HEALTH_URL ..."
+          for i in $(seq 1 10); do
+            STATUS=$(curl -s -o /tmp/health.json -w "%{http_code}" "$HEALTH_URL" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Healthy after $i attempt(s):"
+              cat /tmp/health.json
+              exit 0
+            fi
+            echo "Attempt $i: got HTTP $STATUS, retrying in 5s..."
+            sleep 5
+          done
+          echo "##[error]Deployment did not become healthy after 10 attempts (50s). Failing to block a broken deploy from being reported as successful."
+          cat /tmp/health.json 2>/dev/null || true
+          exit 1
+
+      - name: Smoke test skipped (no STAGING_API_URL configured yet)
+        if: vars.STAGING_API_URL == ''
+        run: echo "::warning::Skipping smoke test - set the STAGING_API_URL repository/environment variable once staging has a real deploy target."
 
       - name: Notify team
         uses: 8398a7/action-slack@v3
@@ -107,10 +132,11 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    # deployment-branch-policy is not a valid inline workflow key - it's a
+    # GitHub Environment protection rule, configured via the Environments API
+    # (see: repos/.../environments/production) or Settings > Environments.
     environment:
       name: production
-      deployment-branch-policy:
-        protected-branches: true
 
     steps:
       - uses: actions/checkout@v4
