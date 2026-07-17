@@ -13,7 +13,7 @@ describe('Analytics HTTP endpoints', () => {
     const registerRes = await request(app).post('/auth/register').send({
       ownerName: 'Test Owner',
       ownerEmail: 'analytics@example.com',
-      ownerPassword: 'password-123',
+      ownerPassword: 'Password-123',
       workspaceName: 'Analytics Test',
       timezone: 'UTC',
     })

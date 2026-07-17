@@ -27,18 +27,9 @@ export function createAnalyticsRouter(container: AwilixContainer<Cradle>): Route
     }
   })
 
-  router.get('/workspaces/:workspaceId/analytics/campaigns/:campaignId', async (req, res) => {
-    const { workspaceId, campaignId } = req.params
-
-    try {
-      const query = new GetCampaignStatsQuery(campaignRepo, deliveryRepo)
-      const stats = await query.execute(String(campaignId), String(workspaceId))
-      res.json({ success: true, data: stats })
-    } catch {
-      res.status(500).json({ success: false, error: 'Internal server error' })
-    }
-  })
-
+  // Literal routes (compare, top) must be registered before the parameterized
+  // :campaignId route below — otherwise Express matches "compare"/"top" as a
+  // campaignId value and the request 404s/500s trying to look up that "campaign".
   router.get('/workspaces/:workspaceId/analytics/campaigns/compare', async (req, res) => {
     const workspaceId = String(req.params.workspaceId)
     const ids = (req.query.ids as string)?.split(',') ?? []
@@ -61,6 +52,18 @@ export function createAnalyticsRouter(container: AwilixContainer<Cradle>): Route
       const query = new GetTopCampaignsQuery(campaignRepo, deliveryRepo)
       const results = await query.execute(workspaceId, metric, limit)
       res.json({ success: true, data: results })
+    } catch {
+      res.status(500).json({ success: false, error: 'Internal server error' })
+    }
+  })
+
+  router.get('/workspaces/:workspaceId/analytics/campaigns/:campaignId', async (req, res) => {
+    const { workspaceId, campaignId } = req.params
+
+    try {
+      const query = new GetCampaignStatsQuery(campaignRepo, deliveryRepo)
+      const stats = await query.execute(String(campaignId), String(workspaceId))
+      res.json({ success: true, data: stats })
     } catch {
       res.status(500).json({ success: false, error: 'Internal server error' })
     }

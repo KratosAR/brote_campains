@@ -34,7 +34,7 @@ describe('RegisterWorkspaceCommand', () => {
     const result = await command.execute({
       ownerName: 'Ada Lovelace',
       ownerEmail: 'ada@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'America/Argentina/Buenos_Aires',
     })
@@ -54,7 +54,7 @@ describe('RegisterWorkspaceCommand', () => {
     const input = {
       ownerName: 'Ada',
       ownerEmail: 'dup@example.com',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     }
@@ -70,7 +70,7 @@ describe('RegisterWorkspaceCommand', () => {
     const result = await command.execute({
       ownerName: 'Ada',
       ownerEmail: 'not-an-email',
-      ownerPassword: 'super-secret-1',
+      ownerPassword: 'Super-secret-1',
       workspaceName: 'Ada Inc',
       timezone: 'UTC',
     })

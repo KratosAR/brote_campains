@@ -17,7 +17,7 @@ STAGED_FILES=$(git diff --cached --name-only)
 # Check if auth, security, or validation files changed
 if echo "$STAGED_FILES" | grep -qE '(auth|security|validation|middleware|command)'; then
   echo "  ⚠️  Critical files modified - running tests for auth/security packages"
-  pnpm test --testPathPattern="(auth|security|validation)" --bail || { echo "❌ Tests failed for critical paths"; exit 1; }
+  pnpm test -- --testPathPattern="(auth|security|validation)" --bail --passWithNoTests || { echo "❌ Tests failed for critical paths"; exit 1; }
 fi
 
 # 3. Detect secrets (fail-fast)
