@@ -1,0 +1,64 @@
+name: Release Notes
+
+# Every push to main (i.e. every staging -> main promotion) tags the release
+# and generates changelog notes from the tagged commit convention
+# ([INFRA]/[BACKEND]/[FRONTEND] type(scope): subject), grouped by area then
+# type. Creates a GitHub Release - never commits anything back to main, so
+# it can't conflict with branch protection.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version and previous tag
+        id: version
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-creatordate | head -1)
+          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            NEW_VERSION="v0.1.0"
+          else
+            # Bump patch by default - promote manually to a minor/major tag
+            # beforehand (git tag vX.Y.0) if this release deserves one.
+            IFS='.' read -r MAJOR MINOR PATCH <<< "${PREVIOUS_TAG#v}"
+            NEW_VERSION="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+          fi
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          {
+            echo "changelog<<EOF"
+            if [ -n "${{ steps.version.outputs.previous_tag }}" ]; then
+              node scripts/generate-changelog.mjs --since "${{ steps.version.outputs.previous_tag }}" --until HEAD
+            else
+              node scripts/generate-changelog.mjs --until HEAD
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.new_version }}" \
+            --title "${{ steps.version.outputs.new_version }}" \
+            --notes "${{ steps.changelog.outputs.changelog }}" \
+            --target main
