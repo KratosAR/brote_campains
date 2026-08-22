@@ -3,11 +3,15 @@ name: Fuzzing Tests
 on:
   schedule:
     - cron: '0 2 * * *'  # Daily 2am UTC
+  workflow_dispatch: {}
 
 jobs:
   fuzz:
     name: Fuzzing on API Endpoints
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
 
     services:
       postgres:
@@ -55,13 +59,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
       - name: Build
         run: pnpm build
 
       - name: Run database migrations
         run: |
-          cd apps/api
-          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy
+          DATABASE_URL=${{ env.DATABASE_URL }} pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma
 
       - name: Start API
         run: |
@@ -74,9 +80,6 @@ jobs:
       - name: Run Fuzzing Tests
         run: |
           echo "Fuzzing API endpoints with random/malformed inputs..."
-
-          # Install fuzzing tool
-          npm install -g fast-check-jest
 
           # Fuzzing: Try malformed JSON
           for i in {1..100}; do
