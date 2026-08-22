@@ -9,6 +9,9 @@ jobs:
   fuzz:
     name: Fuzzing on API Endpoints
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
 
     services:
       postgres:
@@ -77,9 +80,6 @@ jobs:
       - name: Run Fuzzing Tests
         run: |
           echo "Fuzzing API endpoints with random/malformed inputs..."
-
-          # Install fuzzing tool
-          npm install -g fast-check-jest
 
           # Fuzzing: Try malformed JSON
           for i in {1..100}; do
