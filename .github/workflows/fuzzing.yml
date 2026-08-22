@@ -3,6 +3,7 @@ name: Fuzzing Tests
 on:
   schedule:
     - cron: '0 2 * * *'  # Daily 2am UTC
+  workflow_dispatch: {}
 
 jobs:
   fuzz:
