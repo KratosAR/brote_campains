@@ -115,6 +115,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     # deployment-branch-policy is not a valid inline workflow key - it's a
     # GitHub Environment protection rule, configured via the Environments API
     # (see: repos/.../environments/production) or Settings > Environments.
